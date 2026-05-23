@@ -1,0 +1,35 @@
+// ─────────────────────────────────────────────
+//  Global configuration
+// ─────────────────────────────────────────────
+
+export const API_URL =
+  'https://script.google.com/macros/s/AKfycbxutW6of159b8WqeL5xEMaQY43BVllNldleboBYuTgx8eqWb3wAIeeojn4rqTb3O-yy/exec'
+
+export const COMPANY_NAME   = 'NexusAI'
+export const COMPANY_TAGLINE = 'Enterprise AI & Analytics'
+export const COMPANY_EMAIL  = 'hello@nexusai.io'
+export const COMPANY_PHONE  = '+1 (888) 639-8724'
+export const COMPANY_ADDRESS = '350 5th Avenue, New York, NY 10118'
+
+export const SOCIAL_LINKS = {
+  twitter:  'https://twitter.com/nexusai',
+  linkedin: 'https://linkedin.com/company/nexusai',
+  github:   'https://github.com/nexusai',
+  youtube:  'https://youtube.com/@nexusai',
+}
+
+export const NAV_LINKS = [
+  { label: 'Services',     href: '#services'     },
+  { label: 'Products',     href: '#products'     },
+  { label: 'Solutions',    href: '#solutions'    },
+  { label: 'Pricing',      href: '#pricing'      },
+  { label: 'About',        href: '#testimonials' },
+]
+
+export const STORAGE_KEYS = {
+  IS_LOGGED_IN: 'isLoggedIn',
+  USERNAME:     'username',
+  EMAIL:        'email',
+  ROLE:         'role',
+  COMPANY:      'company',
+}
