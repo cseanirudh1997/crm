@@ -8,8 +8,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        sans:    ['DM Sans', 'system-ui', 'sans-serif'],
+        display: ['Playfair Display', 'Georgia', 'serif'],
+        mono:    ['DM Mono', 'monospace'],
       },
       colors: {
         // Gold / luxury palette — maps onto the same brand-* / accent-* class names
