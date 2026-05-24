@@ -1,77 +1,81 @@
-import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Link } from 'react-router-dom'
-import { CheckCircle, X, Zap } from 'lucide-react'
+import { CheckCircle, Phone, Zap, Shield } from 'lucide-react'
 
 const PLANS = [
   {
-    name:       'Starter',
-    tagline:    'Perfect for teams exploring AI.',
-    monthly:    499,
-    annual:     399,
-    color:      'border-white/10',
-    badge:      null,
-    highlight:  false,
-    features:   [
-      { text: 'Up to 5 users',           ok: true  },
-      { text: '3 AI data connectors',    ok: true  },
-      { text: 'Basic BI dashboards',     ok: true  },
-      { text: '100K API calls / month',  ok: true  },
-      { text: 'Email support',           ok: true  },
-      { text: 'Advanced forecasting',    ok: false },
-      { text: 'Custom ML models',        ok: false },
-      { text: 'Dedicated CSM',           ok: false },
-      { text: 'SSO / SAML',             ok: false },
-      { text: 'SLA guarantee',           ok: false },
+    name:      'Foundation',
+    tagline:   'Structured AI deployment for mid-market enterprises.',
+    price:     'Starting at $5,000',
+    period:    '/month',
+    note:      'Annual contracts available',
+    icon:      Zap,
+    color:     'border-white/10',
+    badge:     null,
+    highlight: false,
+    features:  [
+      { text: 'NexusGPT Enterprise (up to 50 users)',    ok: true  },
+      { text: 'Enterprise RAG Platform — 1 knowledge base', ok: true  },
+      { text: 'AI Automation Studio — 5 workflows',     ok: true  },
+      { text: 'Standard SLA (8h response)',              ok: true  },
+      { text: 'Onboarding & scoping workshop',           ok: true  },
+      { text: 'SmartCall AI / VoiceFlow',               ok: false },
+      { text: 'AI Customer Support Suite',              ok: false },
+      { text: 'Dedicated Solutions Architect',          ok: false },
+      { text: 'Custom fine-tuning',                     ok: false },
+      { text: '99.9% uptime SLA guarantee',             ok: false },
     ],
-    cta:   'Start Free Trial',
-    ctaCls: 'btn-secondary w-full justify-center',
+    cta:      'Book Consultation',
+    ctaAction:'contact',
   },
   {
-    name:       'Professional',
-    tagline:    'Scale AI across your whole team.',
-    monthly:    1999,
-    annual:     1599,
-    color:      'border-brand-600/60',
-    badge:      'Most Popular',
-    highlight:  true,
-    features:   [
-      { text: 'Up to 50 users',          ok: true  },
-      { text: '15 AI data connectors',   ok: true  },
-      { text: 'Advanced BI dashboards',  ok: true  },
-      { text: '5M API calls / month',    ok: true  },
-      { text: 'Priority email & chat',   ok: true  },
-      { text: 'Advanced forecasting',    ok: true  },
-      { text: 'Custom ML models',        ok: true  },
-      { text: 'Dedicated CSM',           ok: false },
-      { text: 'SSO / SAML',             ok: false },
-      { text: 'SLA guarantee',           ok: false },
+    name:      'Enterprise',
+    tagline:   'Full AI transformation — every product, unlimited scale.',
+    price:     'Custom Pricing',
+    period:    '',
+    note:      'Based on deployment scope',
+    icon:      Shield,
+    color:     'border-brand-600/60',
+    badge:     'Most Requested',
+    highlight: true,
+    features:  [
+      { text: 'Unlimited users across all products',    ok: true  },
+      { text: 'NexusGPT + RAG + Automation Studio',     ok: true  },
+      { text: 'SmartCall AI + VoiceFlow Enterprise',    ok: true  },
+      { text: 'AI Customer Support Suite',              ok: true  },
+      { text: 'Priority SLA (1h critical response)',    ok: true  },
+      { text: 'Dedicated Solutions Architect',          ok: true  },
+      { text: 'Custom model fine-tuning',               ok: true  },
+      { text: '99.9% uptime SLA guarantee',             ok: true  },
+      { text: 'Executive AI readiness program',         ok: true  },
+      { text: 'Quarterly business reviews',             ok: true  },
     ],
-    cta:   'Start Free Trial',
-    ctaCls: 'btn-primary  w-full justify-center',
+    cta:      'Contact Sales',
+    ctaAction:'contact',
   },
   {
-    name:       'Enterprise',
-    tagline:    'Unlimited scale with white-glove support.',
-    monthly:    null,
-    annual:     null,
-    color:      'border-white/10',
-    badge:      null,
-    highlight:  false,
-    features:   [
-      { text: 'Unlimited users',         ok: true  },
-      { text: 'Unlimited connectors',    ok: true  },
-      { text: 'Custom BI & reporting',   ok: true  },
-      { text: 'Unlimited API calls',     ok: true  },
-      { text: '24 / 7 phone support',    ok: true  },
-      { text: 'Advanced forecasting',    ok: true  },
-      { text: 'Custom ML models',        ok: true  },
-      { text: 'Dedicated CSM',           ok: true  },
-      { text: 'SSO / SAML',             ok: true  },
-      { text: '99.9% SLA guarantee',     ok: true  },
+    name:      'Transformation',
+    tagline:   'Full-stack AI program with dedicated engineering team.',
+    price:     'Contact Sales',
+    period:    '',
+    note:      'Multi-year strategic program',
+    icon:      Phone,
+    color:     'border-white/10',
+    badge:     null,
+    highlight: false,
+    features:  [
+      { text: 'Everything in Enterprise',               ok: true  },
+      { text: 'Dedicated embedded AI team (3–5 FTEs)',  ok: true  },
+      { text: 'Custom model development & research',    ok: true  },
+      { text: 'On-site & remote delivery',              ok: true  },
+      { text: 'Board-level AI strategy advisory',       ok: true  },
+      { text: 'IP ownership & transfer',                ok: true  },
+      { text: 'Custom SLA & penalty clauses',           ok: true  },
+      { text: 'Regulatory & compliance support',        ok: true  },
+      { text: 'White-label licensing option',           ok: true  },
+      { text: '24/7 NOC & AI Ops support',              ok: true  },
     ],
-    cta:   'Contact Sales',
-    ctaCls: 'btn-secondary w-full justify-center',
+    cta:      'Schedule a Call',
+    ctaAction:'contact',
   },
 ]
 
@@ -79,7 +83,9 @@ const container = { hidden: {}, show: { transition: { staggerChildren: 0.15 } } 
 const fadeUp    = { hidden: { opacity: 0, y: 30 }, show: { opacity: 1, y: 0, transition: { duration: 0.5 } } }
 
 export default function Pricing() {
-  const [annual, setAnnual] = useState(false)
+  function scrollToContact() {
+    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
+  }
 
   return (
     <section id="pricing" className="py-24 relative bg-gray-950 overflow-hidden">
@@ -92,32 +98,17 @@ export default function Pricing() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-10"
+          className="text-center mb-14"
         >
-          <span className="section-badge mb-4">Pricing</span>
+          <span className="section-badge mb-4">Enterprise Pricing</span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mt-4 mb-4">
-            Simple, <span className="gradient-text">Transparent Pricing</span>
+            Serious AI Requires a{' '}
+            <span className="gradient-text">Serious Partner</span>
           </h2>
-          <p className="max-w-xl mx-auto text-gray-400 text-lg mb-8">
-            No hidden fees. Cancel anytime. All plans include a 14-day free trial.
+          <p className="max-w-2xl mx-auto text-gray-400 text-lg">
+            We don't do per-seat SaaS. Every engagement is scoped to your organisation's
+            goals, infrastructure, and team — then priced accordingly.
           </p>
-
-          {/* Billing toggle */}
-          <div className="inline-flex items-center gap-3 bg-white/5 border border-white/10 rounded-full p-1">
-            <button
-              onClick={() => setAnnual(false)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${!annual ? 'bg-brand-600 text-white shadow-glow-sm' : 'text-gray-400 hover:text-white'}`}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => setAnnual(true)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-1 ${annual ? 'bg-brand-600 text-white shadow-glow-sm' : 'text-gray-400 hover:text-white'}`}
-            >
-              Annual
-              <span className="text-xs bg-emerald-600 text-white px-1.5 py-0.5 rounded-full">-20%</span>
-            </button>
-          </div>
         </motion.div>
 
         {/* Plan cards */}
@@ -149,26 +140,19 @@ export default function Pricing() {
 
               <div className="p-8 flex-1 flex flex-col">
                 {/* Plan header */}
-                <h3 className="text-xl font-bold text-white mb-1">{plan.name}</h3>
-                <p className="text-sm text-gray-400 mb-6">{plan.tagline}</p>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+                    <plan.icon size={17} className="text-brand-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white">{plan.name}</h3>
+                </div>
+                <p className="text-sm text-gray-400 mb-6 leading-relaxed">{plan.tagline}</p>
 
                 {/* Price */}
-                <div className="mb-8">
-                  {plan.monthly ? (
-                    <>
-                      <span className="text-4xl font-black text-white">
-                        ${annual ? plan.annual : plan.monthly}
-                      </span>
-                      <span className="text-gray-400 text-sm ml-1">/month</span>
-                      {annual && (
-                        <div className="text-xs text-emerald-400 mt-1">
-                          Save ${(plan.monthly - plan.annual) * 12}/year
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="text-3xl font-black text-white">Custom</div>
-                  )}
+                <div className="mb-6">
+                  <div className="text-3xl font-black text-white leading-tight">{plan.price}</div>
+                  {plan.period && <span className="text-gray-400 text-sm">{plan.period}</span>}
+                  <div className="text-xs text-gray-600 mt-1">{plan.note}</div>
                 </div>
 
                 {/* Features */}
@@ -177,7 +161,7 @@ export default function Pricing() {
                     <li key={text} className={`flex items-center gap-2 text-sm ${ok ? 'text-gray-300' : 'text-gray-600'}`}>
                       {ok
                         ? <CheckCircle size={15} className="flex-shrink-0 text-brand-400" />
-                        : <X          size={15} className="flex-shrink-0 text-gray-700" />
+                        : <span className="w-4 h-4 flex-shrink-0 flex items-center justify-center text-gray-700">–</span>
                       }
                       {text}
                     </li>
@@ -185,38 +169,50 @@ export default function Pricing() {
                 </ul>
 
                 {/* CTA */}
-                {plan.name === 'Enterprise' ? (
-                  <button
-                    onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-                    className={plan.ctaCls}
-                  >
-                    {plan.cta}
-                  </button>
-                ) : (
-                  <Link to="/signup" className={plan.ctaCls}>
-                    {plan.cta}
-                  </Link>
-                )}
+                <button
+                  onClick={scrollToContact}
+                  className={plan.highlight ? 'btn-primary w-full justify-center' : 'btn-secondary w-full justify-center'}
+                >
+                  {plan.cta}
+                </button>
               </div>
             </motion.div>
           ))}
         </motion.div>
 
-        {/* Bottom note */}
+        {/* Reassurance row */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mt-14 grid sm:grid-cols-3 gap-4 text-center"
+        >
+          {[
+            { label: 'No Per-Seat Pricing',     desc: 'Flat engagement fee scoped to your needs'      },
+            { label: 'Pilot Before You Commit', desc: 'Start with a 30-day paid pilot on one use case' },
+            { label: 'IP You Own',              desc: 'All custom models and code transfer to you'     },
+          ].map(({ label, desc }) => (
+            <div key={label} className="glass border border-white/10 rounded-2xl p-5">
+              <div className="font-semibold text-white mb-1">{label}</div>
+              <div className="text-xs text-gray-500">{desc}</div>
+            </div>
+          ))}
+        </motion.div>
+
         <motion.p
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="text-center text-gray-500 text-sm mt-10"
+          className="text-center text-gray-500 text-sm mt-8"
         >
-          All prices in USD. VAT may apply depending on your location.
-          Need a custom quote?{' '}
+          Not sure which tier fits?{' '}
           <button
-            onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-            className="text-brand-400 hover:underline"
+            onClick={scrollToContact}
+            className="text-brand-400 hover:underline font-medium"
           >
-            Talk to sales
-          </button>
+            Talk to a solutions architect
+          </button>{' '}
+          — free, no commitment.
         </motion.p>
       </div>
     </section>

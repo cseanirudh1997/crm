@@ -4,11 +4,11 @@ import { motion } from 'framer-motion'
 import { ChevronRight, Play, TrendingUp, Cpu, Globe } from 'lucide-react'
 
 const TYPING_STRINGS = [
-  'Enterprise AI & Analytics',
-  'Retail Intelligence Platforms',
-  'GenAI Integration Suite',
-  'Forecasting & Pricing Engine',
-  'Decision Intelligence Hub',
+  'Enterprise LLM Deployment',
+  'Voice AI & Call Center Automation',
+  'Conversational AI Agents',
+  'Enterprise RAG Platforms',
+  'AI Workflow Automation',
 ]
 
 function useTypingEffect(strings, speed = 80, pause = 2000) {
@@ -40,10 +40,10 @@ function useTypingEffect(strings, speed = 80, pause = 2000) {
 }
 
 const STATS = [
-  { value: 500,  suffix: '+', label: 'Enterprise Clients',  icon: Globe },
-  { value: 98,   suffix: '%', label: 'Customer Satisfaction', icon: TrendingUp },
-  { value: 10,   suffix: 'B+', label: 'Data Points Processed', icon: Cpu },
-  { value: 3.2,  suffix: 'x', label: 'Avg. ROI Improvement',  icon: TrendingUp },
+  { value: 500,  suffix: '+',  label: 'Enterprise Clients',    icon: Globe      },
+  { value: 97.3, suffix: '%',  label: 'Voice Intent Accuracy', icon: TrendingUp },
+  { value: 10,   suffix: 'B+', label: 'AI Queries Processed',  icon: Cpu        },
+  { value: 3.2,  suffix: 'x',  label: 'Avg. ROI Improvement',  icon: TrendingUp },
 ]
 
 function AnimatedCounter({ target, suffix, duration = 2000 }) {
@@ -92,7 +92,7 @@ export default function Hero() {
       <div className="orb w-80 h-80 bg-accent-600 bottom-20 right-10" />
       <div className="orb w-64 h-64 bg-neon-cyan  top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
 
-      {/* Hero grid lines */}
+      {/* Hero fade */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-gray-950/20 to-gray-950" />
       </div>
@@ -117,9 +117,9 @@ export default function Hero() {
             variants={fadeUp}
             className="text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight leading-none mb-4"
           >
-            <span className="text-white">Solutions for</span>
+            <span className="text-white">Enterprise AI</span>
             <br />
-            <span className="gradient-text">Modern Businesses</span>
+            <span className="gradient-text">Operations Platform</span>
           </motion.h1>
 
           {/* Typing subheadline */}
@@ -135,9 +135,8 @@ export default function Hero() {
             variants={fadeUp}
             className="max-w-2xl mx-auto text-gray-400 text-base sm:text-lg leading-relaxed mb-10"
           >
-            Unlock the full potential of your data with our enterprise-grade AI platform.
-            From GenAI integration to real-time retail analytics and intelligent forecasting —
-            NexusAI accelerates growth at every stage.
+            Unlock full LLM deployment power, voice AI automation, and intelligent workflow
+            orchestration — NexusAI manages your entire AI operations lifecycle at enterprise scale.
           </motion.p>
 
           {/* CTA buttons */}
@@ -152,7 +151,7 @@ export default function Hero() {
               onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
               className="btn-secondary text-base px-8 py-4"
             >
-              <Play size={16} className="fill-current" /> Watch Demo
+              <Play size={16} className="fill-current" /> See the Platform
             </button>
           </motion.div>
 
@@ -192,11 +191,12 @@ export default function Hero() {
                 <span className="text-xs text-gray-500 font-mono">nexusai.io/dashboard</span>
               </div>
             </div>
+
             {/* Mock dashboard UI */}
             <div className="flex gap-3">
               {/* Mini sidebar */}
-              <div className="hidden sm:flex w-24 flex-col gap-1 border-r border-white/5 pr-3 shrink-0">
-                {['Overview', 'Analytics', 'Models', 'Forecasts', 'Alerts'].map((item, i) => (
+              <div className="hidden sm:flex w-28 flex-col gap-1 border-r border-white/5 pr-3 shrink-0">
+                {['Overview', 'Voice AI', 'Deployments', 'Insights', 'Support'].map((item, i) => (
                   <div
                     key={item}
                     className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs ${
@@ -216,10 +216,10 @@ export default function Hero() {
                 {/* KPI row */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
                   {[
-                    { label: 'Revenue',  value: '$12.4M', change: '+8.2%',  color: 'from-brand-600 to-brand-800',  up: true  },
-                    { label: 'Accuracy', value: '97.3%',  change: '+1.4%',  color: 'from-accent-600 to-accent-800', up: true  },
-                    { label: 'Data/Day', value: '48.2M',  change: '+12%',   color: 'from-teal-600 to-teal-800',    up: true  },
-                    { label: 'Users',    value: '1,284',  change: '-2.1%',  color: 'from-amber-600 to-amber-800',  up: false },
+                    { label: 'AI Calls',  value: '68.4K', change: '+18.2%', color: 'from-brand-600 to-brand-800',   up: true },
+                    { label: 'Accuracy',  value: '97.3%', change: '+1.4%',  color: 'from-accent-600 to-accent-800', up: true },
+                    { label: 'Deployed',  value: '12',    change: '+3',     color: 'from-teal-600 to-teal-800',     up: true },
+                    { label: 'Sessions',  value: '2,350', change: '+22%',   color: 'from-amber-600 to-amber-800',   up: true },
                   ].map(({ label, value, change, color, up }) => (
                     <div key={label} className={`rounded-lg p-2 bg-gradient-to-br ${color} bg-opacity-20 border border-white/10`}>
                       <div className="text-gray-400 text-xs mb-0.5">{label}</div>
@@ -234,8 +234,8 @@ export default function Hero() {
                   {/* Chart */}
                   <div className="col-span-2">
                     <div className="text-xs text-gray-500 mb-1.5 flex items-center justify-between">
-                      <span>Revenue Forecast</span>
-                      <span className="text-emerald-400">+24% YoY</span>
+                      <span>AI API Volume</span>
+                      <span className="text-emerald-400">+194% YoY</span>
                     </div>
                     <div className="h-16 flex items-end gap-0.5">
                       {[40, 55, 45, 70, 60, 80, 75, 90, 82, 95, 88, 100].map((h, i) => (
@@ -259,10 +259,10 @@ export default function Hero() {
                     <div className="text-xs text-gray-500 mb-1.5">Live Activity</div>
                     <div className="space-y-1.5">
                       {[
-                        { text: 'Model retrained',  ok: true  },
-                        { text: 'Margin alert',      ok: false },
-                        { text: 'Sync complete',     ok: true  },
-                        { text: '12.4K queries',     ok: true  },
+                        { text: 'Model deployed',  ok: true  },
+                        { text: 'Latency alert',   ok: false },
+                        { text: 'Pipeline live',   ok: true  },
+                        { text: '2,350 queries',   ok: true  },
                       ].map(({ text, ok }) => (
                         <div key={text} className="flex items-center gap-1.5">
                           <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${ok ? 'bg-emerald-400' : 'bg-amber-400'}`} />

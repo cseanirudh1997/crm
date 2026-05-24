@@ -1,25 +1,25 @@
 // ─────────────────────────────────────────────
-//  Chatbot helpers — local fallback + prompt seeds
+//  Chatbot helpers — enterprise-focused prompts
 // ─────────────────────────────────────────────
 
 export const SUGGESTED_PROMPTS = [
-  'What services do you offer?',
-  'Tell me about pricing',
-  'How does the AI Forecasting work?',
-  'How do I get started?',
-  'What industries do you serve?',
-  'Contact support',
+  'What AI products do you offer?',
+  'How does SmartCall AI work?',
+  'Tell me about enterprise pricing',
+  'How quickly can you deploy a RAG platform?',
+  'What industries do you specialize in?',
+  'How do I book a consultation?',
 ]
 
 export const FALLBACK_RESPONSE =
-  "I'm not sure about that. Please contact our support team at hello@nexusai.io or use the contact form below for personalised assistance."
+  "I'm not sure about that. Please contact our enterprise team at enterprise@nexusai.io or book a consultation using the form below."
 
 /** Build the initial bot greeting message */
 export function getWelcomeMessage() {
   return {
     id:   Date.now(),
     role: 'bot',
-    text: "👋 Hi! I'm NexusAI Assistant. Ask me about our services, pricing, products, or anything else!",
+    text: "👋 Hi! I'm NexusAI Assistant. Ask me about our enterprise AI products, LLM deployments, voice AI, pricing, or how to get started.",
     ts:   new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
   }
 }

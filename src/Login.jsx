@@ -3,9 +3,9 @@ import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Eye, EyeOff, Zap, LogIn, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { loginUser } from './api'
+import { loginUser, getUserAccess } from './api'
 import { saveSession } from './utils'
-import { COMPANY_NAME } from './config'
+import { COMPANY_NAME, TIERS, ONBOARDING_STAGES } from './config'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -33,11 +33,17 @@ export default function Login() {
       const res = await loginUser({ username: form.username, password: form.password })
 
       if (res.success) {
+        const userEmail = res.user?.email || ''
+        // Load tier & onboarding stage from UserAccess sheet (mock fallback if not ready)
+        const usernameForAccess = res.user?.username || form.username
+        const access = await getUserAccess(usernameForAccess).catch(() => ({}))
         saveSession({
-          username: res.user?.username || form.username,
-          email:    res.user?.email    || '',
-          role:     res.user?.role     || 'user',
-          company:  res.user?.company  || '',
+          username:        res.user?.username || form.username,
+          email:           userEmail,
+          role:            res.user?.role     || 'user',
+          company:         res.user?.company  || '',
+          tier:            access.tier            || res.user?.tier            || TIERS.TRIAL,
+          onboardingStage: access.onboardingStage || res.user?.onboardingStage || ONBOARDING_STAGES.PENDING,
         })
         toast.success(`Welcome back, ${res.user?.username || form.username}! 🎉`)
         navigate('/dashboard')

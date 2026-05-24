@@ -1,71 +1,71 @@
 import { motion } from 'framer-motion'
 import {
-  Brain, Cpu, BarChart2, TrendingUp, DollarSign,
-  Workflow, Lightbulb, PieChart,
+  Brain, Phone, Bot, Users, BookOpen,
+  Workflow, Lightbulb, Settings,
 } from 'lucide-react'
 
 const SERVICES = [
   {
     icon:  Brain,
-    title: 'AI Consulting',
-    desc:  'Strategic AI roadmaps, maturity assessments, and transformation programs tailored to your enterprise.',
+    title: 'LLM / SLM Deployment',
+    desc:  'Private large and small language model deployment on your infrastructure — air-gapped, VPC, or cloud. Full fine-tuning and alignment support.',
     color: 'from-brand-600 to-brand-800',
     glow:  'group-hover:shadow-glow',
   },
   {
-    icon:  Cpu,
-    title: 'GenAI Integration',
-    desc:  'Deploy large language models, RAG pipelines, and generative workflows directly into your products.',
+    icon:  Bot,
+    title: 'Conversational AI Agents',
+    desc:  'Design and deploy intelligent agents for sales, HR, IT helpdesk, and operations — with memory, tool use, and multi-step reasoning.',
     color: 'from-accent-600 to-accent-800',
     glow:  'group-hover:shadow-glow-purple',
   },
   {
-    icon:  BarChart2,
-    title: 'Retail Intelligence',
-    desc:  'Real-time shopper insights, basket analysis, and inventory optimization for retail and CPG.',
+    icon:  Phone,
+    title: 'Voice AI & Call Center',
+    desc:  'AI-powered inbound and outbound voice agents with real-time transcription, sentiment analysis, auto-escalation, and CRM integration.',
     color: 'from-teal-600 to-teal-800',
     glow:  'group-hover:shadow-[0_0_30px_rgba(20,184,166,0.4)]',
   },
   {
-    icon:  TrendingUp,
-    title: 'Forecasting Systems',
-    desc:  'ML-powered demand forecasting with 95%+ accuracy across SKUs, regions, and time horizons.',
+    icon:  Users,
+    title: 'Enterprise Copilots',
+    desc:  'Custom GPT-powered copilots embedded into your existing tools — Salesforce, SAP, ServiceNow, Teams, Slack, and proprietary platforms.',
     color: 'from-emerald-600 to-emerald-800',
     glow:  'group-hover:shadow-[0_0_30px_rgba(5,150,105,0.4)]',
   },
   {
-    icon:  DollarSign,
-    title: 'Pricing Optimization',
-    desc:  'Dynamic, elasticity-aware pricing engines that maximise margin without losing market share.',
-    color: 'from-yellow-600 to-amber-800',
-    glow:  'group-hover:shadow-[0_0_30px_rgba(202,138,4,0.4)]',
+    icon:  BookOpen,
+    title: 'RAG / Knowledge QnA',
+    desc:  'Retrieval-Augmented Generation pipelines that connect your internal docs, wikis, and databases to a secure, hallucination-resistant QnA engine.',
+    color: 'from-sky-600 to-sky-800',
+    glow:  'group-hover:shadow-[0_0_30px_rgba(2,132,199,0.4)]',
   },
   {
     icon:  Workflow,
-    title: 'Data Engineering',
-    desc:  'End-to-end data pipelines, lakehouses, and real-time streaming infrastructure on any cloud.',
+    title: 'Workflow Automation',
+    desc:  'End-to-end intelligent process automation — from document extraction and classification to approval workflows and exception handling.',
     color: 'from-rose-600 to-rose-800',
     glow:  'group-hover:shadow-[0_0_30px_rgba(225,29,72,0.4)]',
   },
   {
     icon:  Lightbulb,
-    title: 'Automation Solutions',
-    desc:  'Intelligent process automation and AI agents that eliminate repetitive work and cut costs.',
+    title: 'AI Transformation Consulting',
+    desc:  'Strategic AI roadmaps, organizational readiness assessments, use-case prioritization, and executive workshops to accelerate enterprise adoption.',
     color: 'from-orange-600 to-orange-800',
     glow:  'group-hover:shadow-[0_0_30px_rgba(234,88,12,0.4)]',
   },
   {
-    icon:  PieChart,
-    title: 'BI Dashboards',
-    desc:  'Executive-grade business intelligence dashboards with live data, drill-downs, and alerts.',
-    color: 'from-sky-600 to-sky-800',
-    glow:  'group-hover:shadow-[0_0_30px_rgba(2,132,199,0.4)]',
+    icon:  Settings,
+    title: 'Managed AI Ops',
+    desc:  'Continuous model monitoring, retraining pipelines, drift detection, cost optimization, and SLA management for production AI systems.',
+    color: 'from-violet-600 to-violet-800',
+    glow:  'group-hover:shadow-[0_0_30px_rgba(124,58,237,0.4)]',
   },
 ]
 
 const container = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.1 } },
+  show:   { transition: { staggerChildren: 0.1 } },
 }
 
 const item = {
@@ -76,7 +76,6 @@ const item = {
 export default function Services() {
   return (
     <section id="services" className="py-24 relative overflow-hidden">
-      {/* Background */}
       <div className="absolute inset-0 bg-gray-950" />
       <div className="orb w-72 h-72 bg-brand-700 top-0 right-0 opacity-10" />
 
@@ -89,14 +88,14 @@ export default function Services() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <span className="section-badge mb-4">What We Do</span>
+          <span className="section-badge mb-4">What We Deploy</span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mt-4 mb-4">
             Enterprise-Grade{' '}
             <span className="gradient-text">AI Services</span>
           </h2>
           <p className="max-w-2xl mx-auto text-gray-400 text-lg">
-            From strategy to deployment — our team of AI engineers, data scientists, and domain experts
-            deliver measurable outcomes across every layer of your business.
+            From LLM deployment to voice AI and intelligent automation — our team of AI engineers
+            and domain experts deliver production-ready systems that drive measurable ROI.
           </p>
         </motion.div>
 
@@ -114,15 +113,11 @@ export default function Services() {
               variants={item}
               className={`group glass p-6 rounded-2xl cursor-pointer transition-all duration-300 border border-white/10 hover:border-white/20 ${glow} hover:-translate-y-2`}
             >
-              {/* Icon */}
               <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center mb-5 shadow-md group-hover:scale-110 transition-transform duration-300`}>
                 <Icon size={22} className="text-white" />
               </div>
-
               <h3 className="text-lg font-semibold text-white mb-2">{title}</h3>
               <p className="text-gray-400 text-sm leading-relaxed">{desc}</p>
-
-              {/* Arrow */}
               <div className="mt-4 flex items-center gap-1 text-brand-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 Learn more
                 <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">

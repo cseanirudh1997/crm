@@ -5,7 +5,7 @@ import { Eye, EyeOff, Zap, UserPlus, AlertCircle, CheckCircle } from 'lucide-rea
 import toast from 'react-hot-toast'
 import { signupUser } from './api'
 import { saveSession, isValidEmail } from './utils'
-import { COMPANY_NAME } from './config'
+import { COMPANY_NAME, TIERS, ONBOARDING_STAGES } from './config'
 
 const STRENGTH_LABELS = ['', 'Weak', 'Fair', 'Good', 'Strong']
 const STRENGTH_COLORS = ['', 'bg-red-500', 'bg-yellow-500', 'bg-blue-500', 'bg-emerald-500']
@@ -62,10 +62,12 @@ export default function Signup() {
 
       if (res.success) {
         saveSession({
-          username: res.user?.username || username,
-          email:    res.user?.email    || email,
-          role:     res.user?.role     || 'user',
-          company:  res.user?.company  || company,
+          username:        res.user?.username || username,
+          email:           res.user?.email    || email,
+          role:            res.user?.role     || 'user',
+          company:         res.user?.company  || company,
+          tier:            TIERS.TRIAL,
+          onboardingStage: ONBOARDING_STAGES.PENDING,
         })
         toast.success('Account created! Welcome to NexusAI 🚀')
         navigate('/dashboard')

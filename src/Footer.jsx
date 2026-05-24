@@ -4,33 +4,35 @@ import { Zap, Twitter, Linkedin, Github, Youtube, Mail, Phone, MapPin } from 'lu
 import { COMPANY_NAME, COMPANY_EMAIL, COMPANY_PHONE, COMPANY_ADDRESS, SOCIAL_LINKS } from './config'
 
 const FOOTER_LINKS = {
-  Platform: [
-    { label: 'RetailIQ Platform',      href: '#products' },
-    { label: 'Smart Pricing Engine',   href: '#products' },
-    { label: 'AI Forecast Studio',     href: '#products' },
-    { label: 'Decision Intelligence',  href: '#products' },
-    { label: 'GenAssist Enterprise',   href: '#products' },
+  Products: [
+    { label: 'NexusGPT Enterprise',      href: '#products' },
+    { label: 'SmartCall AI',             href: '#products' },
+    { label: 'VoiceFlow Enterprise',     href: '#products' },
+    { label: 'Enterprise RAG Platform',  href: '#products' },
+    { label: 'AI Automation Studio',     href: '#products' },
+    { label: 'AI Customer Support Suite',href: '#products' },
   ],
   Services: [
-    { label: 'AI Consulting',          href: '#services' },
-    { label: 'GenAI Integration',      href: '#services' },
-    { label: 'Data Engineering',       href: '#services' },
-    { label: 'BI Dashboards',          href: '#services' },
-    { label: 'Automation Solutions',   href: '#services' },
+    { label: 'LLM / SLM Deployment',    href: '#services' },
+    { label: 'Voice AI & Call Center',   href: '#services' },
+    { label: 'RAG / Knowledge QnA',      href: '#services' },
+    { label: 'Workflow Automation',      href: '#services' },
+    { label: 'AI Transformation',        href: '#services' },
+    { label: 'Managed AI Ops',           href: '#services' },
   ],
   Company: [
-    { label: 'About Us',               href: '#testimonials' },
-    { label: 'Pricing',                href: '#pricing' },
-    { label: 'Blog',                   href: '#' },
-    { label: 'Careers',                href: '#' },
-    { label: 'Press',                  href: '#' },
+    { label: 'About Us',                 href: '#testimonials' },
+    { label: 'Pricing',                  href: '#pricing'      },
+    { label: 'Blog',                     href: '#'             },
+    { label: 'Careers',                  href: '#'             },
+    { label: 'Press',                    href: '#'             },
   ],
   Legal: [
-    { label: 'Privacy Policy',         href: '#' },
-    { label: 'Terms of Service',       href: '#' },
-    { label: 'Cookie Policy',          href: '#' },
-    { label: 'Security',               href: '#' },
-    { label: 'DPA',                    href: '#' },
+    { label: 'Privacy Policy',           href: '#' },
+    { label: 'Terms of Service',         href: '#' },
+    { label: 'Cookie Policy',            href: '#' },
+    { label: 'Security',                 href: '#' },
+    { label: 'DPA',                      href: '#' },
   ],
 }
 
@@ -67,8 +69,8 @@ export default function Footer() {
               <span className="text-xl font-bold gradient-text">{COMPANY_NAME}</span>
             </Link>
             <p className="text-gray-400 text-sm leading-relaxed mb-6 max-w-xs">
-              Enterprise AI & Analytics solutions that help modern businesses unlock the full
-              potential of their data.
+              Enterprise AI solutions — LLM deployment, voice AI, RAG platforms, and intelligent automation
+              for the world's most demanding organisations.
             </p>
 
             {/* Contact info */}
