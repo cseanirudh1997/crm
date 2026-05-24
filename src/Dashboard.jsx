@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   TrendingUp, Users, Brain, Activity, Zap, LogOut,
   BarChart2, Database, AlertCircle, CheckCircle,
-  ArrowUpRight, ArrowDownRight, RefreshCw,
+  ArrowUpRight, ArrowDownRight, RefreshCw, Menu, X,
 } from 'lucide-react'
 import { getSession, clearSession, formatDate } from './utils'
 import { COMPANY_NAME } from './config'
@@ -96,7 +96,8 @@ const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } 
 export default function Dashboard() {
   const navigate  = useNavigate()
   const session   = getSession()
-  const [refresh, setRefresh] = useState(false)
+  const [refresh,       setRefresh]       = useState(false)
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
   function handleLogout() {
     clearSession()
@@ -108,8 +109,97 @@ export default function Dashboard() {
     setTimeout(() => setRefresh(false), 800)
   }
 
+  const NAV_ITEMS = [
+    { label: 'Overview',  icon: BarChart2,  active: true  },
+    { label: 'Analytics', icon: TrendingUp, active: false },
+    { label: 'Models',    icon: Brain,      active: false },
+    { label: 'Data',      icon: Database,   active: false },
+    { label: 'Users',     icon: Users,      active: false },
+    { label: 'Activity',  icon: Activity,   active: false },
+  ]
+
   return (
     <div className="min-h-screen bg-gray-950 text-white">
+
+      {/* ── Mobile nav drawer ── */}
+      <AnimatePresence>
+        {mobileNavOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setMobileNavOpen(false)}
+              className="fixed inset-0 bg-black/70 z-40 lg:hidden"
+            />
+            {/* Drawer */}
+            <motion.aside
+              key="drawer"
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+              className="fixed left-0 top-0 bottom-0 w-64 bg-gray-950 border-r border-white/10 z-50 flex flex-col lg:hidden"
+            >
+              {/* Logo + close */}
+              <div className="flex items-center justify-between h-16 px-5 border-b border-white/10">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-brand-500 to-accent-600 flex items-center justify-center shadow-glow-sm">
+                    <Zap size={14} className="text-white" />
+                  </div>
+                  <span className="font-bold gradient-text">{COMPANY_NAME}</span>
+                </div>
+                <button
+                  onClick={() => setMobileNavOpen(false)}
+                  className="text-gray-500 hover:text-white transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <nav className="flex-1 px-3 py-4 space-y-1">
+                {NAV_ITEMS.map(({ label, icon: Icon, active }) => (
+                  <button
+                    key={label}
+                    onClick={() => setMobileNavOpen(false)}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                      active
+                        ? 'bg-brand-700/30 text-brand-300 border border-brand-700/30'
+                        : 'text-gray-500 hover:text-gray-200 hover:bg-white/5'
+                    }`}
+                  >
+                    <Icon size={16} />
+                    {label}
+                  </button>
+                ))}
+              </nav>
+
+              {/* User info */}
+              <div className="p-4 border-t border-white/10">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-600 to-accent-600 flex items-center justify-center text-white text-xs font-bold">
+                    {session?.username?.[0]?.toUpperCase() || 'U'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-white truncate">{session?.username}</div>
+                    <div className="text-xs text-gray-500 truncate capitalize">{session?.role}</div>
+                  </div>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-900/20 hover:text-red-300 transition-all"
+                >
+                  <LogOut size={14} /> Sign out
+                </button>
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
       {/* Sidebar + main layout */}
       <div className="flex">
 
@@ -124,14 +214,7 @@ export default function Dashboard() {
           </div>
 
           <nav className="flex-1 px-3 py-4 space-y-1">
-            {[
-              { label: 'Overview',   icon: BarChart2,  active: true  },
-              { label: 'Analytics',  icon: TrendingUp,  active: false },
-              { label: 'Models',     icon: Brain,       active: false },
-              { label: 'Data',       icon: Database,    active: false },
-              { label: 'Users',      icon: Users,       active: false },
-              { label: 'Activity',   icon: Activity,    active: false },
-            ].map(({ label, icon: Icon, active }) => (
+            {NAV_ITEMS.map(({ label, icon: Icon, active }) => (
               <button
                 key={label}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
@@ -169,10 +252,20 @@ export default function Dashboard() {
         {/* Main content */}
         <main className="flex-1 lg:pl-56">
           {/* Top bar */}
-          <div className="sticky top-0 z-30 h-16 flex items-center justify-between px-6 border-b border-white/10 bg-gray-950/90 backdrop-blur-xl">
-            <div>
-              <h1 className="text-lg font-bold text-white">Dashboard</h1>
-              <p className="text-xs text-gray-500">{formatDate(Date.now())}</p>
+          <div className="sticky top-0 z-30 h-16 flex items-center justify-between px-4 sm:px-6 border-b border-white/10 bg-gray-950/90 backdrop-blur-xl">
+            <div className="flex items-center gap-3">
+              {/* Mobile hamburger */}
+              <button
+                onClick={() => setMobileNavOpen(true)}
+                className="lg:hidden w-9 h-9 rounded-lg glass border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-all"
+                aria-label="Open navigation"
+              >
+                <Menu size={17} />
+              </button>
+              <div>
+                <h1 className="text-lg font-bold text-white">Dashboard</h1>
+                <p className="text-xs text-gray-500">{formatDate(Date.now())}</p>
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <button

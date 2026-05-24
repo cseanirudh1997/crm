@@ -72,7 +72,7 @@ export default function Chatbot() {
     <>
       {/* Floating button */}
       <motion.div
-        className="fixed bottom-6 right-6 z-50"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ delay: 2, type: 'spring', stiffness: 260, damping: 20 }}
@@ -110,10 +110,10 @@ export default function Chatbot() {
             animate={{ opacity: 1, scale: 1,    y: 0  }}
             exit={{   opacity: 0, scale: 0.85, y: 20  }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 flex flex-col"
-            style={{ maxHeight: '540px' }}
+            className="fixed bottom-20 right-4 left-4 sm:left-auto sm:right-6 sm:w-96 z-50 flex flex-col"
+            style={{ maxHeight: 'min(540px, calc(100vh - 8rem))' }}
           >
-            <div className="glass-dark border border-white/10 rounded-2xl shadow-glass flex flex-col overflow-hidden" style={{ maxHeight: '540px' }}>
+            <div className="glass-dark border border-white/10 rounded-2xl shadow-glass flex flex-col overflow-hidden" style={{ maxHeight: 'min(540px, calc(100vh - 8rem))' }}>
               {/* Header */}
               <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-brand-900/80 to-accent-900/60 border-b border-white/10">
                 <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-accent-600 flex items-center justify-center shadow-glow-sm">

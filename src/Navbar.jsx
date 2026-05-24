@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Zap, LogOut, LayoutDashboard, ChevronRight } from 'lucide-react'
+import { Menu, X, Zap, LogOut, LayoutDashboard, ChevronRight, Bell } from 'lucide-react'
 import { NAV_LINKS, COMPANY_NAME } from './config'
 import { getSession, clearSession, scrollToSection } from './utils'
 
 export default function Navbar() {
-  const [open,      setOpen]      = useState(false)
-  const [scrolled,  setScrolled]  = useState(false)
-  const [darkMode,  setDarkMode]  = useState(true)
+  const [open,     setOpen]    = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const navigate  = useNavigate()
   const location  = useLocation()
   const session   = getSession()
@@ -20,11 +19,6 @@ export default function Navbar() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
-
-  /* Dark mode toggle */
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', darkMode)
-  }, [darkMode])
 
   function handleNavClick(href) {
     setOpen(false)
@@ -48,8 +42,8 @@ export default function Navbar() {
       transition={{ duration: 0.6, ease: 'easeOut' }}
       className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
         scrolled
-          ? 'bg-gray-950/90 backdrop-blur-xl border-b border-white/10 shadow-glass'
-          : 'bg-transparent'
+          ? 'bg-gray-950/95 backdrop-blur-xl border-b border-white/10 shadow-glass'
+          : 'bg-gray-950/20 backdrop-blur-sm border-b border-transparent'
       }`}
     >
       <div className="section-wrapper">
@@ -80,14 +74,17 @@ export default function Navbar() {
 
           {/* Right side */}
           <div className="hidden md:flex items-center gap-3">
-            {/* Dark mode toggle */}
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className="w-9 h-9 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-gray-300 hover:text-white"
-              aria-label="Toggle dark mode"
-            >
-              {darkMode ? '☀️' : '🌙'}
-            </button>
+            {/* Notifications */}
+            <div className="relative">
+              <button
+                className="w-9 h-9 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-gray-400 hover:text-white"
+                aria-label="Notifications"
+                title="Notifications"
+              >
+                <Bell size={15} />
+              </button>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand-500 border border-gray-950 pointer-events-none" />
+            </div>
 
             {session ? (
               <>
@@ -112,12 +109,15 @@ export default function Navbar() {
 
           {/* Mobile hamburger */}
           <div className="md:hidden flex items-center gap-2">
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className="w-9 h-9 rounded-lg flex items-center justify-center bg-white/5 border border-white/10"
-            >
-              {darkMode ? '☀️' : '🌙'}
-            </button>
+            <div className="relative">
+              <button
+                className="w-9 h-9 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 text-gray-400"
+                aria-label="Notifications"
+              >
+                <Bell size={15} />
+              </button>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand-500 border border-gray-950 pointer-events-none" />
+            </div>
             <button
               onClick={() => setOpen(!open)}
               className="w-9 h-9 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 text-gray-300 hover:text-white hover:bg-white/10 transition-all"

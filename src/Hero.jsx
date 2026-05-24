@@ -125,7 +125,7 @@ export default function Hero() {
           {/* Typing subheadline */}
           <motion.div
             variants={fadeUp}
-            className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-300 mb-6 h-10"
+            className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-300 mb-6 min-h-[2.5rem] flex items-center justify-center"
           >
             <span className="typing-cursor">{typedText}</span>
           </motion.div>
@@ -193,32 +193,86 @@ export default function Hero() {
               </div>
             </div>
             {/* Mock dashboard UI */}
-            <div className="grid grid-cols-3 gap-3 mb-3">
-              {[
-                { label: 'Revenue Forecast', value: '$12.4M', color: 'from-brand-600 to-brand-800' },
-                { label: 'AI Accuracy',       value: '97.3%',   color: 'from-accent-600 to-accent-800' },
-                { label: 'Processed Today',   value: '48.2M',  color: 'from-teal-600 to-teal-800' },
-              ].map(({ label, value, color }) => (
-                <div key={label} className={`rounded-xl p-3 bg-gradient-to-br ${color} bg-opacity-30 border border-white/10`}>
-                  <div className="text-xs text-gray-400 mb-1">{label}</div>
-                  <div className="text-lg font-bold text-white">{value}</div>
-                  <div className="mt-2 h-1 bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full bg-white/40 rounded-full w-3/4 animate-pulse-slow" />
+            <div className="flex gap-3">
+              {/* Mini sidebar */}
+              <div className="hidden sm:flex w-24 flex-col gap-1 border-r border-white/5 pr-3 shrink-0">
+                {['Overview', 'Analytics', 'Models', 'Forecasts', 'Alerts'].map((item, i) => (
+                  <div
+                    key={item}
+                    className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs ${
+                      i === 0
+                        ? 'bg-brand-700/40 text-brand-300'
+                        : 'text-gray-600'
+                    }`}
+                  >
+                    <div className={`w-1 h-1 rounded-full shrink-0 ${i === 0 ? 'bg-brand-400' : 'bg-gray-700'}`} />
+                    {item}
+                  </div>
+                ))}
+              </div>
+
+              {/* Main area */}
+              <div className="flex-1 min-w-0">
+                {/* KPI row */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+                  {[
+                    { label: 'Revenue',  value: '$12.4M', change: '+8.2%',  color: 'from-brand-600 to-brand-800',  up: true  },
+                    { label: 'Accuracy', value: '97.3%',  change: '+1.4%',  color: 'from-accent-600 to-accent-800', up: true  },
+                    { label: 'Data/Day', value: '48.2M',  change: '+12%',   color: 'from-teal-600 to-teal-800',    up: true  },
+                    { label: 'Users',    value: '1,284',  change: '-2.1%',  color: 'from-amber-600 to-amber-800',  up: false },
+                  ].map(({ label, value, change, color, up }) => (
+                    <div key={label} className={`rounded-lg p-2 bg-gradient-to-br ${color} bg-opacity-20 border border-white/10`}>
+                      <div className="text-gray-400 text-xs mb-0.5">{label}</div>
+                      <div className="text-sm font-bold text-white">{value}</div>
+                      <div className={`text-xs mt-0.5 font-medium ${up ? 'text-emerald-400' : 'text-red-400'}`}>{change}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Chart + Activity split */}
+                <div className="grid grid-cols-3 gap-2">
+                  {/* Chart */}
+                  <div className="col-span-2">
+                    <div className="text-xs text-gray-500 mb-1.5 flex items-center justify-between">
+                      <span>Revenue Forecast</span>
+                      <span className="text-emerald-400">+24% YoY</span>
+                    </div>
+                    <div className="h-16 flex items-end gap-0.5">
+                      {[40, 55, 45, 70, 60, 80, 75, 90, 82, 95, 88, 100].map((h, i) => (
+                        <motion.div
+                          key={i}
+                          initial={{ height: 0 }}
+                          animate={{ height: `${h}%` }}
+                          transition={{ delay: 1.2 + i * 0.04, duration: 0.5 }}
+                          className={`flex-1 rounded-t-sm ${
+                            i === 11
+                              ? 'bg-gradient-to-t from-brand-500 to-brand-300'
+                              : 'bg-gradient-to-t from-brand-700 to-brand-500 opacity-70'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Activity feed */}
+                  <div>
+                    <div className="text-xs text-gray-500 mb-1.5">Live Activity</div>
+                    <div className="space-y-1.5">
+                      {[
+                        { text: 'Model retrained',  ok: true  },
+                        { text: 'Margin alert',      ok: false },
+                        { text: 'Sync complete',     ok: true  },
+                        { text: '12.4K queries',     ok: true  },
+                      ].map(({ text, ok }) => (
+                        <div key={text} className="flex items-center gap-1.5">
+                          <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${ok ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                          <span className="text-xs text-gray-500 truncate">{text}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-            {/* Mock chart bars */}
-            <div className="h-20 flex items-end gap-1 px-2">
-              {[40, 65, 45, 80, 55, 70, 90, 60, 85, 75, 95, 70].map((h, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ height: 0 }}
-                  animate={{ height: `${h}%` }}
-                  transition={{ delay: 1.2 + i * 0.05, duration: 0.5 }}
-                  className="flex-1 rounded-t-sm bg-gradient-to-t from-brand-700 to-brand-400 opacity-80"
-                />
-              ))}
+              </div>
             </div>
           </div>
         </motion.div>
