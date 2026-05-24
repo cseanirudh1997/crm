@@ -43,7 +43,7 @@ const METRIC_CARDS = [
   },
   {
     label:    'Active Users',
-    value:    '1,284',
+    value:    '1284',
     change:   '-2.1%',
     up:       false,
     icon:     Users,

@@ -31,7 +31,7 @@ export default function Navbar() {
     if (isHome) {
       scrollToSection(href)
     } else {
-      navigate('/' + href)
+      navigate('/', { state: { scrollTo: href } })
     }
   }
 

@@ -1,29 +1,32 @@
 import { useEffect, useState } from 'react'
-import { HashRouter, Routes, Route, Link } from 'react-router-dom'
+import { HashRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 
+// Utils
+import { scrollToSection } from './utils'
+
 // Layout pieces
-import Navbar        from './Navbar'
-import Footer        from './Footer'
-import Chatbot       from './Chatbot'
+import Navbar         from './Navbar'
+import Footer         from './Footer'
+import Chatbot        from './Chatbot'
 import ProtectedRoute from './ProtectedRoute'
 
 // Home page sections
-import Hero          from './Hero'
-import Services      from './Services'
-import Products      from './Products'
-import Solutions     from './Solutions'
-import Pricing       from './Pricing'
-import Testimonials  from './Testimonials'
-import Clients       from './Clients'
-import FAQ           from './FAQ'
-import Newsletter    from './Newsletter'
-import Contact       from './Contact'
+import Hero         from './Hero'
+import Services     from './Services'
+import Products     from './Products'
+import Solutions    from './Solutions'
+import Pricing      from './Pricing'
+import Testimonials from './Testimonials'
+import Clients      from './Clients'
+import FAQ          from './FAQ'
+import Newsletter   from './Newsletter'
+import Contact      from './Contact'
 
 // Auth + Dashboard
-import Login         from './Login'
-import Signup        from './Signup'
-import Dashboard     from './Dashboard'
+import Login     from './Login'
+import Signup    from './Signup'
+import Dashboard from './Dashboard'
 
 // ─────────────────────────────────────────────
 //  Scroll progress bar
@@ -33,9 +36,9 @@ function ScrollProgress() {
 
   useEffect(() => {
     const onScroll = () => {
-      const scrollTop    = window.scrollY
-      const docHeight    = document.documentElement.scrollHeight - window.innerHeight
-      const pct          = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0
+      const scrollTop = window.scrollY
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight
+      const pct       = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0
       setProgress(pct)
     }
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -54,6 +57,18 @@ function ScrollProgress() {
 //  Home page — all sections assembled
 // ─────────────────────────────────────────────
 function HomePage() {
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const { scrollTo } = location.state || {}
+    if (scrollTo) {
+      // Clear state immediately so back-navigation doesn't re-trigger scroll
+      navigate(location.pathname, { replace: true, state: {} })
+      setTimeout(() => scrollToSection(scrollTo), 100)
+    }
+  }, [location.state])
+
   return (
     <>
       <Hero />
@@ -84,11 +99,11 @@ export default function App() {
         position="top-right"
         toastOptions={{
           style: {
-            background: '#111827',
-            color:      '#f9fafb',
-            border:     '1px solid rgba(255,255,255,0.1)',
+            background:   '#111827',
+            color:        '#f9fafb',
+            border:       '1px solid rgba(255,255,255,0.1)',
             borderRadius: '12px',
-            fontSize:   '14px',
+            fontSize:     '14px',
           },
           success: { iconTheme: { primary: '#4a5eff', secondary: '#fff' } },
           error:   { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
@@ -126,7 +141,7 @@ export default function App() {
           }
         />
 
-        {/* ── Fallback ── */}
+        {/* ── Fallback 404 ── */}
         <Route
           path="*"
           element={

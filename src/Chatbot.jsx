@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MessageCircle, X, Send, Bot, Sparkles } from 'lucide-react'
 import { sendChatMessage } from './api'
-import { SUGGESTED_PROMPTS, FALLBACK_RESPONSE, getWelcomeMessage, buildUserMessage, buildBotMessage } from './chatbot'
+import { SUGGESTED_PROMPTS, FALLBACK_RESPONSE, getWelcomeMessage, buildUserMessage, buildBotMessage } from './chatbot-helpers'
 
 function TypingIndicator() {
   return (

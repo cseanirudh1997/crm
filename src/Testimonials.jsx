@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Quote, Star, ChevronLeft, ChevronRight } from 'lucide-react'
 
 const TESTIMONIALS = [
@@ -96,6 +96,7 @@ export default function Testimonials() {
 
         {/* Main testimonial */}
         <div className="max-w-4xl mx-auto">
+          <AnimatePresence mode="wait">
           <motion.div
             key={current}
             initial={{ opacity: 0, x: 40 }}
@@ -130,6 +131,7 @@ export default function Testimonials() {
               </div>
             </div>
           </motion.div>
+          </AnimatePresence>
 
           {/* Controls */}
           <div className="flex items-center justify-between mt-8">
