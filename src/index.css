@@ -219,3 +219,13 @@
   @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full
          text-xs font-semibold bg-brand-900/60 border border-brand-700/40 text-brand-400;
 }
+
+/* ─────────────────────────────────────────
+   Display font utility — Playfair Display
+   Use on luxury headings for editorial feel
+───────────────────────────────────────── */
+.font-display {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-feature-settings: 'liga' 1, 'kern' 1;
+  letter-spacing: -0.01em;
+}

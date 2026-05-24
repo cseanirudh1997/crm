@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────────
 
 export const API_URL =
-  'https://script.google.com/macros/s/AKfycbyyXCd5_lCYyzfVuyxjhZ7DgG6BH36q532QjCpvMf0E-YPc_xdktWwb03KZjVqWH_bDfQ/exec'
+  'https://script.google.com/macros/s/AKfycbxoI24ic-ykU-QeQxkfOI0mo3AaIhCz9_zt2eCzSOAEASYGzNMe_oFnJ9ntEl6uTrLsWg/exec'
 
 export const COMPANY_NAME    = 'EstateFlow'
 export const COMPANY_TAGLINE = 'Premium Indian Real Estate Platform'

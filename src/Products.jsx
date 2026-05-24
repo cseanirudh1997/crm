@@ -1,21 +1,71 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Building2, MapPin, Calendar, Shield, Heart, CalendarCheck, ChevronRight, X, Bed, Ruler } from 'lucide-react'
+import { Building2, MapPin, Calendar, Shield, Heart, CalendarCheck, ChevronRight, ChevronLeft, X, Bed, Ruler, Waves, Dumbbell, Leaf, Car, Wifi, Star, Coffee } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { fetchProjects, fetchSubProjects, fetchProperties } from './api'
+import { fetchProjects, fetchSubProjects, fetchProperties, fetchProjectImages, fetchAmenities, fetchFloorPlans } from './api'
 import { getSession } from './utils'
+
+// ── Amenity icon mapper ───────────────────────────────────────────────────────
+function getAmenityIcon(amenity) {
+  const n = (amenity || '').toLowerCase()
+  if (n.includes('pool') || n.includes('spa') || n.includes('swim'))
+    return { Icon: Waves,    color: 'from-sky-600 to-sky-800' }
+  if (n.includes('sport') || n.includes('gym') || n.includes('fitness') || n.includes('arena'))
+    return { Icon: Dumbbell, color: 'from-emerald-600 to-emerald-800' }
+  if (n.includes('security') || n.includes('safe') || n.includes('access'))
+    return { Icon: Shield,   color: 'from-accent-600 to-accent-800' }
+  if (n.includes('garden') || n.includes('green') || n.includes('land') || n.includes('nature'))
+    return { Icon: Leaf,     color: 'from-lime-600 to-lime-800' }
+  if (n.includes('park') || n.includes('ev') || n.includes('car') || n.includes('garage'))
+    return { Icon: Car,      color: 'from-slate-600 to-slate-800' }
+  if (n.includes('smart') || n.includes('auto') || n.includes('wifi') || n.includes('tech') || n.includes('home'))
+    return { Icon: Wifi,     color: 'from-violet-600 to-violet-800' }
+  if (n.includes('lounge') || n.includes('club') || n.includes('sky') || n.includes('concierge'))
+    return { Icon: Star,     color: 'from-brand-600 to-brand-800' }
+  if (n.includes('retail') || n.includes('dining') || n.includes('cafe') || n.includes('food'))
+    return { Icon: Coffee,   color: 'from-amber-600 to-amber-800' }
+  return { Icon: Star,       color: 'from-brand-600 to-brand-800' }
+}
+
+const MODAL_TABS  = ['gallery', 'overview', 'amenities', 'floorplans', 'inventory']
+const TAB_LABELS  = { gallery: 'Gallery', overview: 'Overview', amenities: 'Amenities', floorplans: 'Floor Plans', inventory: 'Inventory' }
+const STATUS_CLR  = { Available: 'text-emerald-400', Booked: 'text-red-400', Waitlist: 'text-amber-400' }
 
 // ── Project Detail Modal ──────────────────────────────────────────────────────
 function ProjectModal({ project, onClose, onInterest, onVisit }) {
-  const [tab,         setTab]         = useState('overview')
+  const [tab,         setTab]         = useState('gallery')
   const [subProjects, setSubProjects] = useState([])
   const [properties,  setProperties]  = useState([])
-  const [loadingSubs, setLoadingSubs] = useState(true)
+  const [images,      setImages]      = useState([])
+  const [amenities,   setAmenities]   = useState([])
+  const [floorPlans,  setFloorPlans]  = useState([])
+  const [activeImg,   setActiveImg]   = useState(0)
   const [activeSub,   setActiveSub]   = useState(null)
+  const [activeBhk,   setActiveBhk]   = useState('all')
+  const [loadMedia,   setLoadMedia]   = useState(true)
+  const [loadSubs,    setLoadSubs]    = useState(true)
 
   useEffect(() => {
     if (!project) return
-    setLoadingSubs(true)
+    setTab('gallery')
+    setActiveImg(0)
+    setActiveBhk('all')
+    setLoadMedia(true)
+    setLoadSubs(true)
+
+    // Fetch gallery images, amenities, floor plans in parallel (only on modal open)
+    Promise.all([
+      fetchProjectImages(project.id),
+      fetchAmenities(project.id),
+      fetchFloorPlans(project.id),
+    ]).then(([imgRes, amRes, fpRes]) => {
+      setImages(imgRes.images || [])
+      setAmenities(amRes.amenities || [])
+      setFloorPlans(fpRes.floorPlans || [])
+      setLoadMedia(false)
+    })
+
+    // Inventory sub-projects
     fetchSubProjects(project.id).then((res) => {
       const subs = res.subProjects || []
       setSubProjects(subs)
@@ -23,10 +73,10 @@ function ProjectModal({ project, onClose, onInterest, onVisit }) {
         setActiveSub(subs[0].id)
         fetchProperties(subs[0].id).then((r) => {
           setProperties(r.properties || [])
-          setLoadingSubs(false)
+          setLoadSubs(false)
         })
       } else {
-        setLoadingSubs(false)
+        setLoadSubs(false)
       }
     })
   }, [project])
@@ -38,7 +88,11 @@ function ProjectModal({ project, onClose, onInterest, onVisit }) {
 
   if (!project) return null
 
-  const statusColor = { Available: 'text-emerald-400', Booked: 'text-red-400', Waitlist: 'text-amber-400' }
+  const bhkOptions    = ['all', ...Array.from(new Set(floorPlans.map((fp) => fp.bhk)))]
+  const filteredPlans = activeBhk === 'all' ? floorPlans : floorPlans.filter((fp) => fp.bhk === activeBhk)
+  const heroSrc       = tab === 'gallery' && !loadMedia && images[activeImg]
+    ? images[activeImg].imageUrl
+    : project.imageUrl
 
   return (
     <motion.div
@@ -55,50 +109,129 @@ function ProjectModal({ project, onClose, onInterest, onVisit }) {
         transition={{ type: 'spring', damping: 26, stiffness: 260 }}
         className="w-full sm:max-w-4xl max-h-[92vh] sm:max-h-[88vh] overflow-hidden bg-gray-900 border border-white/10 rounded-t-3xl sm:rounded-3xl flex flex-col shadow-glass"
       >
-        {/* Header */}
+        {/* ── Hero Header ────────────────────────────── */}
         <div className="relative flex-shrink-0">
-          <div className="h-48 sm:h-64 overflow-hidden">
-            <img src={project.imageUrl} alt={project.name} className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent" />
+          <div className={`${tab === 'gallery' ? 'h-52 sm:h-72' : 'h-28 sm:h-36'} overflow-hidden`}>
+            <img src={heroSrc} alt={project.name} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/30 to-transparent" />
           </div>
+
+          {/* Close */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+            className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-black/70 transition-colors"
           >
             <X size={16} />
           </button>
-          <div className="absolute bottom-4 left-4 right-16">
-            <div className="flex items-center gap-2 mb-1 flex-wrap">
+
+          {/* Gallery nav + type badge */}
+          {tab === 'gallery' && !loadMedia && images.length > 1 && (
+            <>
+              <button
+                onClick={() => setActiveImg((i) => (i - 1 + images.length) % images.length)}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <button
+                onClick={() => setActiveImg((i) => (i + 1) % images.length)}
+                className="absolute right-14 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </>
+          )}
+          {tab === 'gallery' && !loadMedia && images[activeImg] && (
+            <span className="absolute top-3 left-3 text-xs font-semibold px-2.5 py-1 rounded-full bg-brand-600/80 text-white border border-brand-500/40 capitalize">
+              {images[activeImg].imageType?.replace('_', ' ')}
+            </span>
+          )}
+
+          {/* Project meta overlay */}
+          <div className="absolute bottom-3 left-4 right-14">
+            {tab === 'gallery' && images[activeImg]?.caption && (
+              <p className="text-xs text-gray-300 opacity-75 mb-1">
+                {images[activeImg].caption} · {activeImg + 1}/{images.length}
+              </p>
+            )}
+            <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
               {project.tags?.slice(0, 2).map((t) => (
                 <span key={t} className="text-xs font-semibold px-2 py-0.5 rounded-full bg-brand-600/80 text-white border border-brand-500/40">
                   {t}
                 </span>
               ))}
             </div>
-            <h2 className="text-xl sm:text-2xl font-extrabold text-white">{project.name}</h2>
-            <p className="text-gray-300 text-sm">{project.builder} · {project.city}</p>
+            <h2 className="text-lg sm:text-xl font-extrabold text-white leading-tight">{project.name}</h2>
+            <p className="text-gray-300 text-xs">{project.builder} · {project.city}</p>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1 px-4 pt-4 flex-shrink-0 border-b border-white/10">
-          {['overview', 'towers', 'inventory'].map((t) => (
+        {/* ── Tabs ───────────────────────────────────── */}
+        <div className="flex px-3 pt-3 flex-shrink-0 border-b border-white/10 overflow-x-auto gap-0.5">
+          {MODAL_TABS.map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-4 py-2 text-sm font-medium rounded-t-lg capitalize transition-colors ${
-                tab === t ? 'text-brand-400 border-b-2 border-brand-500' : 'text-gray-400 hover:text-white'
+              className={`px-3 py-2 text-xs sm:text-sm font-medium rounded-t-lg whitespace-nowrap transition-colors ${
+                tab === t
+                  ? 'text-brand-400 border-b-2 border-brand-500 bg-brand-950/20'
+                  : 'text-gray-400 hover:text-white'
               }`}
             >
-              {t === 'towers' ? 'Towers / Phases' : t.charAt(0).toUpperCase() + t.slice(1)}
+              {TAB_LABELS[t]}
             </button>
           ))}
         </div>
 
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+        {/* ── Body ───────────────────────────────────── */}
+        <div className="flex-1 overflow-y-auto">
+
+          {/* Gallery */}
+          {tab === 'gallery' && (
+            <div>
+              {/* Thumbnail strip */}
+              {loadMedia ? (
+                <div className="flex gap-2 p-3">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="shimmer flex-shrink-0 w-16 h-12 rounded-lg bg-white/5" />
+                  ))}
+                </div>
+              ) : images.length > 1 ? (
+                <div className="flex gap-2 p-3 overflow-x-auto bg-gray-900/60">
+                  {images.map((img, i) => (
+                    <button
+                      key={img.imageId}
+                      onClick={() => setActiveImg(i)}
+                      className={`flex-shrink-0 w-16 h-12 rounded-lg overflow-hidden border-2 transition-all ${
+                        i === activeImg ? 'border-brand-500 opacity-100' : 'border-transparent opacity-50 hover:opacity-80'
+                      }`}
+                    >
+                      <img src={img.imageUrl} alt={img.caption} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+
+              {/* Quick stats */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 sm:p-5">
+                {[
+                  { label: 'Starting Price', value: project.startingPrice },
+                  { label: 'Possession',     value: project.possessionDate },
+                  { label: 'Type',           value: project.type },
+                  { label: 'RERA ID',        value: project.reraId || 'Verified', mono: true },
+                ].map(({ label, value, mono }) => (
+                  <div key={label} className="glass rounded-xl p-3 border border-white/5">
+                    <div className="text-xs text-gray-500 mb-1">{label}</div>
+                    <div className={`text-sm font-semibold text-white ${mono ? 'font-mono text-xs' : ''}`}>{value}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Overview */}
           {tab === 'overview' && (
-            <div className="space-y-5">
+            <div className="p-4 sm:p-6 space-y-5">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
                   { label: 'Starting Price', value: project.startingPrice },
@@ -116,85 +249,178 @@ function ProjectModal({ project, onClose, onInterest, onVisit }) {
             </div>
           )}
 
-          {tab === 'towers' && (
-            <div className="space-y-3">
-              {loadingSubs
-                ? [...Array(3)].map((_, i) => <div key={i} className="shimmer h-16 rounded-xl bg-white/5" />)
-                : subProjects.map((sp) => (
-                  <div
-                    key={sp.id}
-                    onClick={() => handleSubClick(sp)}
-                    className={`p-4 rounded-xl border cursor-pointer transition-all duration-200 ${
-                      activeSub === sp.id ? 'border-brand-600/60 bg-brand-950/30' : 'border-white/5 bg-white/3 hover:border-brand-700/30'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <div className="font-semibold text-white text-sm">{sp.name}</div>
-                        <div className="text-xs text-gray-400 mt-0.5">{sp.type} · {sp.units} Units · {sp.floorPlan}</div>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <div className="text-brand-400 text-sm font-bold">{sp.priceRange}</div>
-                        <div className={`text-xs font-medium ${statusColor[sp.availability] || 'text-gray-400'}`}>
-                          {sp.availability}
+          {/* Amenities */}
+          {tab === 'amenities' && (
+            <div className="p-4 sm:p-6">
+              {loadMedia ? (
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="shimmer h-20 rounded-xl bg-white/5" />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {amenities.map((a) => {
+                    const { Icon, color } = getAmenityIcon(a.amenity)
+                    return (
+                      <div
+                        key={a.amenityId}
+                        className="flex items-start gap-3 glass rounded-xl p-4 border border-white/5 hover:border-brand-700/20 transition-colors"
+                      >
+                        <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center flex-shrink-0`}>
+                          <Icon size={16} className="text-white" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-semibold text-white mb-0.5">{a.amenity}</div>
+                          <div className="text-xs text-gray-500 leading-relaxed">{a.description}</div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                ))
-              }
+                    )
+                  })}
+                </div>
+              )}
             </div>
           )}
 
+          {/* Floor Plans */}
+          {tab === 'floorplans' && (
+            <div className="p-4 sm:p-6">
+              {/* BHK filter pills */}
+              {!loadMedia && bhkOptions.length > 1 && (
+                <div className="flex gap-2 mb-4 flex-wrap">
+                  {bhkOptions.map((b) => (
+                    <button
+                      key={b}
+                      onClick={() => setActiveBhk(b)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                        activeBhk === b
+                          ? 'bg-brand-600 text-white'
+                          : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/10'
+                      }`}
+                    >
+                      {b === 'all' ? 'All BHK' : b}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {loadMedia ? (
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="shimmer h-44 rounded-xl bg-white/5" />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {filteredPlans.map((fp) => (
+                    <div key={fp.planId} className="glass border border-white/5 rounded-xl overflow-hidden hover:border-brand-700/30 transition-colors">
+                      {fp.imageUrl && (
+                        <div className="h-36 overflow-hidden">
+                          <img src={fp.imageUrl} alt={`${fp.bhk} floor plan`} className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      <div className="p-3">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-sm font-bold text-white">{fp.bhk}</span>
+                          <span className="text-brand-400 text-sm font-bold">{fp.price}</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-xs text-gray-400 mb-2">
+                          <span className="flex items-center gap-1"><Ruler size={11} />{fp.area}</span>
+                          <span className="flex items-center gap-1"><Bed size={11} />{fp.bathrooms} Bath</span>
+                          {fp.balconies > 0 && (
+                            <span>{fp.balconies} Balcon{fp.balconies > 1 ? 'ies' : 'y'}</span>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-500 leading-relaxed">{fp.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Inventory */}
           {tab === 'inventory' && (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-white/10 text-xs text-gray-500 uppercase tracking-wide">
-                    <th className="text-left pb-3 pr-4">Unit</th>
-                    <th className="text-left pb-3 pr-4">Type</th>
-                    <th className="text-left pb-3 pr-4">Floor</th>
-                    <th className="text-left pb-3 pr-4">Size</th>
-                    <th className="text-left pb-3 pr-4">Price</th>
-                    <th className="text-left pb-3">Facing</th>
-                    <th className="text-left pb-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {loadingSubs
-                    ? [...Array(4)].map((_, i) => (
-                      <tr key={i}><td colSpan={7} className="py-3"><div className="shimmer h-4 rounded bg-white/5" /></td></tr>
-                    ))
-                    : properties.map((p) => (
-                      <tr key={p.id} className="hover:bg-white/3 transition-colors">
-                        <td className="py-3 pr-4 font-mono text-xs text-gray-300">{p.unit}</td>
-                        <td className="py-3 pr-4 text-white font-medium whitespace-nowrap">
-                          <span className="flex items-center gap-1"><Bed size={12} className="text-brand-400" />{p.type}</span>
-                        </td>
-                        <td className="py-3 pr-4 text-gray-400">{p.floor}</td>
-                        <td className="py-3 pr-4 text-gray-400 whitespace-nowrap">
-                          <span className="flex items-center gap-1"><Ruler size={12} />{p.size}</span>
-                        </td>
-                        <td className="py-3 pr-4 text-brand-400 font-bold whitespace-nowrap">{p.price}</td>
-                        <td className="py-3 pr-4 text-gray-400 text-xs max-w-[150px] truncate">{p.facing}</td>
-                        <td className="py-3">
-                          <span className={`text-xs font-semibold ${statusColor[p.status] || 'text-gray-400'}`}>{p.status}</span>
-                        </td>
-                      </tr>
-                    ))
-                  }
-                </tbody>
-              </table>
+            <div className="p-4 sm:p-6">
+              {/* Tower / Phase selector pills */}
+              {subProjects.length > 1 && (
+                <div className="flex gap-2 mb-4 flex-wrap">
+                  {subProjects.map((sp) => (
+                    <button
+                      key={sp.id}
+                      onClick={() => handleSubClick(sp)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                        activeSub === sp.id
+                          ? 'bg-brand-600 text-white'
+                          : 'bg-white/5 text-gray-400 hover:bg-white/10 border border-white/10'
+                      }`}
+                    >
+                      {sp.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-white/10 text-xs text-gray-500 uppercase tracking-wide">
+                      <th className="text-left pb-3 pr-4">Unit</th>
+                      <th className="text-left pb-3 pr-4">Type</th>
+                      <th className="text-left pb-3 pr-4">Floor</th>
+                      <th className="text-left pb-3 pr-4">Size</th>
+                      <th className="text-left pb-3 pr-4">Price</th>
+                      <th className="text-left pb-3">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {loadSubs
+                      ? [...Array(4)].map((_, i) => (
+                        <tr key={i}>
+                          <td colSpan={6} className="py-3">
+                            <div className="shimmer h-4 rounded bg-white/5" />
+                          </td>
+                        </tr>
+                      ))
+                      : properties.map((p) => (
+                        <tr key={p.id} className="hover:bg-white/3 transition-colors">
+                          <td className="py-3 pr-4 font-mono text-xs text-gray-300">{p.unit}</td>
+                          <td className="py-3 pr-4 text-white font-medium whitespace-nowrap">
+                            <span className="flex items-center gap-1">
+                              <Bed size={12} className="text-brand-400" />{p.type}
+                            </span>
+                          </td>
+                          <td className="py-3 pr-4 text-gray-400">{p.floor}</td>
+                          <td className="py-3 pr-4 text-gray-400 whitespace-nowrap">
+                            <span className="flex items-center gap-1"><Ruler size={12} />{p.size}</span>
+                          </td>
+                          <td className="py-3 pr-4 text-brand-400 font-bold whitespace-nowrap">{p.price}</td>
+                          <td className="py-3">
+                            <span className={`text-xs font-semibold ${STATUS_CLR[p.status] || 'text-gray-400'}`}>
+                              {p.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    }
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
 
-        {/* Action bar */}
+        {/* ── Action bar ─────────────────────────────── */}
         <div className="flex-shrink-0 flex items-center gap-3 p-4 border-t border-white/10 bg-gray-900/80">
-          <button onClick={() => { onClose(); onInterest(project) }} className="btn-primary flex-1 justify-center py-3 text-sm">
+          <button
+            onClick={() => { onClose(); onInterest(project) }}
+            className="btn-primary flex-1 justify-center py-3 text-sm"
+          >
             <Heart size={15} /> I'm Interested
           </button>
-          <button onClick={() => { onClose(); onVisit(project) }} className="btn-secondary flex-1 justify-center py-3 text-sm">
+          <button
+            onClick={() => { onClose(); onVisit(project) }}
+            className="btn-secondary flex-1 justify-center py-3 text-sm"
+          >
             <CalendarCheck size={15} /> Schedule Visit
           </button>
         </div>
@@ -207,13 +433,13 @@ function ProjectModal({ project, onClose, onInterest, onVisit }) {
 function LeadModal({ project, type, onClose }) {
   const session = getSession()
   const [form, setForm] = useState({
-    name: session?.username || '',
-    email: session?.email || '',
-    phone: '',
-    budget: '',
-    message: '',
+    name:          session?.username || '',
+    email:         session?.email || '',
+    phone:         '',
+    budget:        '',
+    message:       '',
     preferredDate: '',
-    timeSlot: 'Morning (10AM–1PM)',
+    timeSlot:      'Morning (10AM–1PM)',
   })
   const [loading, setLoading] = useState(false)
   const [sent,    setSent]    = useState(false)
@@ -224,7 +450,9 @@ function LeadModal({ project, type, onClose }) {
     await new Promise((r) => setTimeout(r, 1200))
     setLoading(false)
     setSent(true)
-    toast.success(type === 'interest' ? 'Interest registered! Expect a call within 24 hours.' : 'Site visit booked! Confirmation SMS on its way.')
+    toast.success(type === 'interest'
+      ? 'Interest registered! Expect a call within 24 hours.'
+      : 'Site visit booked! Confirmation SMS on its way.')
   }
 
   return (
@@ -248,7 +476,10 @@ function LeadModal({ project, type, onClose }) {
             </h3>
             {project && <p className="text-xs text-gray-400 mt-0.5">{project.name} · {project.builder}</p>}
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors">
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
+          >
             <X size={14} className="text-gray-400" />
           </button>
         </div>
@@ -273,43 +504,89 @@ function LeadModal({ project, type, onClose }) {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs text-gray-400 mb-1 block">Full Name</label>
-                <input className="input-field text-sm" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="Your name" required />
+                <input
+                  className="input-field text-sm"
+                  value={form.name}
+                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                  placeholder="Your name"
+                  required
+                />
               </div>
               <div>
                 <label className="text-xs text-gray-400 mb-1 block">Phone</label>
-                <input className="input-field text-sm" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} placeholder="+91 98765 43210" required />
+                <input
+                  className="input-field text-sm"
+                  value={form.phone}
+                  onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                  placeholder="+91 98765 43210"
+                  required
+                />
               </div>
             </div>
             <div>
               <label className="text-xs text-gray-400 mb-1 block">Email</label>
-              <input type="email" className="input-field text-sm" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} placeholder="you@email.com" required />
+              <input
+                type="email"
+                className="input-field text-sm"
+                value={form.email}
+                onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                placeholder="you@email.com"
+                required
+              />
             </div>
+
             {type === 'interest' ? (
               <div>
                 <label className="text-xs text-gray-400 mb-1 block">Budget Range</label>
-                <select className="input-field text-sm" value={form.budget} onChange={(e) => setForm((f) => ({ ...f, budget: e.target.value }))} required>
+                <select
+                  className="input-field text-sm"
+                  value={form.budget}
+                  onChange={(e) => setForm((f) => ({ ...f, budget: e.target.value }))}
+                  required
+                >
                   <option value="">Select budget</option>
-                  {['₹1–2 Cr', '₹2–5 Cr', '₹5–10 Cr', '₹10 Cr+'].map((b) => <option key={b} value={b}>{b}</option>)}
+                  {['₹1–2 Cr', '₹2–5 Cr', '₹5–10 Cr', '₹10 Cr+'].map((b) => (
+                    <option key={b} value={b}>{b}</option>
+                  ))}
                 </select>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs text-gray-400 mb-1 block">Preferred Date</label>
-                  <input type="date" className="input-field text-sm" value={form.preferredDate} onChange={(e) => setForm((f) => ({ ...f, preferredDate: e.target.value }))} required />
+                  <input
+                    type="date"
+                    className="input-field text-sm"
+                    value={form.preferredDate}
+                    onChange={(e) => setForm((f) => ({ ...f, preferredDate: e.target.value }))}
+                    required
+                  />
                 </div>
                 <div>
                   <label className="text-xs text-gray-400 mb-1 block">Time Slot</label>
-                  <select className="input-field text-sm" value={form.timeSlot} onChange={(e) => setForm((f) => ({ ...f, timeSlot: e.target.value }))}>
-                    {['Morning (10AM–1PM)', 'Afternoon (2PM–5PM)', 'Evening (5PM–7PM)'].map((s) => <option key={s} value={s}>{s}</option>)}
+                  <select
+                    className="input-field text-sm"
+                    value={form.timeSlot}
+                    onChange={(e) => setForm((f) => ({ ...f, timeSlot: e.target.value }))}
+                  >
+                    {['Morning (10AM–1PM)', 'Afternoon (2PM–5PM)', 'Evening (5PM–7PM)'].map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
                   </select>
                 </div>
               </div>
             )}
-            <button type="submit" disabled={loading} className="btn-primary w-full justify-center py-3 text-sm mt-2">
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary w-full justify-center py-3 text-sm mt-2"
+            >
               {loading
                 ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                : type === 'interest' ? <><Heart size={15} /> Register Interest</> : <><CalendarCheck size={15} /> Confirm Booking</>
+                : type === 'interest'
+                  ? <><Heart size={15} /> Register Interest</>
+                  : <><CalendarCheck size={15} /> Confirm Booking</>
               }
             </button>
           </form>
@@ -324,12 +601,12 @@ const container = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } }
 const fadeUp    = { hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0, transition: { duration: 0.5 } } }
 
 export default function FeaturedProjects() {
-  const [projects,       setProjects]       = useState([])
-  const [loading,        setLoading]        = useState(true)
+  const [projects,        setProjects]        = useState([])
+  const [loading,         setLoading]         = useState(true)
   const [selectedProject, setSelectedProject] = useState(null)
-  const [leadProject,    setLeadProject]    = useState(null)
-  const [leadType,       setLeadType]       = useState(null)
-  const [filter,         setFilter]         = useState('all')
+  const [leadProject,     setLeadProject]     = useState(null)
+  const [leadType,        setLeadType]        = useState(null)
+  const [filter,          setFilter]          = useState('all')
 
   useEffect(() => {
     fetchProjects().then((res) => {
@@ -338,8 +615,18 @@ export default function FeaturedProjects() {
     })
   }, [])
 
-  const cities = ['all', ...Array.from(new Set(projects.map((p) => p.cityId)))]
-  const filtered = filter === 'all' ? projects : projects.filter((p) => p.cityId === filter)
+  // Listen for city-select events from CityShowcase
+  useEffect(() => {
+    function handleCitySelect(e) {
+      const { cityId } = e.detail || {}
+      if (cityId) setFilter(cityId)
+    }
+    window.addEventListener('estateflow:city-select', handleCitySelect)
+    return () => window.removeEventListener('estateflow:city-select', handleCitySelect)
+  }, [])
+
+  const cities    = ['all', ...Array.from(new Set(projects.map((p) => p.cityId)))]
+  const filtered  = filter === 'all' ? projects : projects.filter((p) => p.cityId === filter)
   const cityLabel = { all: 'All Cities', gurgaon: 'Gurugram', noida: 'Noida', bangalore: 'Bengaluru', mumbai: 'Mumbai', hyderabad: 'Hyderabad' }
 
   function openLead(project, type) {
@@ -362,7 +649,7 @@ export default function FeaturedProjects() {
             className="text-center mb-10"
           >
             <span className="section-badge mb-4">Curated Portfolio</span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mt-4 mb-4">
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white mt-4 mb-4">
               Featured{' '}
               <span className="gradient-text">Luxury Projects</span>
             </h2>

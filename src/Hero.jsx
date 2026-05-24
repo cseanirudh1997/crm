@@ -124,7 +124,7 @@ export default function Hero() {
           {/* Main headline */}
           <motion.h1
             variants={fadeUp}
-            className="text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight leading-none mb-4"
+            className="font-display text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tight leading-none mb-4"
           >
             <span className="text-white">Discover Premium</span>
             <br />

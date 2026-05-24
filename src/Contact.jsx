@@ -104,7 +104,7 @@ export default function Contact() {
           className="text-center mb-14"
         >
           <span className="section-badge mb-4">Get In Touch</span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mt-4 mb-4">
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white mt-4 mb-4">
             Your Property Journey{' '}
             <span className="gradient-text">Begins Here</span>
           </h2>

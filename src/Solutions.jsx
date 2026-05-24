@@ -18,7 +18,9 @@ export default function CityShowcase() {
     })
   }, [])
 
-  function scrollToProjects() {
+  function scrollToProjects(cityId) {
+    // Notify FeaturedProjects to filter by this city
+    window.dispatchEvent(new CustomEvent('estateflow:city-select', { detail: { cityId } }))
     document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })
   }
 
@@ -36,7 +38,7 @@ export default function CityShowcase() {
           className="text-center mb-14"
         >
           <span className="section-badge mb-4">Prime Locations</span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mt-4 mb-4">
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white mt-4 mb-4">
             India's Most Coveted{' '}
             <span className="gradient-text">Real Estate Markets</span>
           </h2>
@@ -168,7 +170,7 @@ export default function CityShowcase() {
                   <div className="text-xs text-gray-400 mt-1">Curated Projects</div>
                 </div>
                 <button
-                  onClick={scrollToProjects}
+                  onClick={() => scrollToProjects(city.id)}
                   className="btn-primary justify-center py-3 px-6 text-sm whitespace-nowrap"
                 >
                   View Projects <ArrowRight size={14} />

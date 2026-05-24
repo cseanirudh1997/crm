@@ -52,7 +52,7 @@ export default function FAQ() {
           className="text-center mb-14"
         >
           <span className="section-badge mb-4">Common Questions</span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mt-4 mb-4">
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white mt-4 mb-4">
             Frequently Asked{' '}
             <span className="gradient-text">Questions</span>
           </h2>

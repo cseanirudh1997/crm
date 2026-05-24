@@ -1,64 +1,29 @@
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Waves, Dumbbell, Shield, Leaf, Car, Wifi, Coffee, Star } from 'lucide-react'
+import { fetchAmenities } from './api'
 
-const AMENITIES = [
-  {
-    icon:  Waves,
-    title: 'Infinity Pool & Spa',
-    desc:  'Temperature-controlled infinity pools with dedicated lap lanes, hydrotherapy jets, steam rooms, and a full-service wellness spa.',
-    color: 'from-sky-600 to-sky-800',
-    glow:  'group-hover:shadow-[0_0_30px_rgba(2,132,199,0.35)]',
-  },
-  {
-    icon:  Star,
-    title: 'Sky Lounge & Clubhouse',
-    desc:  'Double-height grand clubhouse with sky lounges, private event halls, business center, and resident concierge services.',
-    color: 'from-brand-600 to-brand-800',
-    glow:  'group-hover:shadow-gold',
-  },
-  {
-    icon:  Dumbbell,
-    title: 'Sports Arena',
-    desc:  'Olympic-size badminton, squash, and basketball courts. Dedicated cricket practice nets, tennis courts, and a jogging track.',
-    color: 'from-emerald-600 to-emerald-800',
-    glow:  'group-hover:shadow-[0_0_30px_rgba(5,150,105,0.35)]',
-  },
-  {
-    icon:  Shield,
-    title: 'Smart Security',
-    desc:  '3-tier smart access control with ANPR, facial recognition, video analytics, and 24×7 trained security personnel.',
-    color: 'from-accent-600 to-accent-800',
-    glow:  'group-hover:shadow-glow-purple',
-  },
-  {
-    icon:  Leaf,
-    title: 'Landscape & Green Zones',
-    desc:  'Curated Japanese zen gardens, reflexology paths, children\'s adventure zones, and over 60% open green landscape.',
-    color: 'from-lime-600 to-lime-800',
-    glow:  'group-hover:shadow-[0_0_30px_rgba(101,163,13,0.35)]',
-  },
-  {
-    icon:  Car,
-    title: 'Smart Parking & EV',
-    desc:  'Multi-level basement parking with EV charging points for every unit, valet services, and car wash bays.',
-    color: 'from-slate-600 to-slate-800',
-    glow:  'group-hover:shadow-[0_0_30px_rgba(100,116,139,0.35)]',
-  },
-  {
-    icon:  Wifi,
-    title: 'Smart Home Automation',
-    desc:  'Pre-wired for home automation — voice-controlled lighting, climate, security, and app-based guest access management.',
-    color: 'from-violet-600 to-violet-800',
-    glow:  'group-hover:shadow-[0_0_30px_rgba(124,58,237,0.35)]',
-  },
-  {
-    icon:  Coffee,
-    title: 'Retail & Dining',
-    desc:  'Curated retail promenade with fine dining, cafés, convenience stores, salon, and premium lifestyle brands within the community.',
-    color: 'from-amber-600 to-amber-800',
-    glow:  'group-hover:shadow-[0_0_30px_rgba(245,158,11,0.35)]',
-  },
-]
+// Map amenity name keywords → Lucide icon + gradient + glow
+function getAmenityMeta(amenity) {
+  const n = (amenity || '').toLowerCase()
+  if (n.includes('pool') || n.includes('spa') || n.includes('swim'))
+    return { Icon: Waves,    color: 'from-sky-600 to-sky-800',       glow: 'group-hover:shadow-[0_0_30px_rgba(2,132,199,0.35)]'   }
+  if (n.includes('sport') || n.includes('gym') || n.includes('fitness') || n.includes('arena'))
+    return { Icon: Dumbbell, color: 'from-emerald-600 to-emerald-800', glow: 'group-hover:shadow-[0_0_30px_rgba(5,150,105,0.35)]'   }
+  if (n.includes('security') || n.includes('safe') || n.includes('access'))
+    return { Icon: Shield,   color: 'from-accent-600 to-accent-800',  glow: 'group-hover:shadow-glow-purple'                       }
+  if (n.includes('garden') || n.includes('green') || n.includes('land') || n.includes('nature'))
+    return { Icon: Leaf,     color: 'from-lime-600 to-lime-800',      glow: 'group-hover:shadow-[0_0_30px_rgba(101,163,13,0.35)]'  }
+  if (n.includes('park') || n.includes('ev') || n.includes('car') || n.includes('garage'))
+    return { Icon: Car,      color: 'from-slate-600 to-slate-800',    glow: 'group-hover:shadow-[0_0_30px_rgba(100,116,139,0.35)]' }
+  if (n.includes('smart') || n.includes('auto') || n.includes('wifi') || n.includes('tech') || n.includes('home'))
+    return { Icon: Wifi,     color: 'from-violet-600 to-violet-800',  glow: 'group-hover:shadow-[0_0_30px_rgba(124,58,237,0.35)]'  }
+  if (n.includes('lounge') || n.includes('club') || n.includes('sky') || n.includes('concierge'))
+    return { Icon: Star,     color: 'from-brand-600 to-brand-800',    glow: 'group-hover:shadow-gold'                              }
+  if (n.includes('retail') || n.includes('dining') || n.includes('cafe') || n.includes('food'))
+    return { Icon: Coffee,   color: 'from-amber-600 to-amber-800',    glow: 'group-hover:shadow-[0_0_30px_rgba(245,158,11,0.35)]'  }
+  return   { Icon: Star,     color: 'from-brand-600 to-brand-800',    glow: 'group-hover:shadow-gold'                              }
+}
 
 const container = {
   hidden: {},
@@ -71,6 +36,16 @@ const item = {
 }
 
 export default function LuxuryAmenities() {
+  const [amenities, setAmenities] = useState([])
+  const [loading,   setLoading]   = useState(true)
+
+  useEffect(() => {
+    fetchAmenities().then((res) => {
+      setAmenities(res.amenities || [])
+      setLoading(false)
+    })
+  }, [])
+
   return (
     <section id="amenities" className="py-24 relative overflow-hidden">
       <div className="absolute inset-0 bg-gray-950" />
@@ -87,7 +62,7 @@ export default function LuxuryAmenities() {
           className="text-center mb-16"
         >
           <span className="section-badge mb-4">World-Class Lifestyle</span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mt-4 mb-4">
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white mt-4 mb-4">
             Amenities That Define{' '}
             <span className="gradient-text">Luxury Living</span>
           </h2>
@@ -97,34 +72,52 @@ export default function LuxuryAmenities() {
           </p>
         </motion.div>
 
+        {/* Skeleton loaders */}
+        {loading && (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="glass rounded-2xl p-6 border border-white/10 space-y-4">
+                <div className="shimmer w-12 h-12 rounded-xl bg-white/5" />
+                <div className="shimmer h-4 w-3/4 rounded bg-white/5" />
+                <div className="shimmer h-12 rounded bg-white/5" />
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Amenity cards */}
-        <motion.div
-          variants={container}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: '-80px' }}
-          className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
-        >
-          {AMENITIES.map(({ icon: Icon, title, desc, color, glow }) => (
-            <motion.div
-              key={title}
-              variants={item}
-              className={`group glass p-6 rounded-2xl cursor-default transition-all duration-300 border border-white/10 hover:border-brand-700/30 ${glow} hover:-translate-y-2`}
-            >
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center mb-5 shadow-md group-hover:scale-110 transition-transform duration-300`}>
-                <Icon size={22} className="text-white" />
-              </div>
-              <h3 className="text-lg font-semibold text-white mb-2">{title}</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">{desc}</p>
-              <div className="mt-4 flex items-center gap-1 text-brand-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                Explore amenity
-                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
+        {!loading && (
+          <motion.div
+            variants={container}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: '-80px' }}
+            className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
+          >
+            {amenities.map((a) => {
+              const { Icon, color, glow } = getAmenityMeta(a.amenity)
+              return (
+                <motion.div
+                  key={a.amenityId}
+                  variants={item}
+                  className={`group glass p-6 rounded-2xl cursor-default transition-all duration-300 border border-white/10 hover:border-brand-700/30 ${glow} hover:-translate-y-2`}
+                >
+                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center mb-5 shadow-md group-hover:scale-110 transition-transform duration-300`}>
+                    <Icon size={22} className="text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-white mb-2">{a.amenity}</h3>
+                  <p className="text-gray-400 text-sm leading-relaxed">{a.description}</p>
+                  <div className="mt-4 flex items-center gap-1 text-brand-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    Explore amenity
+                    <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </motion.div>
+              )
+            })}
+          </motion.div>
+        )}
       </div>
     </section>
   )

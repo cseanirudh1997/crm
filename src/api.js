@@ -454,3 +454,156 @@ export async function sendChatMessage(query) {
 export async function submitContact({ name, email, phone, message }) {
   return post({ action: 'createInterestLead', name, email, phone, message })
 }
+
+// ── Project Images ─────────────────────────────
+
+/**
+ * Fetch gallery images for a specific project.
+ * Sheet: ProjectImages — imageId | projectId | imageUrl | imageType | caption
+ * imageType: 'exterior' | 'interior' | 'amenity' | 'aerial'
+ * @returns {{ success: boolean, images: Array<{ imageId, projectId, imageUrl, imageType, caption }> }}
+ */
+export async function fetchProjectImages(projectId) {
+  try {
+    return await post({ action: 'getProjectImages', projectId })
+  } catch {
+    return {
+      success: true,
+      images: [
+        { imageId: 'img1', projectId, imageUrl: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&q=80', imageType: 'exterior', caption: 'Grand entrance and facade' },
+        { imageId: 'img2', projectId, imageUrl: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80', imageType: 'exterior', caption: 'Tower overview at dusk' },
+        { imageId: 'img3', projectId, imageUrl: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=1200&q=80', imageType: 'interior', caption: 'Signature living room — 4 BHK' },
+        { imageId: 'img4', projectId, imageUrl: 'https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=1200&q=80', imageType: 'interior', caption: 'Master bedroom with city view' },
+        { imageId: 'img5', projectId, imageUrl: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=80', imageType: 'amenity',  caption: 'Infinity pool and sky deck' },
+        { imageId: 'img6', projectId, imageUrl: 'https://images.unsplash.com/photo-1523217582562-09d0def993a6?w=1200&q=80', imageType: 'amenity',  caption: 'Grand clubhouse foyer' },
+        { imageId: 'img7', projectId, imageUrl: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=1200&q=80', imageType: 'aerial',   caption: 'Aerial view — master plan' },
+      ],
+    }
+  }
+}
+
+// ── Amenities ──────────────────────────────────
+
+/**
+ * Fetch amenities. Pass projectId for project-specific; omit for global platform amenities.
+ * Sheet: Amenities — amenityId | projectId | amenity | description | category
+ * @returns {{ success: boolean, amenities: Array<{ amenityId, projectId?, amenity, description, category }> }}
+ */
+export async function fetchAmenities(projectId) {
+  try {
+    return await post({ action: 'getAmenities', projectId })
+  } catch {
+    return {
+      success: true,
+      amenities: [
+        { amenityId: 'am1', projectId, amenity: 'Infinity Pool & Spa',     description: 'Temperature-controlled infinity pools with hydrotherapy jets, steam rooms, and a full-service wellness spa.', category: 'Wellness'     },
+        { amenityId: 'am2', projectId, amenity: 'Sky Lounge & Clubhouse',  description: 'Double-height grand clubhouse with sky lounges, private event halls, and resident concierge services.',        category: 'Social'       },
+        { amenityId: 'am3', projectId, amenity: 'Sports Arena',            description: 'Badminton, squash, basketball courts, cricket nets, tennis courts, and a dedicated jogging track.',              category: 'Sports'       },
+        { amenityId: 'am4', projectId, amenity: 'Smart Security',          description: '3-tier smart access with ANPR, facial recognition, video analytics, and 24×7 trained personnel.',               category: 'Security'     },
+        { amenityId: 'am5', projectId, amenity: 'Landscape & Green Zones', description: 'Japanese zen gardens, reflexology paths, children\'s adventure zones, and 60%+ open green landscape.',         category: 'Green'        },
+        { amenityId: 'am6', projectId, amenity: 'Smart Parking & EV',      description: 'Multi-level basement parking with EV charging for every unit, valet services, and car wash bays.',              category: 'Convenience'  },
+        { amenityId: 'am7', projectId, amenity: 'Smart Home Automation',   description: 'Pre-wired automation — voice-controlled lighting, climate, security, and app-based guest access.',               category: 'Technology'   },
+        { amenityId: 'am8', projectId, amenity: 'Retail & Dining',         description: 'Fine dining, cafés, convenience stores, salon, and premium lifestyle brands within the community.',              category: 'Lifestyle'    },
+      ],
+    }
+  }
+}
+
+// ── Floor Plans ────────────────────────────────
+
+/**
+ * Fetch floor plans for a specific project.
+ * Sheet: FloorPlans — planId | projectId | bhk | area | price | imageUrl | balconies | bathrooms | description
+ * @returns {{ success: boolean, floorPlans: Array<{ planId, projectId, bhk, area, price, imageUrl, balconies, bathrooms, description }> }}
+ */
+export async function fetchFloorPlans(projectId) {
+  try {
+    return await post({ action: 'getFloorPlans', projectId })
+  } catch {
+    return {
+      success: true,
+      floorPlans: [
+        {
+          planId: 'fp1', projectId,
+          bhk: '2 BHK', area: '1,380 sq ft', price: '₹3.1 Cr',
+          imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',
+          balconies: 1, bathrooms: 2,
+          description: 'Efficient 2 BHK with open living-dining, modular kitchen, and east-facing balcony.',
+        },
+        {
+          planId: 'fp2', projectId,
+          bhk: '3 BHK', area: '2,240 sq ft', price: '₹5.0 Cr',
+          imageUrl: 'https://images.unsplash.com/photo-1572120360610-d971b9d7767c?w=600&q=80',
+          balconies: 2, bathrooms: 3,
+          description: 'Spacious 3 BHK with master en-suite, double balconies, and panoramic city views.',
+        },
+        {
+          planId: 'fp3', projectId,
+          bhk: '3 BHK', area: '2,540 sq ft', price: '₹5.7 Cr',
+          imageUrl: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=600&q=80',
+          balconies: 2, bathrooms: 3,
+          description: '3 BHK + Study. Premium corner unit with wrap-around views and private foyer.',
+        },
+        {
+          planId: 'fp4', projectId,
+          bhk: '4 BHK', area: '3,100 sq ft', price: '₹7.0 Cr',
+          imageUrl: 'https://images.unsplash.com/photo-1560185127-6a8dfa5efe15?w=600&q=80',
+          balconies: 3, bathrooms: 4,
+          description: 'Grand 4 BHK with separate family lounge, staff quarters, and three private balconies.',
+        },
+        {
+          planId: 'fp5', projectId,
+          bhk: '4 BHK', area: '3,420 sq ft', price: '₹8.2 Cr',
+          imageUrl: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=600&q=80',
+          balconies: 3, bathrooms: 5,
+          description: '4 BHK + Staff. Penthouse-level sky villa with all-round panoramic views and private terrace.',
+        },
+      ],
+    }
+  }
+}
+
+// ── Testimonials ───────────────────────────────
+
+/**
+ * Fetch buyer testimonials.
+ * Sheet: Testimonials — id | name | city | review | rating
+ * Optional fields returned by backend: title | company | project | avatar
+ * @returns {{ success: boolean, testimonials: Array<{ id, name, city, review, rating }> }}
+ */
+export async function fetchTestimonials() {
+  try {
+    return await post({ action: 'getTestimonials' })
+  } catch {
+    return {
+      success: true,
+      testimonials: [
+        {
+          id: 't1', name: 'Rahul Sharma',    city: 'Gurugram',
+          review: 'EstateFlow made the entire process seamless. From shortlisting projects to the final registration — their concierge guided us at every step. The property has already appreciated 14% in 18 months.',
+          rating: 5,
+        },
+        {
+          id: 't2', name: 'Ananya Krishnan', city: 'Bengaluru',
+          review: 'As an NRI buyer based in the US, I was nervous about a remote purchase. EstateFlow\'s team handled FEMA compliance, power of attorney, and full documentation. The property I bought is generating 5.2% rental yield.',
+          rating: 5,
+        },
+        {
+          id: 't3', name: 'Vikram Malhotra', city: 'Noida',
+          review: 'Their AI market insights flagged the Noida Expressway sector 150 opportunity before mainstream media caught on. That early signal translated into 22% appreciation in under a year.',
+          rating: 5,
+        },
+        {
+          id: 't4', name: 'Deepika Shetty',  city: 'Hyderabad',
+          review: 'Zero brokerage is a game changer. We saved ₹8 lakhs in fees and got direct-builder pricing on a 3BHK in HITEC City. The property assistant chatbot answered every question at 11PM — truly 24×7 service.',
+          rating: 5,
+        },
+        {
+          id: 't5', name: 'Arjun Nair',      city: 'Mumbai',
+          review: 'Lodha Park at this price would have been impossible without EstateFlow\'s builder relationships. Their team negotiated a preferential allotment that saved us ₹35 lakhs versus the open-market price.',
+          rating: 5,
+        },
+      ],
+    }
+  }
+}
