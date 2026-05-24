@@ -12,34 +12,35 @@ export default {
         mono: ['JetBrains Mono', 'monospace'],
       },
       colors: {
+        // Gold / luxury palette — maps onto the same brand-* / accent-* class names
         brand: {
-          50:  '#f0f4ff',
-          100: '#dde5ff',
-          200: '#c3cfff',
-          300: '#9aaeff',
-          400: '#6d84ff',
-          500: '#4a5eff',
-          600: '#3a3ef5',
-          700: '#2d2dd8',
-          800: '#2626af',
-          900: '#242589',
-          950: '#161653',
+          50:  '#fdfaf0',
+          100: '#faf3d0',
+          200: '#f5e49e',
+          300: '#edcc62',
+          400: '#e2b430',   // primary gold
+          500: '#c99a1a',   // brand gold
+          600: '#a67c10',
+          700: '#7d5c0b',
+          800: '#5a4009',
+          900: '#3a2a06',
+          950: '#1e1503',
         },
         accent: {
-          300: '#c4b5fd',
-          400: '#a78bfa',
-          500: '#8b5cf6',
-          600: '#7c3aed',
-          700: '#6d28d9',
-          800: '#5b21b6',
-          900: '#4c1d95',
-          950: '#2e1065',
+          300: '#e8d5b0',
+          400: '#d4b483',   // warm beige-gold
+          500: '#b8915a',   // accent bronze
+          600: '#9a7040',
+          700: '#7a5530',
+          800: '#5e3e22',
+          900: '#432c17',
+          950: '#271908',
         },
         neon: {
-          blue:   '#4f8eff',
-          purple: '#9b6dff',
-          pink:   '#ff6db2',
-          cyan:   '#00d4ff',
+          blue:   '#e2b430',   // re-mapped to gold (keeps .typing-cursor caret color)
+          purple: '#d4b483',
+          pink:   '#c99a1a',
+          cyan:   '#f0d080',
         },
       },
       animation: {
@@ -72,7 +73,7 @@ export default {
         },
         'blink-caret': {
           'from, to': { 'border-color': 'transparent' },
-          '50%':      { 'border-color': '#4a5eff' },
+          '50%':      { 'border-color': '#e2b430' },
         },
         shimmer: {
           '0%':   { 'background-position': '-200% 0' },
@@ -86,12 +87,13 @@ export default {
         xs: '2px',
       },
       boxShadow: {
-        'glow-sm':     '0 0 15px rgba(74, 94, 255, 0.3)',
-        'glow':        '0 0 30px rgba(74, 94, 255, 0.4)',
-        'glow-lg':     '0 0 60px rgba(74, 94, 255, 0.5)',
-        'glow-purple': '0 0 30px rgba(139, 92, 246, 0.4)',
-        'glass':       '0 8px 32px rgba(0, 0, 0, 0.3)',
-        'card':        '0 4px 24px rgba(0, 0, 0, 0.4)',
+        'glow-sm':     '0 0 15px rgba(201, 154, 26, 0.3)',
+        'glow':        '0 0 30px rgba(201, 154, 26, 0.4)',
+        'glow-lg':     '0 0 60px rgba(201, 154, 26, 0.5)',
+        'glow-purple': '0 0 30px rgba(184, 145, 90, 0.4)',
+        'glass':       '0 8px 32px rgba(0, 0, 0, 0.4)',
+        'card':        '0 4px 24px rgba(0, 0, 0, 0.5)',
+        'gold':        '0 4px 24px rgba(201, 154, 26, 0.25)',
       },
     },
   },
