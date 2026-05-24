@@ -1,11 +1,14 @@
 // ─────────────────────────────────────────────
-//  Modals — ServiceRequestModal + SupportRequestModal
+//  Modals — InterestLeadModal + SiteVisitModal
+//  (Kept as named exports for backward compat;
+//   ServiceRequestModal & SupportRequestModal
+//   are aliased so existing imports don't break)
 // ─────────────────────────────────────────────
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Send, CheckCircle, Loader } from 'lucide-react'
-import { createServiceRequest, createSupportRequest } from './api'
+import { X, Send, CheckCircle, Loader, Heart, CalendarCheck, Phone, Mail, Shield } from 'lucide-react'
+import { createInterestLead, createSiteVisit } from './api'
 import toast from 'react-hot-toast'
 
 /* ── Shared modal shell ── */
@@ -26,20 +29,15 @@ function ModalShell({ title, subtitle, onClose, children }) {
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           className="w-full max-w-lg glass-dark border border-white/10 rounded-2xl shadow-glass overflow-hidden"
         >
-          {/* Header */}
-          <div className="flex items-start justify-between p-5 border-b border-white/10 bg-gradient-to-r from-brand-900/60 to-accent-900/40">
+          <div className="flex items-start justify-between p-5 border-b border-white/10 bg-gradient-to-r from-brand-950/60 to-gray-900/40">
             <div>
               <h2 className="text-base font-semibold text-white">{title}</h2>
               {subtitle && <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>}
             </div>
-            <button
-              onClick={onClose}
-              className="text-gray-500 hover:text-white transition-colors ml-4 shrink-0"
-            >
+            <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors ml-4 shrink-0">
               <X size={18} />
             </button>
           </div>
-          {/* Body */}
           <div className="p-5">{children}</div>
         </motion.div>
       </motion.div>
@@ -51,12 +49,12 @@ function ModalShell({ title, subtitle, onClose, children }) {
 function SuccessState({ message, onClose }) {
   return (
     <div className="flex flex-col items-center gap-4 py-6 text-center">
-      <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
-        <CheckCircle size={32} className="text-emerald-400" />
+      <div className="w-16 h-16 rounded-full bg-brand-500/20 border border-brand-500/40 flex items-center justify-center">
+        <Shield size={28} className="text-brand-400" />
       </div>
       <div>
-        <p className="font-semibold text-white mb-1">Request Submitted!</p>
-        <p className="text-sm text-gray-400">{message}</p>
+        <p className="font-semibold text-white mb-1">All Done!</p>
+        <p className="text-sm text-gray-400 leading-relaxed max-w-xs mx-auto">{message}</p>
       </div>
       <button onClick={onClose} className="btn-primary mt-2">Close</button>
     </div>
@@ -64,55 +62,38 @@ function SuccessState({ message, onClose }) {
 }
 
 /* ════════════════════════════════════════════
-   ServiceRequestModal
+   InterestLeadModal — register buyer interest
    ════════════════════════════════════════════ */
-export function ServiceRequestModal({ session, onClose }) {
+export function InterestLeadModal({ session, project, onClose }) {
   const [form, setForm] = useState({
-    service:     '',
-    requestType: '',
-    priority:    'standard',
+    name:    session?.username || '',
+    email:   session?.email   || '',
+    phone:   '',
+    budget:  '',
+    message: '',
   })
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(null)
 
-  const SERVICE_TYPES = [
-    'LLM / SLM Deployment',
-    'Conversational AI Agent',
-    'Voice AI / Call Center Automation',
-    'Enterprise Copilot',
-    'RAG / Knowledge Base QnA',
-    'Workflow Automation',
-    'Transformation Consulting',
-    'Data Engineering & Pipeline',
-    'Other',
-  ]
-
-  const PRIORITY_OPTIONS = [
-    { value: 'standard', label: 'Standard',  desc: '5–7 business days' },
-    { value: 'priority', label: 'Priority',  desc: '2–3 business days' },
-    { value: 'urgent',   label: 'Urgent',    desc: 'Within 24 hours'   },
-  ]
-
-  function update(key, val) {
-    setForm((f) => ({ ...f, [key]: val }))
-  }
-
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!form.service || !form.requestType.trim()) {
-      toast.error('Please complete all required fields.')
+    if (!form.name || !form.phone) {
+      toast.error('Please fill in name and phone number.')
       return
     }
     setLoading(true)
     try {
-      const res = await createServiceRequest({
-        username:    session?.username || '',
-        company:     session?.company  || '',
-        service:     form.service,
-        requestType: form.requestType,
-        priority:    form.priority,
+      const res = await createInterestLead({
+        username:  session?.username || '',
+        name:      form.name,
+        email:     form.email,
+        phone:     form.phone,
+        projectId: project?.id || '',
+        budget:    form.budget,
+        message:   form.message,
       })
-      setSuccess(res.message || 'Request submitted successfully.')
+      setSuccess(res.message || 'Your interest has been registered. A relationship manager will call within 24 hours.')
+      toast.success('Interest registered! We\'ll call you shortly.')
     } catch {
       toast.error('Something went wrong. Please try again.')
     } finally {
@@ -122,85 +103,49 @@ export function ServiceRequestModal({ session, onClose }) {
 
   return (
     <ModalShell
-      title="Request AI Service / Deployment"
-      subtitle="Our solutions team will reach out within 1 business day."
+      title={project ? `I'm Interested — ${project.name}` : 'Register Interest'}
+      subtitle={project ? `${project.builder} · ${project.city} · ${project.startingPrice}` : 'Our team will reach out within 24 hours.'}
       onClose={onClose}
     >
       {success ? (
         <SuccessState message={success} onClose={onClose} />
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Service type */}
-          <div>
-            <label className="block text-xs text-gray-400 mb-1.5 font-medium">Service *</label>
-            <select
-              value={form.service}
-              onChange={(e) => update('service', e.target.value)}
-              className="input-field text-sm"
-              required
-            >
-              <option value="" disabled>Select a service…</option>
-              {SERVICE_TYPES.map((s) => (
-                <option key={s} value={s} className="bg-gray-900">{s}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Pre-filled info */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs text-gray-400 mb-1.5 font-medium">Username</label>
-              <input type="text" value={session?.username || ''} readOnly className="input-field text-sm opacity-60 cursor-not-allowed" />
+              <label className="block text-xs text-gray-400 mb-1.5">Full Name *</label>
+              <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className="input-field text-sm" placeholder="Your name" required />
             </div>
             <div>
-              <label className="block text-xs text-gray-400 mb-1.5 font-medium">Company</label>
-              <input type="text" value={session?.company || ''} readOnly className="input-field text-sm opacity-60 cursor-not-allowed" />
+              <label className="block text-xs text-gray-400 mb-1.5">Phone *</label>
+              <div className="relative">
+                <Phone size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                <input value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} className="input-field text-sm pl-8" placeholder="+91 98765 43210" required />
+              </div>
             </div>
           </div>
-
-          {/* Request type / details */}
           <div>
-            <label className="block text-xs text-gray-400 mb-1.5 font-medium">Request Details *</label>
-            <textarea
-              value={form.requestType}
-              onChange={(e) => update('requestType', e.target.value)}
-              placeholder="Describe your use case, scale, integrations, and any specific requirements…"
-              rows={4}
-              className="input-field text-sm resize-none"
-              required
-            />
-          </div>
-
-          {/* Priority */}
-          <div>
-            <label className="block text-xs text-gray-400 mb-2 font-medium">Priority</label>
-            <div className="grid grid-cols-3 gap-2">
-              {PRIORITY_OPTIONS.map(({ value, label, desc }) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => update('priority', value)}
-                  className={`p-2.5 rounded-xl border text-center transition-all ${
-                    form.priority === value
-                      ? 'border-brand-500 bg-brand-900/40 text-brand-300'
-                      : 'border-white/10 bg-white/5 text-gray-400 hover:border-white/20'
-                  }`}
-                >
-                  <div className="text-xs font-semibold">{label}</div>
-                  <div className="text-xs text-gray-500 mt-0.5">{desc}</div>
-                </button>
-              ))}
+            <label className="block text-xs text-gray-400 mb-1.5">Email</label>
+            <div className="relative">
+              <Mail size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+              <input type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} className="input-field text-sm pl-8" placeholder="you@email.com" />
             </div>
           </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary w-full justify-center"
-          >
+          <div>
+            <label className="block text-xs text-gray-400 mb-1.5">Budget Range</label>
+            <select value={form.budget} onChange={(e) => setForm((f) => ({ ...f, budget: e.target.value }))} className="input-field text-sm">
+              <option value="">Select budget</option>
+              {['Under ₹1 Cr', '₹1–2 Cr', '₹2–5 Cr', '₹5–10 Cr', '₹10 Cr+'].map((b) => <option key={b} value={b}>{b}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs text-gray-400 mb-1.5">Message (optional)</label>
+            <textarea value={form.message} onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))} rows={3} className="input-field text-sm resize-none" placeholder="Any specific requirements, preferred floor, facing…" />
+          </div>
+          <button type="submit" disabled={loading} className="btn-primary w-full justify-center">
             {loading
               ? <><Loader size={15} className="animate-spin" /> Submitting…</>
-              : <><Send size={15} /> Submit Request</>
+              : <><Heart size={15} /> Register My Interest</>
             }
           </button>
         </form>
@@ -210,45 +155,38 @@ export function ServiceRequestModal({ session, onClose }) {
 }
 
 /* ════════════════════════════════════════════
-   SupportRequestModal
+   SiteVisitModal — book a site visit
    ════════════════════════════════════════════ */
-export function SupportRequestModal({ session, onClose }) {
+export function SiteVisitModal({ session, project, onClose }) {
   const [form, setForm] = useState({
-    category: '',
-    message:  '',
+    name:          session?.username || '',
+    email:         session?.email   || '',
+    phone:         '',
+    preferredDate: '',
+    timeSlot:      'Morning (10AM–1PM)',
   })
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(null)
 
-  const CATEGORIES = [
-    'Deployment Issue',
-    'API / Integration Error',
-    'Performance Degradation',
-    'Model Accuracy Problem',
-    'Billing & Licensing',
-    'Feature Request',
-    'Security Concern',
-    'Other',
-  ]
-
-  function update(key, val) {
-    setForm((f) => ({ ...f, [key]: val }))
-  }
-
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!form.category || !form.message.trim()) {
-      toast.error('Please complete all required fields.')
+    if (!form.phone || !form.preferredDate) {
+      toast.error('Please fill in phone and preferred date.')
       return
     }
     setLoading(true)
     try {
-      const res = await createSupportRequest({
-        username: session?.username || '',
-        category: form.category,
-        message:  form.message,
+      const res = await createSiteVisit({
+        username:     session?.username || '',
+        name:         form.name,
+        email:        form.email,
+        phone:        form.phone,
+        projectId:    project?.id || '',
+        preferredDate:form.preferredDate,
+        timeSlot:     form.timeSlot,
       })
-      setSuccess(res.message || 'Support ticket created successfully.')
+      setSuccess(res.message || 'Site visit confirmed! You\'ll receive an SMS confirmation with visit details.')
+      toast.success('Site visit booked! Confirmation SMS on its way.')
     } catch {
       toast.error('Something went wrong. Please try again.')
     } finally {
@@ -258,57 +196,51 @@ export function SupportRequestModal({ session, onClose }) {
 
   return (
     <ModalShell
-      title="Create Support Ticket"
-      subtitle="Enterprise SLA: Critical — 1h, High — 4h, Medium — 8h, Low — 24h."
+      title={project ? `Schedule Visit — ${project.name}` : 'Book Site Visit'}
+      subtitle={project ? `${project.builder} · ${project.city}` : 'Our concierge will confirm within 4 hours.'}
       onClose={onClose}
     >
       {success ? (
         <SuccessState message={success} onClose={onClose} />
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Username (pre-filled) */}
-          <div>
-            <label className="block text-xs text-gray-400 mb-1.5 font-medium">Account</label>
-            <input type="text" value={session?.username || ''} readOnly className="input-field text-sm opacity-60 cursor-not-allowed" />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-gray-400 mb-1.5">Your Name</label>
+              <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className="input-field text-sm" placeholder="Full name" />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-400 mb-1.5">Phone *</label>
+              <div className="relative">
+                <Phone size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                <input value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} className="input-field text-sm pl-8" placeholder="+91 98765 43210" required />
+              </div>
+            </div>
           </div>
-
-          {/* Category */}
           <div>
-            <label className="block text-xs text-gray-400 mb-1.5 font-medium">Category *</label>
-            <select
-              value={form.category}
-              onChange={(e) => update('category', e.target.value)}
-              className="input-field text-sm"
-              required
-            >
-              <option value="" disabled>Select category…</option>
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c} className="bg-gray-900">{c}</option>
-              ))}
-            </select>
+            <label className="block text-xs text-gray-400 mb-1.5">Email</label>
+            <div className="relative">
+              <Mail size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+              <input type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} className="input-field text-sm pl-8" placeholder="you@email.com" />
+            </div>
           </div>
-
-          {/* Message */}
-          <div>
-            <label className="block text-xs text-gray-400 mb-1.5 font-medium">Message *</label>
-            <textarea
-              value={form.message}
-              onChange={(e) => update('message', e.target.value)}
-              placeholder="Describe the issue — include steps to reproduce, error messages, affected service, and business impact…"
-              rows={5}
-              className="input-field text-sm resize-none"
-              required
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-gray-400 mb-1.5">Preferred Date *</label>
+              <input type="date" value={form.preferredDate} onChange={(e) => setForm((f) => ({ ...f, preferredDate: e.target.value }))} className="input-field text-sm" required />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-400 mb-1.5">Time Slot</label>
+              <select value={form.timeSlot} onChange={(e) => setForm((f) => ({ ...f, timeSlot: e.target.value }))} className="input-field text-sm">
+                {['Morning (10AM–1PM)', 'Afternoon (2PM–5PM)', 'Evening (5PM–7PM)'].map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
           </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary w-full justify-center"
-          >
+          <p className="text-xs text-gray-600">Premium transport can be arranged — let us know if needed.</p>
+          <button type="submit" disabled={loading} className="btn-primary w-full justify-center">
             {loading
               ? <><Loader size={15} className="animate-spin" /> Submitting…</>
-              : <><Send size={15} /> Create Ticket</>
+              : <><CalendarCheck size={15} /> Confirm Site Visit</>
             }
           </button>
         </form>
@@ -316,3 +248,7 @@ export function SupportRequestModal({ session, onClose }) {
     </ModalShell>
   )
 }
+
+/* ── Backward-compat aliases (used by TrialDashboard) ── */
+export const ServiceRequestModal = InterestLeadModal
+export const SupportRequestModal  = SiteVisitModal

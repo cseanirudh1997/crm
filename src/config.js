@@ -1,36 +1,40 @@
 // ─────────────────────────────────────────────
-//  Global configuration
+//  EstateFlow — Global Configuration
 // ─────────────────────────────────────────────
 
 export const API_URL =
-  'https://script.google.com/macros/s/AKfycbw-SYvVnL6sNyVNI_yEY2UyrTMVU1nybWDiK6wMoyPxOjhka66F6qr3z-2x8Qh9ckbYoQ/exec'
+  'https://script.google.com/macros/s/AKfycbyyXCd5_lCYyzfVuyxjhZ7DgG6BH36q532QjCpvMf0E-YPc_xdktWwb03KZjVqWH_bDfQ/exec'
 
-export const COMPANY_NAME    = 'NexusAI'
-export const COMPANY_TAGLINE = 'Enterprise AI Solutions & Automation'
-export const COMPANY_EMAIL   = 'enterprise@nexusai.io'
-export const COMPANY_PHONE   = '+1 (888) 639-8724'
-export const COMPANY_ADDRESS = '350 5th Avenue, New York, NY 10118'
+export const COMPANY_NAME    = 'EstateFlow'
+export const COMPANY_TAGLINE = 'Premium Indian Real Estate Platform'
+export const COMPANY_EMAIL   = 'concierge@estateflow.in'
+export const COMPANY_PHONE   = '+91 98765 43210'
+export const COMPANY_ADDRESS = 'DLF Cyber City, Sector 24, Gurugram, Haryana 122002'
 
 export const SOCIAL_LINKS = {
-  twitter:  'https://twitter.com/nexusai',
-  linkedin: 'https://linkedin.com/company/nexusai',
-  github:   'https://github.com/nexusai',
-  youtube:  'https://youtube.com/@nexusai',
+  twitter:   'https://twitter.com/estateflow',
+  linkedin:  'https://linkedin.com/company/estateflow',
+  instagram: 'https://instagram.com/estateflow',
+  youtube:   'https://youtube.com/@estateflow',
 }
 
 export const NAV_LINKS = [
-  { label: 'Services',  href: '#services'     },
-  { label: 'Products',  href: '#products'     },
-  { label: 'Solutions', href: '#solutions'    },
-  { label: 'Pricing',   href: '#pricing'      },
-  { label: 'About',     href: '#testimonials' },
+  { label: 'Cities',    href: '#cities'     },
+  { label: 'Projects',  href: '#projects'   },
+  { label: 'Amenities', href: '#amenities'  },
+  { label: 'Insights',  href: '#insights'   },
+  { label: 'Contact',   href: '#contact'    },
 ]
+
+// ── Payments feature flag ──────────────────────
+// Set to true once Razorpay integration is wired up
+export const paymentsEnabled = false
 
 // ── Tier constants ─────────────────────────────
 export const TIERS = {
-  TRIAL:   'trial',
-  PREMIUM: 'premium',
-  ADMIN:   'admin',
+  CUSTOMER: 'customer',   // free registered user
+  PREMIUM:  'premium',    // verified investor / premium buyer
+  ADMIN:    'admin',
 }
 
 // ── Role constants ─────────────────────────────
@@ -43,9 +47,9 @@ export const ROLES = {
 export const ONBOARDING_STAGES = {
   PENDING:      'pending',
   CONSULTATION: 'consultation',
-  SCOPING:      'scoping',
-  DEPLOYMENT:   'deployment',
-  DEPLOYED:     'deployed',
+  SITE_VISIT:   'site_visit',
+  NEGOTIATION:  'negotiation',
+  BOOKED:       'booked',
 }
 
 // ── LocalStorage keys ──────────────────────────
@@ -54,7 +58,7 @@ export const STORAGE_KEYS = {
   USERNAME:         'username',
   EMAIL:            'email',
   ROLE:             'role',
-  COMPANY:          'company',
+  PHONE:            'phone',
   TIER:             'tier',
   ONBOARDING_STAGE: 'onboardingStage',
 }

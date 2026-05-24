@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { HashRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
+import { Building2 } from 'lucide-react'
 
 // Utils
 import { scrollToSection } from './utils'
@@ -73,9 +74,9 @@ function HomePage() {
     <>
       <Hero />
       <Clients />
-      <Services />
-      <Products />
       <Solutions />
+      <Products />
+      <Services />
       <Pricing />
       <Testimonials />
       <FAQ />
@@ -105,7 +106,7 @@ export default function App() {
             borderRadius: '12px',
             fontSize:     '14px',
           },
-          success: { iconTheme: { primary: '#4a5eff', secondary: '#fff' } },
+          success: { iconTheme: { primary: '#c99a1a', secondary: '#fff' } },
           error:   { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
           duration: 4000,
         }}
@@ -149,8 +150,12 @@ export default function App() {
               <Navbar />
               <div className="min-h-screen flex items-center justify-center bg-gray-950">
                 <div className="text-center">
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-600 to-accent-600 flex items-center justify-center shadow-glow mx-auto mb-6">
+                    <Building2 size={36} className="text-white" />
+                  </div>
                   <h1 className="text-8xl font-black gradient-text mb-4">404</h1>
-                  <p className="text-gray-400 text-lg mb-8">Page not found.</p>
+                  <p className="text-gray-400 text-lg mb-2">Page not found.</p>
+                  <p className="text-gray-600 text-sm mb-8">The property you're looking for doesn't exist or has been moved.</p>
                   <Link to="/" className="btn-primary">← Back to Home</Link>
                 </div>
               </div>

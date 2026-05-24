@@ -1,15 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Zap, LogOut, LayoutDashboard, ChevronRight, Bell } from 'lucide-react'
+import { Menu, X, Building2, LogOut, LayoutDashboard, ChevronRight, Bell } from 'lucide-react'
 import { NAV_LINKS, COMPANY_NAME } from './config'
 import { getSession, clearSession, scrollToSection } from './utils'
 
 const NOTIFICATIONS = [
-  { id: 1, dot: 'bg-brand-500',   title: 'NexusGPT v2.4 deployed',        body: 'Your enterprise instance was updated successfully.',  time: '2m ago'  },
-  { id: 2, dot: 'bg-emerald-500', title: 'SmartCall AI: 99.8% uptime',     body: 'Weekly health report is ready to view.',             time: '1h ago'  },
-  { id: 3, dot: 'bg-accent-500',  title: 'New AI insight available',        body: '3 optimization recommendations found.',             time: '4h ago'  },
-  { id: 4, dot: 'bg-amber-500',   title: 'VoiceFlow deployment complete',   body: 'Enterprise voice AI is fully live.',                time: '1d ago'  },
+  { id: 1, dot: 'bg-brand-500',   title: 'Price Drop Alert — The Arbour',      body: 'DLF Gurugram: Starting price revised to ₹4.2 Cr. Limited inventory.',  time: '2m ago'  },
+  { id: 2, dot: 'bg-emerald-500', title: 'New Launch — Lodha Bellavista',      body: 'Phase 2 towers launched in Noida. Bookings now open.',                  time: '1h ago'  },
+  { id: 3, dot: 'bg-accent-500',  title: 'Market Insight Ready',               body: 'Gurugram appreciation hits 18.4% YoY — view full AI report.',           time: '4h ago'  },
+  { id: 4, dot: 'bg-amber-500',   title: 'Site Visit Confirmed',               body: 'Your visit to Prestige Lakeside, Bengaluru is scheduled for tomorrow.', time: '1d ago'  },
 ]
 
 export default function Navbar() {
@@ -97,7 +97,7 @@ export default function Navbar() {
           <Link to="/" className="flex items-center gap-2 group" onClick={() => setOpen(false)}>
             <div className="relative">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-accent-600 flex items-center justify-center shadow-glow-sm group-hover:shadow-glow transition-all duration-300">
-                <Zap size={16} className="text-white" />
+                <Building2 size={16} className="text-white" />
               </div>
               <div className="absolute inset-0 w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-accent-600 blur-md opacity-40 group-hover:opacity-70 transition-opacity" />
             </div>

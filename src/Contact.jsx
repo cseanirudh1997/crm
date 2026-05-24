@@ -1,22 +1,36 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Mail, Building2, User, MessageSquare, Send, Check, AlertCircle, Phone, MapPin } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Mail, User, MessageSquare, Send, Check, AlertCircle, Phone, MapPin, CalendarCheck, Heart } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { submitContact } from './api'
+import { submitContact, createSiteVisit } from './api'
 import { isValidEmail } from './utils'
 import { COMPANY_EMAIL, COMPANY_PHONE, COMPANY_ADDRESS } from './config'
+import { getSession } from './utils'
 
 const CONTACT_METHODS = [
-  { icon: Mail,    label: 'Email',   value: COMPANY_EMAIL,   href: `mailto:${COMPANY_EMAIL}`   },
-  { icon: Phone,   label: 'Phone',   value: COMPANY_PHONE,   href: `tel:${COMPANY_PHONE}`      },
-  { icon: MapPin,  label: 'Office',  value: COMPANY_ADDRESS, href: '#'                         },
+  { icon: Phone,  label: 'Concierge',  value: COMPANY_PHONE,   href: `tel:${COMPANY_PHONE}`      },
+  { icon: Mail,   label: 'Email',      value: COMPANY_EMAIL,   href: `mailto:${COMPANY_EMAIL}`   },
+  { icon: MapPin, label: 'Head Office',value: COMPANY_ADDRESS, href: '#'                         },
 ]
 
+const TIME_SLOTS = ['Morning (10AM–1PM)', 'Afternoon (2PM–5PM)', 'Evening (5PM–7PM)']
+
 export default function Contact() {
-  const [form,      setForm]      = useState({ name: '', company: '', email: '', message: '' })
-  const [loading,   setLoading]   = useState(false)
-  const [submitted, setSubmitted] = useState(false)
-  const [error,     setError]     = useState('')
+  const session = getSession()
+  const [activeTab,  setActiveTab]  = useState('consultation')
+  const [form,       setForm]       = useState({
+    name:          session?.username || '',
+    email:         session?.email || '',
+    phone:         '',
+    message:       '',
+    budget:        '',
+    projectId:     '',
+    preferredDate: '',
+    timeSlot:      TIME_SLOTS[0],
+  })
+  const [loading,    setLoading]    = useState(false)
+  const [submitted,  setSubmitted]  = useState(false)
+  const [error,      setError]      = useState('')
 
   function handleChange(e) {
     setError('')
@@ -25,13 +39,11 @@ export default function Contact() {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    const { name, company, email, message } = form
-
-    if (!name || !email || !message) {
-      setError('Please fill in name, email, and message.')
+    if (!form.name || !form.email || !form.phone) {
+      setError('Please fill in name, email, and phone.')
       return
     }
-    if (!isValidEmail(email)) {
+    if (!isValidEmail(form.email)) {
       setError('Please enter a valid email address.')
       return
     }
@@ -40,24 +52,46 @@ export default function Contact() {
     setError('')
 
     try {
-      const res = await submitContact({ name, company, email, message })
+      let res
+      if (activeTab === 'consultation') {
+        res = await submitContact({ name: form.name, email: form.email, phone: form.phone, message: form.message || `Budget: ${form.budget}` })
+      } else {
+        if (!form.preferredDate) { setError('Please select a preferred date.'); setLoading(false); return }
+        res = await createSiteVisit({
+          username:     session?.username || '',
+          name:         form.name,
+          email:        form.email,
+          phone:        form.phone,
+          projectId:    form.projectId || 'general',
+          preferredDate:form.preferredDate,
+          timeSlot:     form.timeSlot,
+        })
+      }
+
       if (res.success !== false) {
         setSubmitted(true)
-        toast.success('Message sent! We\'ll get back to you within 24 hours.')
+        toast.success(activeTab === 'consultation'
+          ? 'Request sent! Our concierge will call within 24 hours.'
+          : 'Site visit booked! Expect an SMS confirmation shortly.')
       } else {
         setError(res.message || 'Something went wrong. Please try again.')
       }
     } catch {
-      setError('Unable to send. Please try again or email us directly.')
-      toast.error('Could not send message.')
+      setError('Unable to submit. Please try again or call us directly.')
     } finally {
       setLoading(false)
     }
   }
 
+  function reset() {
+    setSubmitted(false)
+    setForm({ name: session?.username || '', email: session?.email || '', phone: '', message: '', budget: '', projectId: '', preferredDate: '', timeSlot: TIME_SLOTS[0] })
+    setError('')
+  }
+
   return (
     <section id="contact" className="py-24 relative overflow-hidden bg-gray-950">
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-700/40 to-transparent" />
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-700/30 to-transparent" />
       <div className="orb w-80 h-80 bg-brand-800 top-10 right-10 opacity-10" />
       <div className="orb w-64 h-64 bg-accent-800 bottom-10 left-10 opacity-10" />
 
@@ -67,47 +101,58 @@ export default function Contact() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-14"
         >
-          <span className="section-badge mb-4">Contact Us</span>
+          <span className="section-badge mb-4">Get In Touch</span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mt-4 mb-4">
-            Let's <span className="gradient-text">Start a Conversation</span>
+            Your Property Journey{' '}
+            <span className="gradient-text">Begins Here</span>
           </h2>
           <p className="max-w-xl mx-auto text-gray-400 text-lg">
-            Ready to transform your business with AI? Our team responds within 24 hours.
+            Schedule a consultation with our investment advisors or book a premium site visit
+            — we handle everything from here.
           </p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-5 gap-10 max-w-5xl mx-auto">
+        <div className="grid lg:grid-cols-5 gap-10 items-start">
           {/* Left — contact info */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="lg:col-span-2 flex flex-col gap-6"
+            className="lg:col-span-2 space-y-5"
           >
             {CONTACT_METHODS.map(({ icon: Icon, label, value, href }) => (
               <a
                 key={label}
                 href={href}
-                className="glass border border-white/10 rounded-2xl p-5 flex items-start gap-4 hover:border-white/20 hover:-translate-y-1 transition-all duration-300 group"
+                className="flex items-start gap-4 glass border border-white/8 rounded-2xl p-5 hover:border-brand-700/40 hover:shadow-gold transition-all duration-300 group"
               >
-                <div className="w-10 h-10 rounded-xl bg-brand-900/60 border border-brand-700/40 flex items-center justify-center flex-shrink-0 group-hover:shadow-glow-sm transition-all">
+                <div className="w-10 h-10 rounded-xl bg-brand-700/30 border border-brand-700/40 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                   <Icon size={18} className="text-brand-400" />
                 </div>
                 <div>
-                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{label}</div>
-                  <div className="text-sm text-gray-200 leading-relaxed">{value}</div>
+                  <div className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-0.5">{label}</div>
+                  <div className="text-sm text-white font-medium leading-relaxed">{value}</div>
                 </div>
               </a>
             ))}
 
-            {/* Extra note */}
-            <div className="glass rounded-2xl p-5 border border-white/10 bg-gradient-to-br from-brand-900/20 to-transparent">
-              <p className="text-sm text-gray-400 leading-relaxed">
-                For enterprise inquiries, our solutions team can prepare a customised demo
-                and ROI analysis for your specific industry and use case.
-              </p>
+            {/* Trust indicators */}
+            <div className="glass border border-white/5 rounded-2xl p-5 space-y-3">
+              <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Why Choose EstateFlow</div>
+              {[
+                'Zero brokerage — direct builder pricing',
+                'RERA-verified projects only',
+                'Dedicated relationship manager',
+                'End-to-end transaction support',
+                'NRI-friendly documentation',
+              ].map((item) => (
+                <div key={item} className="flex items-center gap-2 text-sm text-gray-300">
+                  <div className="w-1.5 h-1.5 rounded-full bg-brand-400 flex-shrink-0" />
+                  {item}
+                </div>
+              ))}
             </div>
           </motion.div>
 
@@ -116,125 +161,151 @@ export default function Contact() {
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="lg:col-span-3"
+            className="lg:col-span-3 glass border border-white/8 rounded-3xl overflow-hidden"
           >
-            {submitted ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="glass border border-emerald-700/40 rounded-3xl p-10 flex flex-col items-center text-center"
+            {/* Tab bar */}
+            <div className="flex border-b border-white/10">
+              <button
+                onClick={() => { setActiveTab('consultation'); reset() }}
+                className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-semibold transition-colors ${
+                  activeTab === 'consultation'
+                    ? 'text-brand-400 border-b-2 border-brand-500 bg-brand-950/20'
+                    : 'text-gray-400 hover:text-white'
+                }`}
               >
-                <div className="w-20 h-20 rounded-full bg-emerald-600/20 border-2 border-emerald-600/40 flex items-center justify-center mb-6">
-                  <Check size={36} className="text-emerald-400" />
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-2">Message Received!</h3>
-                <p className="text-gray-400 mb-6">
-                  Thank you for reaching out. We'll get back to you at <span className="text-white">{form.email}</span> within 24 hours.
-                </p>
-                <button
-                  onClick={() => { setSubmitted(false); setForm({ name:'', company:'', email:'', message:'' }) }}
-                  className="btn-secondary"
-                >
-                  Send another message
-                </button>
-              </motion.div>
-            ) : (
-              <div className="glass border border-white/10 rounded-3xl p-8">
-                {/* Error */}
-                {error && (
+                <Heart size={15} /> Book Consultation
+              </button>
+              <button
+                onClick={() => { setActiveTab('visit'); reset() }}
+                className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-semibold transition-colors ${
+                  activeTab === 'visit'
+                    ? 'text-brand-400 border-b-2 border-brand-500 bg-brand-950/20'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                <CalendarCheck size={15} /> Schedule Site Visit
+              </button>
+            </div>
+
+            <div className="p-6 sm:p-8">
+              <AnimatePresence mode="wait">
+                {submitted ? (
                   <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    className="flex items-center gap-2 p-3 mb-5 rounded-xl bg-red-900/30 border border-red-700/50 text-red-300 text-sm"
+                    key="success"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="text-center py-8"
                   >
-                    <AlertCircle size={16} className="flex-shrink-0" />
-                    {error}
+                    <div className="w-16 h-16 rounded-full bg-brand-600/20 border border-brand-600/30 flex items-center justify-center mx-auto mb-4">
+                      <Check size={28} className="text-brand-400" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">
+                      {activeTab === 'consultation' ? 'Request Received!' : 'Visit Confirmed!'}
+                    </h3>
+                    <p className="text-gray-400 text-sm leading-relaxed mb-6 max-w-sm mx-auto">
+                      {activeTab === 'consultation'
+                        ? 'Our property concierge will reach out within 24 hours to discuss your requirements in detail.'
+                        : 'You\'ll receive an SMS with the visit details. Our team will arrange premium transport if needed.'}
+                    </p>
+                    <button onClick={reset} className="btn-ghost border border-white/10 hover:border-white/20">
+                      Submit Another Request
+                    </button>
                   </motion.div>
-                )}
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                        <User size={13} className="inline mr-1 text-brand-400" />
-                        Full Name <span className="text-red-400">*</span>
-                      </label>
-                      <input
-                        name="name"
-                        value={form.name}
-                        onChange={handleChange}
-                        placeholder="Jane Smith"
-                        className="input-field"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                        <Building2 size={13} className="inline mr-1 text-brand-400" />
-                        Company
-                      </label>
-                      <input
-                        name="company"
-                        value={form.company}
-                        onChange={handleChange}
-                        placeholder="Acme Inc."
-                        className="input-field"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                      <Mail size={13} className="inline mr-1 text-brand-400" />
-                      Work Email <span className="text-red-400">*</span>
-                    </label>
-                    <input
-                      name="email"
-                      type="email"
-                      value={form.email}
-                      onChange={handleChange}
-                      placeholder="jane@company.com"
-                      className="input-field"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                      <MessageSquare size={13} className="inline mr-1 text-brand-400" />
-                      Message <span className="text-red-400">*</span>
-                    </label>
-                    <textarea
-                      name="message"
-                      value={form.message}
-                      onChange={handleChange}
-                      placeholder="Tell us about your project, goals, and timeline…"
-                      rows={5}
-                      className="input-field resize-none"
-                      required
-                    />
-                    <div className="text-xs text-gray-600 text-right mt-1">
-                      {form.message.length} / 1000
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="btn-primary w-full justify-center py-3.5 text-base"
+                ) : (
+                  <motion.form
+                    key={activeTab}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    onSubmit={handleSubmit}
+                    className="space-y-4"
                   >
-                    {loading ? (
+                    {error && (
+                      <div className="flex items-center gap-2 p-3 rounded-xl bg-red-900/20 border border-red-700/40 text-red-300 text-sm">
+                        <AlertCircle size={15} className="flex-shrink-0" />
+                        {error}
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs text-gray-400 mb-1.5">Full Name</label>
+                        <div className="relative">
+                          <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+                          <input name="name" type="text" value={form.name} onChange={handleChange} className="input-field pl-9 text-sm" placeholder="Your name" required />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-400 mb-1.5">Phone Number</label>
+                        <div className="relative">
+                          <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+                          <input name="phone" type="tel" value={form.phone} onChange={handleChange} className="input-field pl-9 text-sm" placeholder="+91 98765 43210" required />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-1.5">Email Address</label>
+                      <div className="relative">
+                        <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+                        <input name="email" type="email" value={form.email} onChange={handleChange} className="input-field pl-9 text-sm" placeholder="you@email.com" required />
+                      </div>
+                    </div>
+
+                    {activeTab === 'consultation' ? (
                       <>
-                        <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Sending…
+                        <div>
+                          <label className="block text-xs text-gray-400 mb-1.5">Budget Range</label>
+                          <select name="budget" value={form.budget} onChange={handleChange} className="input-field text-sm">
+                            <option value="">Select your budget</option>
+                            {['Under ₹1 Cr', '₹1–2 Cr', '₹2–5 Cr', '₹5–10 Cr', '₹10 Cr+'].map((b) => (
+                              <option key={b} value={b}>{b}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-400 mb-1.5">Message (optional)</label>
+                          <div className="relative">
+                            <MessageSquare size={14} className="absolute left-3 top-3 text-gray-500 pointer-events-none" />
+                            <textarea name="message" value={form.message} onChange={handleChange} rows={3} className="input-field pl-9 text-sm resize-none" placeholder="Preferred cities, property type, timeline..." />
+                          </div>
+                        </div>
                       </>
                     ) : (
-                      <><Send size={17} /> Send Message</>
+                      <>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs text-gray-400 mb-1.5">Preferred Date</label>
+                            <input name="preferredDate" type="date" value={form.preferredDate} onChange={handleChange} className="input-field text-sm" required />
+                          </div>
+                          <div>
+                            <label className="block text-xs text-gray-400 mb-1.5">Time Slot</label>
+                            <select name="timeSlot" value={form.timeSlot} onChange={handleChange} className="input-field text-sm">
+                              {TIME_SLOTS.map((s) => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-400 mb-1.5">Project of Interest (optional)</label>
+                          <input name="projectId" type="text" value={form.projectId} onChange={handleChange} className="input-field text-sm" placeholder="e.g. The Arbour, Lodha Park, or leave blank" />
+                        </div>
+                      </>
                     )}
-                  </button>
-                </form>
-              </div>
-            )}
+
+                    <button type="submit" disabled={loading} className="btn-primary w-full justify-center py-3.5 text-sm mt-2">
+                      {loading ? (
+                        <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : activeTab === 'consultation' ? (
+                        <><Send size={16} /> Submit Request</>
+                      ) : (
+                        <><CalendarCheck size={16} /> Confirm Site Visit</>
+                      )}
+                    </button>
+                  </motion.form>
+                )}
+              </AnimatePresence>
+            </div>
           </motion.div>
         </div>
       </div>

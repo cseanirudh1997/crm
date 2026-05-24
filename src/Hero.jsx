@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ChevronRight, Play, TrendingUp, Cpu, Globe } from 'lucide-react'
+import { ChevronRight, MapPin, Building2, Users, TrendingUp, CalendarCheck, Phone } from 'lucide-react'
 
 const TYPING_STRINGS = [
-  'Enterprise LLM Deployment',
-  'Voice AI & Call Center Automation',
-  'Conversational AI Agents',
-  'Enterprise RAG Platforms',
-  'AI Workflow Automation',
+  'Luxury Apartments in Gurugram',
+  'Premium Villas in Bengaluru',
+  'Ultra-Premium High-Rises in Mumbai',
+  'Investment-Grade Projects in Noida',
+  'Smart Homes in Hyderabad',
 ]
 
 function useTypingEffect(strings, speed = 80, pause = 2000) {
@@ -40,10 +40,10 @@ function useTypingEffect(strings, speed = 80, pause = 2000) {
 }
 
 const STATS = [
-  { value: 500,  suffix: '+',  label: 'Enterprise Clients',    icon: Globe      },
-  { value: 97.3, suffix: '%',  label: 'Voice Intent Accuracy', icon: TrendingUp },
-  { value: 10,   suffix: 'B+', label: 'AI Queries Processed',  icon: Cpu        },
-  { value: 3.2,  suffix: 'x',  label: 'Avg. ROI Improvement',  icon: TrendingUp },
+  { value: 5,    suffix: '+',   label: 'Premium Cities',     icon: MapPin     },
+  { value: 100,  suffix: '+',   label: 'Curated Projects',   icon: Building2  },
+  { value: 25,   suffix: '+',   label: 'Trusted Builders',   icon: Users      },
+  { value: 18.4, suffix: '%',   label: 'Avg Appreciation',   icon: TrendingUp },
 ]
 
 function AnimatedCounter({ target, suffix, duration = 2000 }) {
@@ -87,17 +87,26 @@ export default function Hero() {
       {/* Background grid */}
       <div className="absolute inset-0 dot-grid opacity-30" />
 
-      {/* Glowing orbs */}
-      <div className="orb w-96 h-96 bg-brand-600  top-20 -left-20"   />
-      <div className="orb w-80 h-80 bg-accent-600 bottom-20 right-10" />
-      <div className="orb w-64 h-64 bg-neon-cyan  top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+      {/* Luxury gold orbs */}
+      <div className="orb w-[500px] h-[500px] bg-brand-800  top-10 -left-40   opacity-15" />
+      <div className="orb w-80   h-80   bg-accent-700 bottom-10 right-10  opacity-10" />
+      <div className="orb w-64   h-64   bg-brand-700  top-1/2  left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-8" />
 
-      {/* Hero fade */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-gray-950/20 to-gray-950" />
-      </div>
+      {/* Subtle image overlay */}
+      <div
+        className="absolute inset-0 opacity-[0.07]"
+        style={{
+          backgroundImage: 'url(https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1920&q=60)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      />
 
-      <div className="section-wrapper relative z-10 py-24 lg:py-32">
+      {/* Gradient overlays */}
+      <div className="absolute inset-0 bg-gradient-to-b from-gray-950/60 via-transparent to-gray-950 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-r from-gray-950/80 via-transparent to-gray-950/80 pointer-events-none" />
+
+      <div className="section-wrapper relative z-10 py-24 lg:py-36">
         <motion.div
           variants={{ hidden: {}, show: { transition: { staggerChildren: 0.12 } } }}
           initial="hidden"
@@ -108,7 +117,7 @@ export default function Hero() {
           <motion.div variants={fadeUp} className="flex justify-center mb-6">
             <span className="section-badge gap-2">
               <span className="w-2 h-2 rounded-full bg-brand-400 animate-pulse-slow inline-block" />
-              Trusted by 500+ Enterprise Teams
+              India's Premium Property Platform
             </span>
           </motion.div>
 
@@ -117,15 +126,15 @@ export default function Hero() {
             variants={fadeUp}
             className="text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight leading-none mb-4"
           >
-            <span className="text-white">Enterprise AI</span>
+            <span className="text-white">Discover Premium</span>
             <br />
-            <span className="gradient-text">Operations Platform</span>
+            <span className="gradient-text">Living Across India</span>
           </motion.h1>
 
           {/* Typing subheadline */}
           <motion.div
             variants={fadeUp}
-            className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-300 mb-6 min-h-[2.5rem] flex items-center justify-center"
+            className="text-xl sm:text-2xl font-semibold text-gray-300 mb-6 min-h-[2.5rem] flex items-center justify-center"
           >
             <span className="typing-cursor">{typedText}</span>
           </motion.div>
@@ -135,8 +144,9 @@ export default function Hero() {
             variants={fadeUp}
             className="max-w-2xl mx-auto text-gray-400 text-base sm:text-lg leading-relaxed mb-10"
           >
-            Unlock full LLM deployment power, voice AI automation, and intelligent workflow
-            orchestration — NexusAI manages your entire AI operations lifecycle at enterprise scale.
+            Explore luxury apartments, ultra-premium villas, plots, and investment-grade opportunities
+            across Gurugram, Noida, Bengaluru, Mumbai, and Hyderabad — curated by India's most trusted
+            real estate concierge.
           </motion.p>
 
           {/* CTA buttons */}
@@ -144,14 +154,23 @@ export default function Hero() {
             variants={fadeUp}
             className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
           >
-            <Link to="/signup" className="btn-primary text-base px-8 py-4">
-              Start Free Trial <ChevronRight size={18} />
-            </Link>
             <button
-              onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
+              className="btn-primary text-base px-8 py-4"
+            >
+              Explore Projects <ChevronRight size={18} />
+            </button>
+            <button
+              onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
               className="btn-secondary text-base px-8 py-4"
             >
-              <Play size={16} className="fill-current" /> See the Platform
+              <Phone size={16} /> Book Consultation
+            </button>
+            <button
+              onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+              className="btn-ghost text-base px-6 py-4 border border-brand-700/30 hover:border-brand-600/50 hover:bg-brand-950/40"
+            >
+              <CalendarCheck size={16} /> Schedule Site Visit
             </button>
           </motion.div>
 
@@ -174,105 +193,87 @@ export default function Hero() {
           </motion.div>
         </motion.div>
 
-        {/* Floating UI preview card */}
+        {/* Floating property preview card */}
         <motion.div
           initial={{ opacity: 0, y: 60 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.9, duration: 0.8, ease: 'easeOut' }}
           className="mt-20 max-w-4xl mx-auto"
         >
-          <div className="glass p-4 rounded-3xl shadow-glow-lg border border-brand-800/40">
-            {/* Window bar */}
-            <div className="flex items-center gap-2 mb-4 px-2">
-              <div className="w-3 h-3 rounded-full bg-red-500/70" />
-              <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
-              <div className="w-3 h-3 rounded-full bg-green-500/70" />
-              <div className="flex-1 h-6 rounded-md bg-white/5 mx-4 flex items-center px-3">
-                <span className="text-xs text-gray-500 font-mono">nexusai.io/dashboard</span>
+          <div className="glass rounded-3xl shadow-gold border border-brand-800/40 overflow-hidden">
+            {/* Card header */}
+            <div className="flex items-center justify-between px-5 py-3 border-b border-white/5 bg-black/20">
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-brand-500 animate-pulse-slow" />
+                <span className="text-xs text-gray-400 font-medium">Featured Properties</span>
               </div>
+              <span className="text-xs text-brand-400 font-semibold">RERA Verified</span>
             </div>
 
-            {/* Mock dashboard UI */}
-            <div className="flex gap-3">
-              {/* Mini sidebar */}
-              <div className="hidden sm:flex w-28 flex-col gap-1 border-r border-white/5 pr-3 shrink-0">
-                {['Overview', 'Voice AI', 'Deployments', 'Insights', 'Support'].map((item, i) => (
-                  <div
-                    key={item}
-                    className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs ${
-                      i === 0
-                        ? 'bg-brand-700/40 text-brand-300'
-                        : 'text-gray-600'
-                    }`}
-                  >
-                    <div className={`w-1 h-1 rounded-full shrink-0 ${i === 0 ? 'bg-brand-400' : 'bg-gray-700'}`} />
-                    {item}
+            {/* Property grid */}
+            <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {[
+                {
+                  name: 'The Arbour',
+                  builder: 'DLF',
+                  city: 'Gurugram',
+                  price: '₹4.5 Cr+',
+                  type: 'Luxury Apartments',
+                  badge: 'Ready to Move',
+                  img: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&q=70',
+                },
+                {
+                  name: 'Prestige Lakeside',
+                  builder: 'Prestige',
+                  city: 'Bengaluru',
+                  price: '₹1.8 Cr+',
+                  type: 'Premium Apartments',
+                  badge: 'RERA Approved',
+                  img: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400&q=70',
+                },
+                {
+                  name: 'Lodha Park',
+                  builder: 'Lodha',
+                  city: 'Mumbai',
+                  price: '₹12 Cr+',
+                  type: 'Sea-Facing Luxury',
+                  badge: 'Sea View',
+                  img: 'https://images.unsplash.com/photo-1523217582562-09d0def993a6?w=400&q=70',
+                },
+              ].map((p) => (
+                <div key={p.name} className="rounded-xl overflow-hidden border border-white/5 bg-white/5 group">
+                  <div className="relative h-28 overflow-hidden">
+                    <img
+                      src={p.img}
+                      alt={p.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                    <span className="absolute top-2 left-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-brand-600/80 text-white border border-brand-500/50">
+                      {p.badge}
+                    </span>
                   </div>
-                ))}
-              </div>
-
-              {/* Main area */}
-              <div className="flex-1 min-w-0">
-                {/* KPI row */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
-                  {[
-                    { label: 'AI Calls',  value: '68.4K', change: '+18.2%', color: 'from-brand-600 to-brand-800',   up: true },
-                    { label: 'Accuracy',  value: '97.3%', change: '+1.4%',  color: 'from-accent-600 to-accent-800', up: true },
-                    { label: 'Deployed',  value: '12',    change: '+3',     color: 'from-teal-600 to-teal-800',     up: true },
-                    { label: 'Sessions',  value: '2,350', change: '+22%',   color: 'from-amber-600 to-amber-800',   up: true },
-                  ].map(({ label, value, change, color, up }) => (
-                    <div key={label} className={`rounded-lg p-2 bg-gradient-to-br ${color} bg-opacity-20 border border-white/10`}>
-                      <div className="text-gray-400 text-xs mb-0.5">{label}</div>
-                      <div className="text-sm font-bold text-white">{value}</div>
-                      <div className={`text-xs mt-0.5 font-medium ${up ? 'text-emerald-400' : 'text-red-400'}`}>{change}</div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Chart + Activity split */}
-                <div className="grid grid-cols-3 gap-2">
-                  {/* Chart */}
-                  <div className="col-span-2">
-                    <div className="text-xs text-gray-500 mb-1.5 flex items-center justify-between">
-                      <span>AI API Volume</span>
-                      <span className="text-emerald-400">+194% YoY</span>
-                    </div>
-                    <div className="h-16 flex items-end gap-0.5">
-                      {[40, 55, 45, 70, 60, 80, 75, 90, 82, 95, 88, 100].map((h, i) => (
-                        <motion.div
-                          key={i}
-                          initial={{ height: 0 }}
-                          animate={{ height: `${h}%` }}
-                          transition={{ delay: 1.2 + i * 0.04, duration: 0.5 }}
-                          className={`flex-1 rounded-t-sm ${
-                            i === 11
-                              ? 'bg-gradient-to-t from-brand-500 to-brand-300'
-                              : 'bg-gradient-to-t from-brand-700 to-brand-500 opacity-70'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Activity feed */}
-                  <div>
-                    <div className="text-xs text-gray-500 mb-1.5">Live Activity</div>
-                    <div className="space-y-1.5">
-                      {[
-                        { text: 'Model deployed',  ok: true  },
-                        { text: 'Latency alert',   ok: false },
-                        { text: 'Pipeline live',   ok: true  },
-                        { text: '2,350 queries',   ok: true  },
-                      ].map(({ text, ok }) => (
-                        <div key={text} className="flex items-center gap-1.5">
-                          <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${ok ? 'bg-emerald-400' : 'bg-amber-400'}`} />
-                          <span className="text-xs text-gray-500 truncate">{text}</span>
-                        </div>
-                      ))}
+                  <div className="p-3">
+                    <div className="text-xs font-bold text-white leading-snug">{p.name}</div>
+                    <div className="text-xs text-gray-500">{p.builder} · {p.city}</div>
+                    <div className="flex items-center justify-between mt-1.5">
+                      <span className="text-brand-400 text-xs font-bold">{p.price}</span>
+                      <span className="text-gray-600 text-xs">{p.type}</span>
                     </div>
                   </div>
                 </div>
-              </div>
+              ))}
+            </div>
+
+            {/* Footer bar */}
+            <div className="px-5 py-2.5 border-t border-white/5 bg-black/20 flex items-center justify-between">
+              <span className="text-xs text-gray-500">100+ projects across 5 cities</span>
+              <button
+                onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
+                className="text-xs text-brand-400 font-semibold hover:text-brand-300 flex items-center gap-1"
+              >
+                View All <ChevronRight size={12} />
+              </button>
             </div>
           </div>
         </motion.div>

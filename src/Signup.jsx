@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Eye, EyeOff, Zap, UserPlus, AlertCircle, CheckCircle } from 'lucide-react'
+import { Eye, EyeOff, Building2, UserPlus, AlertCircle, CheckCircle, Phone } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { signupUser } from './api'
 import { saveSession, isValidEmail } from './utils'
@@ -21,7 +21,7 @@ function passwordStrength(pw) {
 
 export default function Signup() {
   const navigate = useNavigate()
-  const [form, setForm] = useState({ username: '', password: '', email: '', company: '' })
+  const [form, setForm] = useState({ username: '', password: '', email: '', phone: '' })
   const [showPw,   setShowPw]   = useState(false)
   const [loading,  setLoading]  = useState(false)
   const [error,    setError]    = useState('')
@@ -35,7 +35,7 @@ export default function Signup() {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    const { username, password, email, company } = form
+    const { username, password, email, phone } = form
 
     if (!username || !password || !email) {
       setError('Please fill in all required fields.')
@@ -58,18 +58,18 @@ export default function Signup() {
     setError('')
 
     try {
-      const res = await signupUser({ username, password, email, company })
+      const res = await signupUser({ username, password, email, phone })
 
       if (res.success) {
         saveSession({
           username:        res.user?.username || username,
           email:           res.user?.email    || email,
           role:            res.user?.role     || 'user',
-          company:         res.user?.company  || company,
-          tier:            TIERS.TRIAL,
+          phone:           res.user?.phone    || phone,
+          tier:            TIERS.CUSTOMER,
           onboardingStage: ONBOARDING_STAGES.PENDING,
         })
-        toast.success('Account created! Welcome to NexusAI 🚀')
+        toast.success('Account created! Welcome to EstateFlow 🏙️')
         navigate('/dashboard')
       } else {
         setError(res.message || 'Signup failed. Please try again.')
@@ -98,12 +98,12 @@ export default function Signup() {
           <div className="text-center mb-8">
             <Link to="/" className="inline-flex items-center gap-2 mb-6">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-600 flex items-center justify-center shadow-glow-sm">
-                <Zap size={20} className="text-white" />
+                <Building2 size={20} className="text-white" />
               </div>
               <span className="text-2xl font-bold gradient-text">{COMPANY_NAME}</span>
             </Link>
             <h1 className="text-2xl font-extrabold text-white mb-1">Create your account</h1>
-            <p className="text-gray-400 text-sm">Start your 14-day free trial. No credit card required.</p>
+            <p className="text-gray-400 text-sm">Create a free account to explore India's finest luxury properties.</p>
           </div>
 
           {/* Error */}
@@ -139,31 +139,34 @@ export default function Signup() {
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                Work Email <span className="text-red-400">*</span>
+                Email Address <span className="text-red-400">*</span>
               </label>
               <input
                 name="email"
                 type="email"
                 value={form.email}
                 onChange={handleChange}
-                placeholder="you@company.com"
+                placeholder="you@email.com"
                 className="input-field"
                 autoComplete="email"
                 required
               />
             </div>
 
-            {/* Company */}
+            {/* Phone */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1.5">Company</label>
-              <input
-                name="company"
-                type="text"
-                value={form.company}
-                onChange={handleChange}
-                placeholder="Acme Inc."
-                className="input-field"
-              />
+              <label className="block text-sm font-medium text-gray-300 mb-1.5">Phone Number</label>
+              <div className="relative">
+                <Phone size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+                <input
+                  name="phone"
+                  type="tel"
+                  value={form.phone}
+                  onChange={handleChange}
+                  placeholder="+91 98765 43210"
+                  className="input-field pl-9"
+                />
+              </div>
             </div>
 
             {/* Password */}
@@ -214,9 +217,9 @@ export default function Signup() {
             {/* Perks */}
             <div className="pt-1 space-y-1.5">
               {[
-                '14-day free trial, no card needed',
-                'Cancel anytime',
-                'SOC 2 compliant & secure',
+                'Zero brokerage — no hidden charges',
+                'RERA-verified projects only',
+                'Dedicated relationship manager',
               ].map((p) => (
                 <div key={p} className="flex items-center gap-2 text-xs text-gray-400">
                   <CheckCircle size={12} className="text-brand-400 flex-shrink-0" />

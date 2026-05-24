@@ -6,7 +6,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Zap, LogOut, Menu, X, RefreshCw, Bell } from 'lucide-react'
+import { Building2, LogOut, Menu, X, RefreshCw, Bell } from 'lucide-react'
 import { COMPANY_NAME } from './config'
 import { clearSession, formatDate } from './utils'
 
@@ -60,8 +60,8 @@ export default function DashboardLayout({
 
   /* ── Shared user footer ── */
   function UserFooter() {
-    const tierLabel = session?.tier === 'admin' ? 'Admin' : session?.tier === 'premium' ? 'Premium' : 'Trial'
-    const tierColor = session?.tier === 'admin' ? 'text-brand-300' : session?.tier === 'premium' ? 'text-accent-300' : 'text-amber-300'
+    const tierLabel = session?.tier === 'admin' ? 'Admin' : session?.tier === 'premium' ? 'Premium Investor' : 'Registered Buyer'
+    const tierColor = session?.tier === 'admin' ? 'text-brand-300' : session?.tier === 'premium' ? 'text-brand-300' : 'text-amber-300'
     return (
       <div className="p-4 border-t border-white/10">
         <div className="flex items-center gap-3 mb-3">
@@ -110,7 +110,7 @@ export default function DashboardLayout({
               <div className="flex items-center justify-between h-16 px-5 border-b border-white/10">
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-brand-500 to-accent-600 flex items-center justify-center shadow-glow-sm">
-                    <Zap size={14} className="text-white" />
+                    <Building2 size={14} className="text-white" />
                   </div>
                   <span className="font-bold gradient-text">{COMPANY_NAME}</span>
                 </div>
@@ -130,7 +130,7 @@ export default function DashboardLayout({
         <aside className="hidden lg:flex flex-col w-56 min-h-screen border-r border-white/10 bg-gray-950/80 fixed left-0 top-0 bottom-0 z-40">
           <div className="flex items-center gap-2 h-16 px-5 border-b border-white/10">
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-brand-500 to-accent-600 flex items-center justify-center shadow-glow-sm">
-              <Zap size={14} className="text-white" />
+              <Building2 size={14} className="text-white" />
             </div>
             <span className="font-bold gradient-text">{COMPANY_NAME}</span>
           </div>

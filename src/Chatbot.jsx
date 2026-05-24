@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MessageCircle, X, Send, Bot, Sparkles } from 'lucide-react'
+import { MessageCircle, X, Send, Building2, Sparkles } from 'lucide-react'
 import { sendChatMessage } from './api'
 import { SUGGESTED_PROMPTS, FALLBACK_RESPONSE, getWelcomeMessage, buildUserMessage, buildBotMessage } from './chatbot-helpers'
 
@@ -115,17 +115,17 @@ export default function Chatbot() {
           >
             <div className="glass-dark border border-white/10 rounded-2xl shadow-glass flex flex-col overflow-hidden" style={{ maxHeight: 'min(540px, calc(100vh - 8rem))' }}>
               {/* Header */}
-              <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-brand-900/80 to-accent-900/60 border-b border-white/10">
+              <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-brand-900/80 to-gray-900/80 border-b border-white/10">
                 <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-accent-600 flex items-center justify-center shadow-glow-sm">
-                  <Bot size={16} className="text-white" />
+                  <Building2 size={16} className="text-white" />
                 </div>
                 <div>
                   <div className="text-sm font-semibold text-white flex items-center gap-1">
-                    NexusAI Assistant <Sparkles size={12} className="text-brand-300" />
+                    Property Assistant <Sparkles size={12} className="text-brand-300" />
                   </div>
                   <div className="text-xs text-emerald-400 flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse-slow" />
-                    Online
+                    EstateFlow Concierge
                   </div>
                 </div>
                 <button
@@ -201,7 +201,7 @@ export default function Chatbot() {
                   </motion.button>
                 </div>
                 <p className="text-center text-gray-700 text-xs mt-2">
-                  Powered by NexusAI backend
+                  Powered by EstateFlow AI · Zero brokerage
                 </p>
               </div>
             </div>

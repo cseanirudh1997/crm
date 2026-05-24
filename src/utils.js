@@ -12,15 +12,15 @@ export function saveSession({
   username,
   email,
   role            = 'user',
-  company         = '',
-  tier            = TIERS.TRIAL,
+  phone           = '',
+  tier            = TIERS.CUSTOMER,
   onboardingStage = ONBOARDING_STAGES.PENDING,
 }) {
   localStorage.setItem(STORAGE_KEYS.IS_LOGGED_IN,     'true')
   localStorage.setItem(STORAGE_KEYS.USERNAME,          username)
   localStorage.setItem(STORAGE_KEYS.EMAIL,             email)
   localStorage.setItem(STORAGE_KEYS.ROLE,              role)
-  localStorage.setItem(STORAGE_KEYS.COMPANY,           company)
+  localStorage.setItem(STORAGE_KEYS.PHONE,             phone)
   localStorage.setItem(STORAGE_KEYS.TIER,              tier)
   localStorage.setItem(STORAGE_KEYS.ONBOARDING_STAGE,  onboardingStage)
 }
@@ -43,8 +43,8 @@ export function getSession() {
     username:        localStorage.getItem(STORAGE_KEYS.USERNAME)         || '',
     email:           localStorage.getItem(STORAGE_KEYS.EMAIL)            || '',
     role:            localStorage.getItem(STORAGE_KEYS.ROLE)             || 'user',
-    company:         localStorage.getItem(STORAGE_KEYS.COMPANY)          || '',
-    tier:            localStorage.getItem(STORAGE_KEYS.TIER)             || TIERS.TRIAL,
+    phone:           localStorage.getItem(STORAGE_KEYS.PHONE)            || '',
+    tier:            localStorage.getItem(STORAGE_KEYS.TIER)             || TIERS.CUSTOMER,
     onboardingStage: localStorage.getItem(STORAGE_KEYS.ONBOARDING_STAGE) || ONBOARDING_STAGES.PENDING,
   }
 }

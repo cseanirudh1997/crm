@@ -1,97 +1,124 @@
 // ─────────────────────────────────────────────
-//  PremiumDashboard — full experience for Premium / Enterprise users
+//  InvestorDashboard — Premium / verified investor view
 // ─────────────────────────────────────────────
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
-  TrendingUp, ArrowUpRight, ArrowDownRight,
-  CheckCircle, Clock, Loader2, Zap, Headphones, LayoutDashboard,
-  Rocket, Lightbulb, Phone, BarChart2, AlertTriangle, MessageSquare,
-  PhoneIncoming, PhoneOutgoing, Server, Activity, Mail, User,
+  TrendingUp, ArrowUpRight, ArrowDownRight, Heart, CalendarCheck,
+  Building2, LayoutDashboard, BarChart2, Lightbulb, Bell, MapPin,
+  CheckCircle, Clock, Shield, Star, RefreshCw, ChevronRight,
 } from 'lucide-react'
 import {
-  AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, PieChart, Pie, Cell,
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  BarChart, Bar,
 } from 'recharts'
 import DashboardLayout from './DashboardLayout'
-import { SupportRequestModal, ServiceRequestModal } from './Modals'
-import { getDeploymentStatus, getEnterpriseMetrics, getAIInsights } from './api'
+import { fetchDashboardMetrics, fetchAIInsights } from './api'
 
 /* ── Nav ── */
 const NAV_ITEMS = [
-  { id: 'overview',    label: 'Overview',    icon: LayoutDashboard },
-  { id: 'analytics',   label: 'Analytics',   icon: BarChart2       },
-  { id: 'deployments', label: 'Deployments', icon: Rocket          },
-  { id: 'voice',       label: 'Voice AI',    icon: Phone           },
-  { id: 'insights',    label: 'AI Insights', icon: Lightbulb       },
-  { id: 'support',     label: 'Support',     icon: Headphones      },
+  { id: 'overview',  label: 'Overview',        icon: LayoutDashboard },
+  { id: 'saved',     label: 'Saved Projects',   icon: Heart           },
+  { id: 'visits',    label: 'Site Visits',      icon: CalendarCheck   },
+  { id: 'insights',  label: 'AI Insights',      icon: Lightbulb       },
+  { id: 'trends',    label: 'Market Trends',    icon: BarChart2       },
+  { id: 'alerts',    label: 'Notifications',    icon: Bell            },
 ]
 
-/* ── Pie chart colors ── */
-const PIE_COLORS = ['#10b981', '#4a5eff', '#8b5cf6', '#f59e0b']
-
-/* ── Mock: recent call log ── */
-const RECENT_CALLS = [
-  { id: 'CA-8821', type: 'inbound',  duration: '4m 12s', intent: 'Billing Inquiry',    outcome: 'resolved',  sentiment: 'positive', time: '2m ago'  },
-  { id: 'CA-8820', type: 'outbound', duration: '2m 54s', intent: 'Follow-up Outreach', outcome: 'resolved',  sentiment: 'neutral',  time: '5m ago'  },
-  { id: 'CA-8819', type: 'inbound',  duration: '7m 03s', intent: 'Technical Support',  outcome: 'escalated', sentiment: 'negative', time: '9m ago'  },
-  { id: 'CA-8818', type: 'inbound',  duration: '1m 45s', intent: 'Order Status',       outcome: 'resolved',  sentiment: 'positive', time: '14m ago' },
-  { id: 'CA-8817', type: 'outbound', duration: '3m 22s', intent: 'Renewal Reminder',   outcome: 'resolved',  sentiment: 'positive', time: '21m ago' },
-  { id: 'CA-8816', type: 'inbound',  duration: '5m 57s', intent: 'Cancellation',       outcome: 'escalated', sentiment: 'negative', time: '28m ago' },
+/* ── Mock: saved projects ── */
+const SAVED_PROJECTS = [
+  { id: 'p1', name: 'The Arbour',             builder: 'DLF',      city: 'Gurugram', price: '₹4.5 Cr+', possession: 'Ready', status: 'saved',      tag: 'Golf Course View' },
+  { id: 'p3', name: 'Lodha Bellavista',       builder: 'Lodha',    city: 'Noida',    price: '₹3.8 Cr+', possession: 'Mar 2026', status: 'interested', tag: 'Villa Community' },
+  { id: 'p5', name: 'Smartworld One DXP',     builder: 'Smartworld',city:'Bengaluru', price: '₹5.2 Cr+', possession: 'Dec 2026', status: 'saved',     tag: 'Ultra Luxury'   },
+  { id: 'p6', name: 'Lodha Park',             builder: 'Lodha',    city: 'Mumbai',   price: '₹12 Cr+',  possession: 'Ready', status: 'visit_done', tag: 'Sea Facing'      },
+  { id: 'p4', name: 'Prestige Lakeside',      builder: 'Prestige', city: 'Bengaluru',price: '₹1.8 Cr+', possession: 'Jun 2025', status: 'interested',tag: 'Lakeside'       },
+  { id: 'p7', name: 'My Home Avatar',         builder: 'My Home',  city: 'Hyderabad',price: '₹1.4 Cr+', possession: 'Sep 2026', status: 'saved',     tag: 'HITEC City'     },
 ]
 
-/* ── Mock: AI system health ── */
-const SYSTEM_HEALTH = [
-  { name: 'ASR Engine',    status: 'operational', latency: '62ms',  model: 'Whisper v3'     },
-  { name: 'LLM Core',      status: 'operational', latency: '1.1s',  model: 'GPT-4o'         },
-  { name: 'TTS Synthesis', status: 'operational', latency: '180ms', model: 'ElevenLabs v2'  },
-  { name: 'CRM Sync',      status: 'operational', latency: '44ms',  model: 'Salesforce API' },
+/* ── Mock: site visits ── */
+const SITE_VISITS = [
+  { id: 'v1', project: 'The Arbour', builder: 'DLF',      city: 'Gurugram', date: '2026-06-08', slot: 'Morning (10AM–1PM)', status: 'confirmed' },
+  { id: 'v2', project: 'Lodha Park', builder: 'Lodha',    city: 'Mumbai',   date: '2026-05-18', slot: 'Afternoon (2PM–5PM)',status: 'completed' },
+  { id: 'v3', project: 'Prestige Lakeside', builder: 'Prestige', city: 'Bengaluru', date: '2026-06-22', slot: 'Morning (10AM–1PM)', status: 'pending' },
 ]
 
-/* ── Status badge ── */
-function StatusBadge({ status }) {
-  const map = {
-    deployed:     { label: 'Deployed',     class: 'bg-emerald-900/40 border-emerald-700/40 text-emerald-300' },
-    deployment:   { label: 'Deploying',    class: 'bg-brand-900/40 border-brand-700/40 text-brand-300'       },
-    scoping:      { label: 'Scoping',      class: 'bg-accent-900/40 border-accent-700/40 text-accent-300'    },
-    consultation: { label: 'Consultation', class: 'bg-amber-900/40 border-amber-700/40 text-amber-300'       },
-    pending:      { label: 'Pending',      class: 'bg-gray-800/60 border-gray-700/40 text-gray-400'          },
-  }
-  const { label, class: cls } = map[status] || map.pending
-  return (
-    <span className={`px-2 py-0.5 rounded-full border text-xs font-semibold ${cls}`}>{label}</span>
-  )
+/* ── Mock: market trend data ── */
+const PRICE_TREND = [
+  { month: 'Jun 25', gurugram: 12400, noida: 8200,  bangalore: 9800  },
+  { month: 'Jul 25', gurugram: 12700, noida: 8400,  bangalore: 10200 },
+  { month: 'Aug 25', gurugram: 12900, noida: 8600,  bangalore: 10500 },
+  { month: 'Sep 25', gurugram: 13200, noida: 8900,  bangalore: 10800 },
+  { month: 'Oct 25', gurugram: 13600, noida: 9100,  bangalore: 11200 },
+  { month: 'Nov 25', gurugram: 13900, noida: 9400,  bangalore: 11500 },
+  { month: 'Dec 25', gurugram: 14200, noida: 9700,  bangalore: 11900 },
+  { month: 'Jan 26', gurugram: 14600, noida: 10000, bangalore: 12200 },
+  { month: 'Feb 26', gurugram: 14900, noida: 10300, bangalore: 12600 },
+  { month: 'Mar 26', gurugram: 15300, noida: 10600, bangalore: 13000 },
+  { month: 'Apr 26', gurugram: 15700, noida: 10900, bangalore: 13400 },
+  { month: 'May 26', gurugram: 16100, noida: 11200, bangalore: 13800 },
+]
+
+const YIELD_DATA = [
+  { city: 'Gurugram', yield: 3.8 },
+  { city: 'Noida',    yield: 4.1 },
+  { city: 'Bengaluru',yield: 4.6 },
+  { city: 'Mumbai',   yield: 2.9 },
+  { city: 'Hyderabad',yield: 5.8 },
+]
+
+/* ── Status config ── */
+const PROJECT_STATUS = {
+  saved:       { label: 'Saved',        class: 'bg-gray-800/60 border-gray-700/40 text-gray-300' },
+  interested:  { label: 'Interested',   class: 'bg-brand-900/40 border-brand-700/40 text-brand-300' },
+  visit_done:  { label: 'Visit Done',   class: 'bg-emerald-900/40 border-emerald-700/40 text-emerald-300' },
 }
 
-/* ── Voice waveform animation ── */
-function VoiceWaveform({ active = true }) {
-  const bars = [4, 7, 11, 8, 14, 10, 6, 13, 9, 5, 12, 7, 15, 8, 4, 11, 6, 9, 13, 5]
+const VISIT_STATUS = {
+  confirmed: { label: 'Confirmed', class: 'bg-brand-900/40 border-brand-700/40 text-brand-300',  icon: CalendarCheck },
+  completed: { label: 'Completed', class: 'bg-emerald-900/40 border-emerald-700/40 text-emerald-300', icon: CheckCircle },
+  pending:   { label: 'Pending',   class: 'bg-amber-900/40 border-amber-700/40 text-amber-300',  icon: Clock },
+}
+
+/* ── Metric card ── */
+function MetricCard({ label, value, change, icon: Icon, color, loading }) {
+  const up = change?.startsWith('+')
   return (
-    <div className="flex items-center gap-0.5 h-12">
-      {bars.map((h, i) => (
-        <motion.div
-          key={i}
-          className="w-1 rounded-full bg-gradient-to-t from-brand-600 to-brand-300"
-          animate={active ? { height: [`${h * 2}px`, `${h * 4}px`, `${h * 2}px`] } : { height: '4px' }}
-          transition={{ duration: 0.8 + (i % 5) * 0.12, repeat: Infinity, ease: 'easeInOut', delay: i * 0.04 }}
-        />
-      ))}
+    <div className={`glass border ${color} rounded-2xl p-5 flex flex-col gap-3`}>
+      <div className="flex items-start justify-between">
+        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${color.replace('border-', 'from-').replace('/30', '').replace(/border-(\w+-\d+)/, 'from-$1 to-gray-900')} flex items-center justify-center`}>
+          <Icon size={18} className="text-white" />
+        </div>
+        {change && (
+          <span className={`flex items-center gap-0.5 text-xs font-semibold ${up ? 'text-emerald-400' : 'text-red-400'}`}>
+            {up ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+            {change}
+          </span>
+        )}
+      </div>
+      {loading
+        ? <div className="shimmer h-7 w-16 rounded-lg bg-white/5" />
+        : <div className="text-2xl font-extrabold text-white">{value}</div>
+      }
+      <div className="text-xs text-gray-500">{label}</div>
     </div>
   )
 }
 
-/* ── Insight icon — severity-based ── */
-function InsightIcon({ severity }) {
-  const map = {
-    high:   { icon: AlertTriangle, cls: 'bg-amber-900/40 text-amber-400 border-amber-700/30'    },
-    medium: { icon: Zap,           cls: 'bg-brand-900/40 text-brand-400 border-brand-700/30'    },
-    low:    { icon: CheckCircle,   cls: 'bg-accent-900/40 text-accent-400 border-accent-700/30' },
-  }
-  const { icon: Icon, cls } = map[severity] || map.low
+/* ── Custom tooltip for charts ── */
+function CustomTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null
   return (
-    <div className={`w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 ${cls}`}>
-      <Icon size={16} />
+    <div className="glass-dark border border-white/10 rounded-xl p-3 text-xs shadow-glass">
+      <div className="text-gray-400 mb-1.5 font-medium">{label}</div>
+      {payload.map((p) => (
+        <div key={p.name} className="flex items-center justify-between gap-4">
+          <span style={{ color: p.color }}>{p.name}</span>
+          <span className="text-white font-semibold">
+            {typeof p.value === 'number' && p.value > 1000 ? `₹${(p.value / 1000).toFixed(1)}K/sqft` : `${p.value}%`}
+          </span>
+        </div>
+      ))}
     </div>
   )
 }
@@ -102,800 +129,346 @@ const fadeUp = (delay = 0) => ({
   transition: { delay, duration: 0.4 },
 })
 
-function toMonth(dateStr) {
-  try {
-    return new Date(dateStr).toLocaleString('default', { month: 'short' })
-  } catch {
-    return dateStr
-  }
-}
-
-/* ════════════════════════════════════════════
-   PremiumDashboard
-   ════════════════════════════════════════════ */
-export default function PremiumDashboard({ session }) {
-  const [activeNav,     setActiveNav]     = useState('overview')
-  const [showSupport,   setShowSupport]   = useState(false)
-  const [showService,   setShowService]   = useState(false)
-  const [metrics,       setMetrics]       = useState([])
-  const [summary,       setSummary]       = useState(null)
-  const [deployments,   setDeployments]   = useState([])
-  const [insights,      setInsights]      = useState([])
-  const [loading,       setLoading]       = useState(true)
-  const [voiceActive,   setVoiceActive]   = useState(true)
-  const [deployFilter,  setDeployFilter]  = useState('all')
-  const [insightFilter, setInsightFilter] = useState('all')
+export default function InvestorDashboard({ session }) {
+  const [activeNav,  setActiveNav]  = useState('overview')
+  const [metrics,    setMetrics]    = useState({})
+  const [insights,   setInsights]   = useState([])
+  const [loading,    setLoading]    = useState(true)
 
   async function loadData() {
     setLoading(true)
-    const [m, d, ins] = await Promise.all([
-      getEnterpriseMetrics(session?.username),
-      getDeploymentStatus(session?.username),
-      getAIInsights(session?.username),
+    const [mRes, iRes] = await Promise.all([
+      fetchDashboardMetrics(session?.username),
+      fetchAIInsights(),
     ])
-    const rows = m.metrics || []
-    setMetrics(rows)
-
-    if (rows.length) {
-      const totalCalls    = rows.reduce((s, r) => s + (r.aiCalls || 0), 0)
-      const totalHours    = rows.reduce((s, r) => s + (r.automationHoursSaved || 0), 0)
-      const avgScore      = (rows.reduce((s, r) => s + (r.satisfactionScore || 0), 0) / rows.length).toFixed(1)
-      const totalSessions = rows.reduce((s, r) => s + (r.chatbotSessions || 0), 0)
-      setSummary({ totalCalls, totalHours, avgScore, totalSessions })
-    }
-
-    setDeployments(d.deployments || [])
-    setInsights(ins.insights || [])
+    setMetrics(mRes.metrics || {})
+    setInsights(iRes.insights || [])
     setLoading(false)
   }
 
   useEffect(() => { loadData() }, [])
 
-  /* ── Derived data ── */
-  const stageBreakdown = [
-    { name: 'Deployed',   value: deployments.filter(d => d.deploymentStage === 'deployed').length     || 1 },
-    { name: 'Deploying',  value: deployments.filter(d => d.deploymentStage === 'deployment').length   || 1 },
-    { name: 'Scoping',    value: deployments.filter(d => d.deploymentStage === 'scoping').length      || 1 },
-    { name: 'Consulting', value: deployments.filter(d => d.deploymentStage === 'consultation').length || 1 },
-  ]
-
-  const filteredDeployments = deployFilter === 'all'
-    ? deployments
-    : deployments.filter(d => d.deploymentStage === deployFilter)
-
-  const filteredInsights = insightFilter === 'all'
-    ? insights
-    : insights.filter(ins => ins.severity === insightFilter)
-
   const METRIC_CARDS = [
-    { label: 'Total AI Calls',       value: summary?.totalCalls?.toLocaleString() || '–', change: '+18%', up: true, icon: Zap,        color: 'from-brand-600 to-brand-800',   bg: 'bg-brand-900/20',  border: 'border-brand-700/30'  },
-    { label: 'Active Deployments',   value: deployments.length || '–',                    change: '+1',   up: true, icon: Rocket,     color: 'from-accent-600 to-accent-800', bg: 'bg-accent-900/20', border: 'border-accent-700/30' },
-    { label: 'Automation Hrs Saved', value: summary?.totalHours?.toLocaleString() || '–', change: '+32%', up: true, icon: TrendingUp, color: 'from-teal-600 to-teal-800',    bg: 'bg-teal-900/20',   border: 'border-teal-700/30'   },
-    { label: 'Avg Satisfaction',     value: summary ? `${summary.avgScore} / 5` : '–',    change: '+0.2', up: true, icon: Clock,      color: 'from-amber-600 to-amber-800',   bg: 'bg-amber-900/20',  border: 'border-amber-700/30'  },
+    { label: 'Saved Projects',         value: metrics.savedProjects         ?? '–', change: '+2 this week', icon: Heart,        color: 'border-brand-700/30'  },
+    { label: 'Site Visits Booked',     value: metrics.siteVisits            ?? '–', change: '+1 upcoming',  icon: CalendarCheck,color: 'border-emerald-700/30' },
+    { label: 'Interested Properties',  value: metrics.interestedProperties  ?? '–', change: '+3 this month',icon: Building2,    color: 'border-accent-700/30'  },
+    { label: 'AI Insights Available',  value: metrics.marketInsights        ?? '–', change: '2 new alerts', icon: Lightbulb,    color: 'border-amber-700/30'   },
   ]
-
-  /* ── Shared welcome banner ── */
-  const WelcomeBanner = (
-    <motion.div {...fadeUp(0)} className="glass border border-brand-800/40 rounded-2xl p-5 sm:p-6 bg-gradient-to-r from-brand-900/40 to-accent-900/20">
-      <div className="flex items-start sm:items-center justify-between flex-wrap gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
-            <span className="px-2.5 py-0.5 rounded-full bg-brand-500/20 border border-brand-500/40 text-brand-300 text-xs font-semibold tracking-wide uppercase">
-              Premium
-            </span>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse-slow inline-block" />
-            <span className="text-emerald-400 text-xs font-medium">All Systems Operational</span>
-          </div>
-          <h2 className="text-xl font-bold text-white">Welcome back, {session?.username || 'there'}!</h2>
-          {session?.company && <p className="text-gray-400 text-sm mt-0.5">{session.company}</p>}
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          <button onClick={() => setShowService(true)} className="btn-primary text-sm">
-            + Request Deployment
-          </button>
-          <button onClick={() => setShowSupport(true)} className="btn-secondary text-sm">
-            <Headphones size={14} /> Support
-          </button>
-        </div>
-      </div>
-    </motion.div>
-  )
-
-  /* ── Shared metric cards ── */
-  const MetricCards = (
-    <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
-      {METRIC_CARDS.map(({ label, value, change, up, icon: Icon, color, bg, border }, i) => (
-        <motion.div
-          key={label}
-          {...fadeUp(i * 0.06)}
-          className={`glass ${bg} border ${border} rounded-2xl p-5 hover:-translate-y-1 transition-all duration-300`}
-        >
-          <div className="flex items-start justify-between mb-3">
-            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center shadow-md`}>
-              {loading ? <Loader2 size={18} className="text-white animate-spin" /> : <Icon size={18} className="text-white" />}
-            </div>
-            {loading
-              ? <div className="shimmer h-4 w-10 rounded-full bg-white/5" />
-              : (
-                <span className={`flex items-center gap-0.5 text-xs font-medium ${up ? 'text-emerald-400' : 'text-red-400'}`}>
-                  {up ? <ArrowUpRight size={13} /> : <ArrowDownRight size={13} />}
-                  {change}
-                </span>
-              )
-            }
-          </div>
-          {loading
-            ? <div className="shimmer h-7 w-24 rounded-lg mb-1 bg-white/5" />
-            : <div className="text-2xl font-extrabold text-white mb-1">{value}</div>
-          }
-          <div className="text-xs text-gray-400">{label}</div>
-        </motion.div>
-      ))}
-    </div>
-  )
 
   return (
-    <>
-      <DashboardLayout
-        session={session}
-        title="Enterprise Dashboard"
-        subtitle={`${session?.company || 'Your Organization'} · Premium`}
-        navItems={NAV_ITEMS}
-        activeNav={activeNav}
-        onNavChange={setActiveNav}
-        onRefresh={loadData}
-      >
-
-        {/* ══════════════════════════════════
-            OVERVIEW
-            ══════════════════════════════════ */}
-        {activeNav === 'overview' && (
-          <>
-            {WelcomeBanner}
-            {MetricCards}
-
-            <div className="grid sm:grid-cols-3 gap-4">
-              {[
-                { label: 'Active Deployments', value: deployments.length || 4,  sub: 'across all environments',  color: 'text-brand-400',                                                  onClick: () => setActiveNav('deployments') },
-                { label: 'AI Recommendations', value: insights.length || 5,     sub: 'awaiting your review',     color: 'text-accent-400',                                                 onClick: () => setActiveNav('insights')    },
-                { label: 'Voice AI Status',     value: voiceActive ? 'Live' : 'Paused', sub: 'SmartCall AI + VoiceFlow', color: voiceActive ? 'text-emerald-400' : 'text-gray-400', onClick: () => setActiveNav('voice')       },
-              ].map(({ label, value, sub, color, onClick }) => (
-                <button
-                  key={label}
-                  onClick={onClick}
-                  className="glass border border-white/10 rounded-2xl p-5 text-left hover:-translate-y-1 hover:border-brand-700/40 transition-all duration-200 group"
-                >
-                  <div className={`text-2xl font-extrabold mb-1 ${color}`}>{String(value)}</div>
-                  <div className="text-sm font-semibold text-white">{label}</div>
-                  <div className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
-                    {sub} <ArrowUpRight size={10} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-
-        {/* ══════════════════════════════════
-            ANALYTICS
-            ══════════════════════════════════ */}
-        {activeNav === 'analytics' && (
-          <>
-            <motion.div {...fadeUp(0)}>
-              <h2 className="text-lg font-bold text-white mb-1">Analytics</h2>
-              <p className="text-sm text-gray-400 mb-5">Usage trends and deployment distribution across your enterprise.</p>
-            </motion.div>
-
-            {MetricCards}
-
-            <div className="grid lg:grid-cols-3 gap-6">
-              {/* Area chart — AI call volume */}
-              <motion.div {...fadeUp(0.1)} className="lg:col-span-2 glass border border-white/10 rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-5">
-                  <div>
-                    <h3 className="font-semibold text-white">AI API Call Volume</h3>
-                    <p className="text-xs text-gray-500 mt-0.5">12-month trend</p>
-                  </div>
-                  <span className="flex items-center gap-1 text-xs text-emerald-400 font-medium">
-                    <ArrowUpRight size={12} /> +194% YoY
+    <DashboardLayout
+      session={session}
+      title="Investor Dashboard"
+      subtitle="Premium Account"
+      navItems={NAV_ITEMS}
+      activeNav={activeNav}
+      onNavChange={setActiveNav}
+      onRefresh={loadData}
+    >
+      {/* ── Overview ── */}
+      {activeNav === 'overview' && (
+        <>
+          {/* Welcome */}
+          <motion.div {...fadeUp(0)} className="glass border border-brand-800/30 rounded-2xl p-5 sm:p-6 bg-gradient-to-r from-brand-950/60 to-gray-900/20">
+            <div className="flex items-start sm:items-center justify-between flex-wrap gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="px-2.5 py-0.5 rounded-full bg-brand-500/20 border border-brand-500/40 text-brand-300 text-xs font-semibold tracking-wide uppercase">
+                    Premium Investor
                   </span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse-slow inline-block" />
+                  <span className="text-emerald-400 text-xs font-medium">Active</span>
                 </div>
-                <ResponsiveContainer width="100%" height={220}>
-                  <AreaChart data={metrics} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
-                    <defs>
-                      <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%"  stopColor="#4a5eff" stopOpacity={0.35} />
-                        <stop offset="95%" stopColor="#4a5eff" stopOpacity={0}    />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                    <XAxis dataKey="date" tickFormatter={toMonth} tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fill: '#6b7280', fontSize: 10 }} axisLine={false} tickLine={false} />
-                    <Tooltip
-                      contentStyle={{ background: '#111827', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', fontSize: '12px' }}
-                      labelStyle={{ color: '#e5e7eb' }}
-                      itemStyle={{ color: '#4a5eff' }}
-                      labelFormatter={toMonth}
-                    />
-                    <Area type="monotone" dataKey="aiCalls" name="AI Calls" stroke="#4a5eff" strokeWidth={2} fill="url(#areaGrad)" dot={false} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </motion.div>
-
-              {/* Pie chart — deployment mix */}
-              <motion.div {...fadeUp(0.15)} className="glass border border-white/10 rounded-2xl p-6">
-                <h3 className="font-semibold text-white mb-1">Deployment Mix</h3>
-                <p className="text-xs text-gray-500 mb-4">By pipeline stage</p>
-                <ResponsiveContainer width="100%" height={200}>
-                  <PieChart>
-                    <Pie
-                      data={stageBreakdown}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={50}
-                      outerRadius={80}
-                      paddingAngle={3}
-                      dataKey="value"
-                    >
-                      {stageBreakdown.map((_, index) => (
-                        <Cell key={index} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{ background: '#111827', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', fontSize: '12px' }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="space-y-1.5 mt-2">
-                  {stageBreakdown.map((item, i) => (
-                    <div key={item.name} className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-2 h-2 rounded-full" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
-                        <span className="text-gray-400">{item.name}</span>
-                      </div>
-                      <span className="text-gray-300 font-medium">{item.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            </div>
-
-            {/* Bottom charts row */}
-            <div className="grid lg:grid-cols-2 gap-6">
-              {/* Chatbot sessions */}
-              <motion.div {...fadeUp(0.2)} className="glass border border-white/10 rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-5">
-                  <div>
-                    <h3 className="font-semibold text-white">Chatbot Sessions</h3>
-                    <p className="text-xs text-gray-500 mt-0.5">Monthly volume</p>
-                  </div>
-                  <span className="flex items-center gap-1 text-xs text-emerald-400 font-medium">
-                    <ArrowUpRight size={12} /> +186% YoY
-                  </span>
-                </div>
-                <ResponsiveContainer width="100%" height={160}>
-                  <AreaChart data={metrics} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
-                    <defs>
-                      <linearGradient id="sessionGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%"  stopColor="#8b5cf6" stopOpacity={0.35} />
-                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}    />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                    <XAxis dataKey="date" tickFormatter={toMonth} tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fill: '#6b7280', fontSize: 10 }} axisLine={false} tickLine={false} />
-                    <Tooltip
-                      contentStyle={{ background: '#111827', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', fontSize: '12px' }}
-                      labelFormatter={toMonth}
-                    />
-                    <Area type="monotone" dataKey="chatbotSessions" name="Sessions" stroke="#8b5cf6" strokeWidth={2} fill="url(#sessionGrad)" dot={false} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </motion.div>
-
-              {/* Automation hours — bar chart */}
-              <motion.div {...fadeUp(0.25)} className="glass border border-white/10 rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-5">
-                  <div>
-                    <h3 className="font-semibold text-white">Automation Hours Saved</h3>
-                    <p className="text-xs text-gray-500 mt-0.5">Monthly labor hours recovered</p>
-                  </div>
-                  <span className="flex items-center gap-1 text-xs text-emerald-400 font-medium">
-                    <ArrowUpRight size={12} /> +168% YoY
-                  </span>
-                </div>
-                <ResponsiveContainer width="100%" height={160}>
-                  <BarChart data={metrics} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                    <XAxis dataKey="date" tickFormatter={toMonth} tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fill: '#6b7280', fontSize: 10 }} axisLine={false} tickLine={false} />
-                    <Tooltip
-                      contentStyle={{ background: '#111827', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', fontSize: '12px' }}
-                      labelFormatter={toMonth}
-                    />
-                    <Bar dataKey="automationHoursSaved" name="Hours Saved" fill="#10b981" radius={[3, 3, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </motion.div>
-            </div>
-          </>
-        )}
-
-        {/* ══════════════════════════════════
-            DEPLOYMENTS
-            ══════════════════════════════════ */}
-        {activeNav === 'deployments' && (
-          <>
-            <motion.div {...fadeUp(0)}>
-              <h2 className="text-lg font-bold text-white mb-1">Deployment Pipeline</h2>
-              <p className="text-sm text-gray-400 mb-5">Track the status and progress of all your enterprise AI deployments.</p>
-            </motion.div>
-
-            {/* Pipeline summary tiles */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {[
-                { label: 'Total Projects', value: deployments.length || 4,                                                                                color: 'text-white'         },
-                { label: 'Live',           value: deployments.filter(d => d.deploymentStage === 'deployed').length || 1,                                  color: 'text-emerald-400'   },
-                { label: 'In Progress',    value: deployments.filter(d => ['deployment','scoping'].includes(d.deploymentStage)).length || 2,              color: 'text-brand-400'     },
-                { label: 'Consulting',     value: deployments.filter(d => d.deploymentStage === 'consultation').length || 1,                              color: 'text-amber-400'     },
-              ].map(({ label, value, color }) => (
-                <motion.div key={label} {...fadeUp(0.05)} className="glass border border-white/10 rounded-2xl p-4 text-center">
-                  <div className={`text-3xl font-extrabold ${color} mb-1`}>{loading ? '—' : value}</div>
-                  <div className="text-xs text-gray-500">{label}</div>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Filter tabs + table */}
-            <motion.div {...fadeUp(0.08)} className="glass border border-white/10 rounded-2xl overflow-hidden">
-              <div className="flex items-center justify-between gap-3 p-5 border-b border-white/10 flex-wrap">
-                <div className="flex gap-1 flex-wrap">
-                  {[
-                    { id: 'all',          label: 'All',       count: deployments.length                                                    },
-                    { id: 'deployed',     label: 'Live',      count: deployments.filter(d => d.deploymentStage === 'deployed').length     },
-                    { id: 'deployment',   label: 'Deploying', count: deployments.filter(d => d.deploymentStage === 'deployment').length   },
-                    { id: 'scoping',      label: 'Scoping',   count: deployments.filter(d => d.deploymentStage === 'scoping').length      },
-                    { id: 'consultation', label: 'Consult.',  count: deployments.filter(d => d.deploymentStage === 'consultation').length },
-                  ].map(({ id, label, count }) => (
-                    <button
-                      key={id}
-                      onClick={() => setDeployFilter(id)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                        deployFilter === id
-                          ? 'bg-brand-700/60 text-brand-200 border border-brand-600/40'
-                          : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
-                      }`}
-                    >
-                      {label} <span className="ml-1 opacity-60">{count}</span>
-                    </button>
-                  ))}
-                </div>
-                <button onClick={() => setShowService(true)} className="btn-primary text-xs shrink-0">
-                  + New Request
+                <h2 className="text-xl font-bold text-white">Welcome back, {session?.username || 'Investor'}! 🏙️</h2>
+                <p className="text-gray-400 text-sm mt-1">
+                  Your portfolio is tracking well. 2 new AI insights are available.
+                </p>
+              </div>
+              <div className="flex gap-2 shrink-0">
+                <button onClick={() => setActiveNav('insights')} className="btn-ghost text-sm border border-brand-700/30 hover:border-brand-600/50 hover:bg-brand-950/30">
+                  <Lightbulb size={14} /> View Insights
+                </button>
+                <button onClick={() => setActiveNav('visits')} className="btn-primary text-sm">
+                  <CalendarCheck size={14} /> My Visits
                 </button>
               </div>
+            </div>
+          </motion.div>
 
-              {loading ? (
-                <div className="flex items-center justify-center py-16">
-                  <Loader2 size={24} className="animate-spin text-brand-400" />
-                </div>
-              ) : filteredDeployments.length === 0 ? (
-                <div className="flex flex-col items-center py-16 text-gray-500">
-                  <Rocket size={32} className="mb-3 opacity-40" />
-                  <p className="text-sm">No deployments in this stage.</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-white/5">
-                  {filteredDeployments.map((dep, i) => (
-                    <div key={i} className="flex items-center gap-4 px-5 py-5 hover:bg-white/5 transition-colors">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap mb-1">
-                          <span className="text-sm font-medium text-white truncate">{dep.solution}</span>
-                          <StatusBadge status={dep.deploymentStage} />
-                        </div>
-                        <div className="text-xs text-gray-500">{dep.company}</div>
-                      </div>
-                      <div className="shrink-0 w-36">
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-xs text-gray-500">Progress</span>
-                          <span className="text-xs text-gray-300 font-semibold">{dep.completionPercent}%</span>
-                        </div>
-                        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${dep.completionPercent}%` }}
-                            transition={{ duration: 0.8, ease: 'easeOut' }}
-                            className={`h-full rounded-full ${dep.deploymentStage === 'deployed' ? 'bg-emerald-500' : 'bg-gradient-to-r from-brand-600 to-accent-500'}`}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </motion.div>
-          </>
-        )}
-
-        {/* ══════════════════════════════════
-            VOICE AI
-            ══════════════════════════════════ */}
-        {activeNav === 'voice' && (
-          <>
-            <motion.div {...fadeUp(0)}>
-              <h2 className="text-lg font-bold text-white mb-1">Voice AI Suite</h2>
-              <p className="text-sm text-gray-400 mb-5">Live monitoring for SmartCall AI and VoiceFlow Enterprise.</p>
-            </motion.div>
-
-            {/* Live status card */}
-            <motion.div {...fadeUp(0.05)} className="glass border border-brand-800/40 rounded-2xl p-5 sm:p-8 bg-gradient-to-br from-brand-900/20 to-transparent overflow-hidden relative">
-              <div className="absolute top-0 right-0 w-80 h-80 rounded-full bg-brand-600/10 blur-3xl pointer-events-none" />
-              <div className="relative z-10">
-                <div className="flex items-start justify-between flex-wrap gap-4 mb-8">
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-600 to-accent-600 flex items-center justify-center shadow-glow-sm">
-                        <Phone size={17} className="text-white" />
-                      </div>
-                      <span className="text-sm font-semibold text-brand-300 uppercase tracking-wide">SmartCall AI + VoiceFlow Enterprise</span>
-                    </div>
-                    <h3 className="text-2xl font-bold text-white mb-2">Voice AI Infrastructure</h3>
-                    <p className="text-gray-400 max-w-xl">
-                      Your voice AI processes inbound and outbound calls with 97.3% intent accuracy. Real-time transcription, sentiment analysis, and auto-escalation are active.
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setVoiceActive((v) => !v)}
-                    className={`px-4 py-2 rounded-full border text-sm font-semibold transition-all ${
-                      voiceActive
-                        ? 'bg-emerald-900/40 border-emerald-700/40 text-emerald-300 hover:bg-emerald-900/60'
-                        : 'bg-gray-800/60 border-gray-700/40 text-gray-400 hover:bg-gray-800/80'
-                    }`}
-                  >
-                    {voiceActive ? '● Live' : '○ Paused'}
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-6 mb-8 p-4 rounded-xl bg-white/5 border border-white/10">
-                  <VoiceWaveform active={voiceActive} />
-                  <div>
-                    <div className="text-sm font-medium text-white">{voiceActive ? 'Processing live calls' : 'Voice processing paused'}</div>
-                    <div className="text-xs text-gray-500 mt-0.5">{voiceActive ? 'All queues active · Real-time transcription on' : 'Resume to restore live processing'}</div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  {[
-                    { label: 'Calls Today',     value: '1,284' },
-                    { label: 'Avg Handle Time', value: '3m 42s' },
-                    { label: 'Intent Accuracy', value: '97.3%' },
-                    { label: 'Auto-Resolved',   value: '68.4%' },
-                  ].map(({ label, value }) => (
-                    <div key={label} className="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
-                      <div className="text-2xl font-bold gradient-text">{value}</div>
-                      <div className="text-xs text-gray-500 mt-1">{label}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-
-            {/* System health + channel breakdown */}
-            <div className="grid lg:grid-cols-2 gap-6">
-              {/* AI system health */}
-              <motion.div {...fadeUp(0.1)} className="glass border border-white/10 rounded-2xl p-5 sm:p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Server size={16} className="text-brand-400" />
-                  <h3 className="font-semibold text-white">AI System Health</h3>
-                  <span className="ml-auto text-xs text-emerald-400 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse-slow inline-block" />
-                    All Operational
-                  </span>
-                </div>
-                <div className="space-y-3">
-                  {SYSTEM_HEALTH.map(({ name, status, latency, model }) => (
-                    <div key={name} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
-                      <div className={`w-2 h-2 rounded-full shrink-0 ${status === 'operational' ? 'bg-emerald-400' : 'bg-amber-400'}`} />
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-white">{name}</div>
-                        <div className="text-xs text-gray-500 truncate">{model}</div>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <div className="text-xs font-semibold text-gray-300">{latency}</div>
-                        <div className="text-xs text-emerald-400 capitalize">{status}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+          {/* Metric cards */}
+          <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            {METRIC_CARDS.map(({ label, value, change, icon, color }, i) => (
+              <motion.div key={label} {...fadeUp(i * 0.06)}>
+                <MetricCard label={label} value={value} change={change} icon={icon} color={color} loading={loading} />
               </motion.div>
+            ))}
+          </div>
 
-              {/* Channel breakdown */}
-              <motion.div {...fadeUp(0.12)} className="glass border border-white/10 rounded-2xl p-5 sm:p-6">
-                <div className="flex items-center gap-2 mb-5">
-                  <Activity size={16} className="text-brand-400" />
-                  <h3 className="font-semibold text-white">Channel Breakdown</h3>
-                </div>
-                <div className="space-y-4 mb-6">
-                  {[
-                    { label: 'Inbound',  count: 847, pct: 66, color: 'bg-brand-500',  text: 'text-brand-400',  icon: PhoneIncoming  },
-                    { label: 'Outbound', count: 437, pct: 34, color: 'bg-accent-500', text: 'text-accent-400', icon: PhoneOutgoing  },
-                  ].map(({ label, count, pct, color, text, icon: Icon }) => (
-                    <div key={label}>
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <Icon size={14} className={text} />
-                          <span className="text-sm text-gray-300">{label}</span>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-sm font-semibold text-white">{count.toLocaleString()}</span>
-                          <span className="text-xs text-gray-500 ml-1">({pct}%)</span>
-                        </div>
-                      </div>
-                      <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${pct}%` }}
-                          transition={{ duration: 0.7, ease: 'easeOut' }}
-                          className={`h-full rounded-full ${color}`}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { label: 'Avg Queue Wait', value: '18s'    },
-                    { label: 'Peak Hour',       value: '2–3 PM' },
-                  ].map(({ label, value }) => (
-                    <div key={label} className="p-3 rounded-xl bg-white/5 border border-white/5 text-center">
-                      <div className="text-lg font-bold text-white">{value}</div>
-                      <div className="text-xs text-gray-500 mt-0.5">{label}</div>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            </div>
-
-            {/* Recent call log */}
-            <motion.div {...fadeUp(0.15)} className="glass border border-white/10 rounded-2xl overflow-hidden">
-              <div className="p-5 border-b border-white/10">
-                <h3 className="font-semibold text-white">Recent Calls</h3>
-                <p className="text-xs text-gray-500 mt-0.5">Live call log — last 30 minutes</p>
+          {/* Price trend chart */}
+          <motion.div {...fadeUp(0.15)} className="glass border border-white/8 rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h3 className="font-semibold text-white">Price Appreciation — 12 Month Trend</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Average price per sq ft (₹)</p>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-white/5">
-                      {['Call ID', 'Type', 'Duration', 'Intent', 'Outcome', 'Sentiment', 'Time'].map((h) => (
-                        <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {RECENT_CALLS.map((call) => (
-                      <tr key={call.id} className="hover:bg-white/5 transition-colors">
-                        <td className="px-5 py-3.5 font-mono text-xs text-gray-400 whitespace-nowrap">{call.id}</td>
-                        <td className="px-5 py-3.5 whitespace-nowrap">
-                          <span className="flex items-center gap-1.5">
-                            {call.type === 'inbound'
-                              ? <PhoneIncoming  size={12} className="text-brand-400"  />
-                              : <PhoneOutgoing  size={12} className="text-accent-400" />}
-                            <span className="text-xs capitalize text-gray-300">{call.type}</span>
-                          </span>
-                        </td>
-                        <td className="px-5 py-3.5 text-xs text-gray-300 whitespace-nowrap">{call.duration}</td>
-                        <td className="px-5 py-3.5 text-xs text-gray-300">{call.intent}</td>
-                        <td className="px-5 py-3.5 whitespace-nowrap">
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${
-                            call.outcome === 'resolved'
-                              ? 'bg-emerald-900/40 border-emerald-700/40 text-emerald-300'
-                              : 'bg-amber-900/40 border-amber-700/40 text-amber-300'
-                          }`}>
-                            {call.outcome}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3.5 whitespace-nowrap">
-                          <span className={`text-xs font-medium capitalize ${
-                            call.sentiment === 'positive' ? 'text-emerald-400'
-                              : call.sentiment === 'negative' ? 'text-red-400'
-                              : 'text-gray-400'
-                          }`}>{call.sentiment}</span>
-                        </td>
-                        <td className="px-5 py-3.5 text-xs text-gray-500 whitespace-nowrap">{call.time}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </motion.div>
-
-            {/* Expansion CTA */}
-            <motion.div {...fadeUp(0.2)} className="glass border border-white/10 rounded-2xl p-5 sm:p-6">
-              <h3 className="font-semibold text-white mb-1">Expand Voice AI Coverage</h3>
-              <p className="text-sm text-gray-400 mb-4">Deploy SmartCall AI to additional queues or add VoiceFlow workflows to new use cases.</p>
-              <button onClick={() => setShowService(true)} className="btn-primary text-sm">
-                + Request Voice AI Expansion
-              </button>
-            </motion.div>
-          </>
-        )}
-
-        {/* ══════════════════════════════════
-            AI INSIGHTS
-            ══════════════════════════════════ */}
-        {activeNav === 'insights' && (
-          <>
-            <motion.div {...fadeUp(0)}>
-              <h2 className="text-lg font-bold text-white flex items-center gap-2 mb-1">
-                <Lightbulb size={18} className="text-brand-400" /> AI Recommendations
-              </h2>
-              <p className="text-sm text-gray-400 mb-5">Auto-generated based on your usage patterns and deployment telemetry.</p>
-            </motion.div>
-
-            {/* Summary count row */}
-            <div className="grid grid-cols-3 gap-4">
-              {[
-                { label: 'High Priority',   count: insights.filter(i => i.severity === 'high').length,   color: 'text-amber-400',  border: 'border-amber-700/30',  bg: 'bg-amber-900/10'  },
-                { label: 'Medium Priority', count: insights.filter(i => i.severity === 'medium').length, color: 'text-brand-400',  border: 'border-brand-700/30',  bg: 'bg-brand-900/10'  },
-                { label: 'Low Priority',    count: insights.filter(i => i.severity === 'low').length,    color: 'text-accent-400', border: 'border-accent-700/30', bg: 'bg-accent-900/10' },
-              ].map(({ label, count, color, border, bg }) => (
-                <motion.div key={label} {...fadeUp(0.05)} className={`glass border ${border} ${bg} rounded-2xl p-4 text-center`}>
-                  <div className={`text-3xl font-extrabold ${color} mb-1`}>{loading ? '—' : count}</div>
-                  <div className="text-xs text-gray-500">{label}</div>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Filter tabs */}
-            <motion.div {...fadeUp(0.08)} className="flex gap-2 flex-wrap">
-              {[
-                { id: 'all',    label: 'All',    count: insights.length                                           },
-                { id: 'high',   label: 'High',   count: insights.filter(i => i.severity === 'high').length    },
-                { id: 'medium', label: 'Medium', count: insights.filter(i => i.severity === 'medium').length  },
-                { id: 'low',    label: 'Low',    count: insights.filter(i => i.severity === 'low').length     },
-              ].map(({ id, label, count }) => (
-                <button
-                  key={id}
-                  onClick={() => setInsightFilter(id)}
-                  className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-all ${
-                    insightFilter === id
-                      ? 'bg-brand-700/60 text-brand-200 border-brand-600/40'
-                      : 'bg-white/5 text-gray-500 border-white/10 hover:text-gray-300 hover:bg-white/10'
-                  }`}
-                >
-                  {label} <span className="ml-1 opacity-60">{count}</span>
-                </button>
-              ))}
-            </motion.div>
-
-            <motion.div {...fadeUp(0.1)} className="glass border border-white/10 rounded-2xl p-5 sm:p-6">
-              {loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 size={24} className="animate-spin text-brand-400" />
-                </div>
-              ) : filteredInsights.length === 0 ? (
-                <div className="flex flex-col items-center py-12 text-gray-500">
-                  <Lightbulb size={32} className="mb-3 opacity-40" />
-                  <p className="text-sm">No {insightFilter} priority insights.</p>
-                </div>
-              ) : (
-                <div className="grid sm:grid-cols-2 gap-4">
-                  {filteredInsights.map((ins, i) => (
-                    <motion.div
-                      key={ins.timestamp || i}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0  }}
-                      transition={{ delay: i * 0.08 }}
-                      className="flex gap-3 p-5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/8 transition-all"
-                    >
-                      <InsightIcon severity={ins.severity} />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className={`text-xs font-semibold uppercase tracking-wide ${
-                            ins.severity === 'high' ? 'text-amber-400' : ins.severity === 'medium' ? 'text-brand-400' : 'text-accent-400'
-                          }`}>{ins.severity} priority</span>
-                          {ins.timestamp && (
-                            <span className="text-xs text-gray-600">
-                              {new Date(ins.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-300 leading-relaxed mb-3">{ins.insight}</p>
-                        <button
-                          onClick={() => ins.severity === 'high' ? setShowService(true) : setShowSupport(true)}
-                          className="text-xs text-brand-300 hover:text-brand-200 font-medium transition-colors flex items-center gap-1"
-                        >
-                          {ins.severity === 'high' ? 'Request Deployment' : 'Open Support Ticket'} <ArrowUpRight size={11} />
-                        </button>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-            </motion.div>
-          </>
-        )}
-
-        {/* ══════════════════════════════════
-            SUPPORT
-            ══════════════════════════════════ */}
-        {activeNav === 'support' && (
-          <>
-            <motion.div {...fadeUp(0)}>
-              <h2 className="text-lg font-bold text-white mb-1">Enterprise Support</h2>
-              <p className="text-sm text-gray-400 mb-5">Submit tickets, track open issues, and reach your dedicated solutions team.</p>
-            </motion.div>
-
-            {/* SLA cards — 4 priority tiers */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {[
-                { priority: 'Critical', sla: '1 hour',   color: 'border-red-700/40 bg-red-900/10',       text: 'text-red-300',    desc: 'System down / data loss'      },
-                { priority: 'High',     sla: '4 hours',  color: 'border-orange-700/40 bg-orange-900/10', text: 'text-orange-300', desc: 'Major feature impaired'       },
-                { priority: 'Medium',   sla: '8 hours',  color: 'border-amber-700/40 bg-amber-900/10',   text: 'text-amber-300',  desc: 'Partial functionality loss'   },
-                { priority: 'Low',      sla: '24 hours', color: 'border-gray-700/40 bg-gray-800/20',     text: 'text-gray-400',   desc: 'Questions & how-to requests'  },
-              ].map(({ priority, sla, color, text, desc }) => (
-                <motion.div
-                  key={priority}
-                  {...fadeUp(0.05)}
-                  className={`glass border rounded-2xl p-5 ${color}`}
-                >
-                  <div className={`text-xs font-semibold mb-1 ${text}`}>{priority} Priority</div>
-                  <div className="text-2xl font-bold text-white">{sla}</div>
-                  <div className="text-xs text-gray-500 mt-1 leading-snug">{desc}</div>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Support action card */}
-            <motion.div {...fadeUp(0.1)} className="glass border border-white/10 rounded-2xl p-6 sm:p-8">
-              <div className="flex items-start gap-4 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-600 to-accent-600 flex items-center justify-center shadow-glow-sm shrink-0">
-                  <MessageSquare size={22} className="text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-white mb-1">Open a Support Ticket</h3>
-                  <p className="text-gray-400 text-sm">
-                    Our enterprise support team is available 24/7. Tickets are prioritized by severity and routed to the appropriate specialist.
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                <button onClick={() => setShowSupport(true)} className="btn-primary">
-                  <Headphones size={15} /> Open Support Ticket
-                </button>
-                <button onClick={() => setShowService(true)} className="btn-secondary">
-                  + Request New Service
-                </button>
-              </div>
-            </motion.div>
-
-            {/* Contact channel cards */}
-            <motion.div {...fadeUp(0.15)} className="glass border border-white/10 rounded-2xl p-5 sm:p-6">
-              <h3 className="font-semibold text-white mb-4">Direct Contact Channels</h3>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {[
-                  { icon: Mail,          label: 'Enterprise Support',  value: 'enterprise@nexusai.io',    color: 'from-brand-600 to-brand-800'   },
-                  { icon: Phone,         label: 'Emergency Hotline',   value: '+1 (888) 639-8724',        color: 'from-teal-600 to-teal-800'     },
-                  { icon: MessageSquare, label: 'Slack Connect',       value: 'Dedicated workspace',      color: 'from-accent-600 to-accent-800' },
-                  { icon: User,          label: 'Solutions Architect', value: 'Assigned to your account', color: 'from-amber-600 to-amber-800'   },
-                ].map(({ icon: Icon, label, value, color }) => (
-                  <div key={label} className="p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/8 transition-colors">
-                    <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center mb-3`}>
-                      <Icon size={16} className="text-white" />
-                    </div>
-                    <div className="text-xs text-gray-500 mb-0.5">{label}</div>
-                    <div className="text-sm font-medium text-white">{value}</div>
+              <div className="flex items-center gap-3 text-xs">
+                {[{ c: '#c99a1a', l: 'Gurugram' }, { c: '#5eead4', l: 'Noida' }, { c: '#818cf8', l: 'Bengaluru' }].map(({ c, l }) => (
+                  <div key={l} className="flex items-center gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: c }} />
+                    <span className="text-gray-400">{l}</span>
                   </div>
                 ))}
               </div>
-            </motion.div>
-          </>
-        )}
+            </div>
+            <ResponsiveContainer width="100%" height={220}>
+              <AreaChart data={PRICE_TREND} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                <defs>
+                  {[{ id: 'cGuru',  c: '#c99a1a' }, { id: 'cNoida', c: '#5eead4' }, { id: 'cBang', c: '#818cf8' }].map(({ id, c }) => (
+                    <linearGradient key={id} id={id} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%"  stopColor={c} stopOpacity={0.3} />
+                      <stop offset="95%" stopColor={c} stopOpacity={0.02} />
+                    </linearGradient>
+                  ))}
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="month" tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${(v/1000).toFixed(0)}K`} width={48} />
+                <Tooltip content={<CustomTooltip />} />
+                <Area type="monotone" dataKey="gurugram" name="Gurugram" stroke="#c99a1a" fill="url(#cGuru)"  strokeWidth={2} dot={false} />
+                <Area type="monotone" dataKey="noida"    name="Noida"    stroke="#5eead4" fill="url(#cNoida)" strokeWidth={2} dot={false} />
+                <Area type="monotone" dataKey="bangalore" name="Bengaluru" stroke="#818cf8" fill="url(#cBang)" strokeWidth={2} dot={false} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </motion.div>
 
-      </DashboardLayout>
+          {/* Quick summary cards */}
+          <div className="grid md:grid-cols-3 gap-4">
+            {[
+              { label: 'Top Performing City', value: 'Gurugram', sub: '+18.4% YoY appreciation', icon: TrendingUp, color: 'text-brand-400' },
+              { label: 'Best Rental Yield',   value: 'Hyderabad', sub: '5.8% gross yield',        icon: BarChart2, color: 'text-emerald-400' },
+              { label: 'RERA Compliance',     value: '100%',       sub: 'All listed projects',    icon: Shield,    color: 'text-sky-400'   },
+            ].map(({ label, value, sub, icon: Icon, color }) => (
+              <motion.div key={label} {...fadeUp(0.2)} className="glass border border-white/8 rounded-2xl p-5 hover:border-brand-800/30 transition-colors">
+                <Icon size={18} className={`${color} mb-3`} />
+                <div className="text-xl font-extrabold text-white mb-0.5">{value}</div>
+                <div className="text-xs text-gray-500">{label}</div>
+                <div className="text-xs text-gray-600 mt-1">{sub}</div>
+              </motion.div>
+            ))}
+          </div>
+        </>
+      )}
 
-      {showSupport && <SupportRequestModal session={session} onClose={() => setShowSupport(false)} />}
-      {showService  && <ServiceRequestModal session={session} onClose={() => setShowService(false)} />}
-    </>
+      {/* ── Saved Projects ── */}
+      {activeNav === 'saved' && (
+        <motion.div {...fadeUp(0)}>
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="font-semibold text-white">Saved Projects ({SAVED_PROJECTS.length})</h3>
+            <span className="text-xs text-brand-400 font-medium">Sorted by latest activity</span>
+          </div>
+          <div className="space-y-3">
+            {SAVED_PROJECTS.map((p, i) => {
+              const s = PROJECT_STATUS[p.status]
+              return (
+                <motion.div
+                  key={p.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.06 }}
+                  className="glass border border-white/8 rounded-xl p-4 flex items-center justify-between gap-4 hover:border-brand-800/30 transition-all"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-brand-900/40 border border-brand-800/30 flex items-center justify-center text-xs font-bold text-brand-400 flex-shrink-0">
+                      {i + 1}
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-white">{p.name}</div>
+                      <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
+                        <span>{p.builder}</span>
+                        <span>·</span>
+                        <span className="flex items-center gap-0.5"><MapPin size={9} />{p.city}</span>
+                        <span>·</span>
+                        <span className="text-brand-400 font-medium">{p.tag}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <div className="text-right hidden sm:block">
+                      <div className="text-brand-400 text-sm font-bold">{p.price}</div>
+                      <div className="text-xs text-gray-600">{p.possession}</div>
+                    </div>
+                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${s.class}`}>{s.label}</span>
+                  </div>
+                </motion.div>
+              )
+            })}
+          </div>
+        </motion.div>
+      )}
+
+      {/* ── Site Visits ── */}
+      {activeNav === 'visits' && (
+        <motion.div {...fadeUp(0)}>
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="font-semibold text-white">Site Visits</h3>
+            <button className="btn-primary text-xs py-2 px-4">
+              <CalendarCheck size={13} /> Book New Visit
+            </button>
+          </div>
+          <div className="space-y-4">
+            {SITE_VISITS.map((v, i) => {
+              const s = VISIT_STATUS[v.status]
+              const StatusIcon = s.icon
+              return (
+                <motion.div
+                  key={v.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.08 }}
+                  className="glass border border-white/8 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between hover:border-brand-800/30 transition-all"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${s.class.split(' ')[0]}`}>
+                      <StatusIcon size={18} className={s.class.split(' ').pop()} />
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-white">{v.project}</div>
+                      <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
+                        <span>{v.builder}</span>
+                        <span>·</span>
+                        <span className="flex items-center gap-0.5"><MapPin size={9} />{v.city}</span>
+                      </div>
+                      <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
+                        <span>📅 {v.date}</span>
+                        <span>⏰ {v.slot}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${s.class} shrink-0`}>{s.label}</span>
+                </motion.div>
+              )
+            })}
+          </div>
+        </motion.div>
+      )}
+
+      {/* ── AI Insights ── */}
+      {activeNav === 'insights' && (
+        <motion.div {...fadeUp(0)}>
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="font-semibold text-white">AI Investment Insights</h3>
+            <button onClick={loadData} className="w-8 h-8 glass rounded-lg border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+              <RefreshCw size={13} />
+            </button>
+          </div>
+          {loading
+            ? <div className="space-y-3">{[...Array(4)].map((_, i) => <div key={i} className="shimmer h-24 rounded-2xl bg-white/5" />)}</div>
+            : (
+              <div className="space-y-4">
+                {insights.map((insight, i) => (
+                  <motion.div
+                    key={insight.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.07 }}
+                    className="glass border border-white/8 rounded-2xl p-5 hover:border-brand-800/30 transition-all"
+                  >
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <span className="text-xs font-semibold uppercase tracking-wide text-brand-400 bg-brand-900/30 border border-brand-800/30 px-2 py-0.5 rounded-full">
+                        {insight.category}
+                      </span>
+                      <span className="text-brand-400 font-black text-sm flex items-center gap-1">
+                        {insight.trend} <ArrowUpRight size={13} />
+                      </span>
+                    </div>
+                    <h4 className="text-white font-semibold text-sm mb-1.5">{insight.title}</h4>
+                    <p className="text-gray-400 text-sm leading-relaxed">{insight.body}</p>
+                    <div className="mt-3 text-xs text-gray-600 font-medium">{insight.trendLabel}</div>
+                  </motion.div>
+                ))}
+              </div>
+            )
+          }
+        </motion.div>
+      )}
+
+      {/* ── Market Trends ── */}
+      {activeNav === 'trends' && (
+        <motion.div {...fadeUp(0)} className="space-y-6">
+          {/* Area chart */}
+          <div className="glass border border-white/8 rounded-2xl p-6">
+            <h3 className="font-semibold text-white mb-1">Price Trend (₹/sqft) — 12 Months</h3>
+            <p className="text-xs text-gray-500 mb-5">Across Gurugram, Noida, and Bengaluru</p>
+            <ResponsiveContainer width="100%" height={250}>
+              <AreaChart data={PRICE_TREND}>
+                <defs>
+                  {[{ id: 'g2', c: '#c99a1a' }, { id: 'n2', c: '#5eead4' }, { id: 'b2', c: '#818cf8' }].map(({ id, c }) => (
+                    <linearGradient key={id} id={id} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%"  stopColor={c} stopOpacity={0.3} />
+                      <stop offset="95%" stopColor={c} stopOpacity={0} />
+                    </linearGradient>
+                  ))}
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="month" tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${(v/1000).toFixed(0)}K`} width={48} />
+                <Tooltip content={<CustomTooltip />} />
+                <Area type="monotone" dataKey="gurugram"  name="Gurugram"  stroke="#c99a1a" fill="url(#g2)" strokeWidth={2} dot={false} />
+                <Area type="monotone" dataKey="noida"     name="Noida"     stroke="#5eead4" fill="url(#n2)" strokeWidth={2} dot={false} />
+                <Area type="monotone" dataKey="bangalore" name="Bengaluru" stroke="#818cf8" fill="url(#b2)" strokeWidth={2} dot={false} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Bar chart — rental yield */}
+          <div className="glass border border-white/8 rounded-2xl p-6">
+            <h3 className="font-semibold text-white mb-1">Gross Rental Yield by City (%)</h3>
+            <p className="text-xs text-gray-500 mb-5">Premium segment average, Q1 2026</p>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={YIELD_DATA}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="city" tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} width={36} />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar dataKey="yield" name="Rental Yield" fill="#c99a1a" radius={[4, 4, 0, 0]} opacity={0.85} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </motion.div>
+      )}
+
+      {/* ── Alerts / Notifications ── */}
+      {activeNav === 'alerts' && (
+        <motion.div {...fadeUp(0)}>
+          <h3 className="font-semibold text-white mb-5">Recent Alerts</h3>
+          <div className="space-y-3">
+            {[
+              { title: 'Price Drop Alert',       body: 'ATS Pristine (Noida) has reduced prices by ₹12L on select units.',           time: '2h ago',  dot: 'bg-brand-500',   read: false },
+              { title: 'Site Visit Confirmed',   body: 'Your visit to The Arbour (DLF, Gurugram) is confirmed for June 8, 10AM.',     time: '1d ago',  dot: 'bg-emerald-500', read: false },
+              { title: 'New AI Insight',          body: 'Gurugram Golf Course Road appreciation hits 18.4% YoY — new report ready.', time: '2d ago',  dot: 'bg-accent-500',  read: true  },
+              { title: 'Possession Update',       body: 'Prestige Lakeside Habitat now ready for possession — contact us for keys.',  time: '3d ago',  dot: 'bg-amber-500',   read: true  },
+              { title: 'New Project Launch',      body: 'Smartworld Orion — Phase 2 launching in Gurugram Sector 90. Pre-register.', time: '5d ago',  dot: 'bg-sky-500',     read: true  },
+            ].map(({ title, body, time, dot, read }, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.06 }}
+                className={`glass border rounded-2xl p-4 flex items-start gap-3 transition-all ${
+                  read ? 'border-white/5 opacity-60' : 'border-brand-800/30 hover:border-brand-700/40'
+                }`}
+              >
+                <div className={`w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0 ${read ? 'bg-gray-600' : dot}`} />
+                <div>
+                  <div className="text-sm font-semibold text-white">{title}</div>
+                  <div className="text-xs text-gray-400 mt-0.5 leading-relaxed">{body}</div>
+                  <div className="text-xs text-gray-600 mt-1.5">{time}</div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+    </DashboardLayout>
   )
 }

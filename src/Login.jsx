@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Eye, EyeOff, Zap, LogIn, AlertCircle, Mail, ArrowRight } from 'lucide-react'
+import { Eye, EyeOff, Building2, LogIn, AlertCircle, Mail, ArrowRight } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { loginUser, getUserAccess } from './api'
 import { saveSession, isValidEmail } from './utils'
@@ -57,8 +57,8 @@ export default function Login() {
           username:        res.user?.username || form.username,
           email:           userEmail,
           role:            res.user?.role     || 'user',
-          company:         res.user?.company  || '',
-          tier:            access.tier            || res.user?.tier            || TIERS.TRIAL,
+          phone:           res.user?.phone    || '',
+          tier:            access.tier            || res.user?.tier            || TIERS.CUSTOMER,
           onboardingStage: access.onboardingStage || res.user?.onboardingStage || ONBOARDING_STAGES.PENDING,
         })
         toast.success(`Welcome back, ${res.user?.username || form.username}! 🎉`)
@@ -92,7 +92,7 @@ export default function Login() {
           <div className="text-center mb-8">
             <Link to="/" className="inline-flex items-center gap-2 mb-6 group">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-600 flex items-center justify-center shadow-glow-sm">
-                <Zap size={20} className="text-white" />
+                <Building2 size={20} className="text-white" />
               </div>
               <span className="text-2xl font-bold gradient-text">{COMPANY_NAME}</span>
             </Link>
@@ -201,7 +201,7 @@ export default function Login() {
                               type="email"
                               value={forgotEmail}
                               onChange={(e) => setForgotEmail(e.target.value)}
-                              placeholder="you@company.com"
+                              placeholder="you@email.com"
                               className="input-field pl-9 text-sm"
                               required
                             />

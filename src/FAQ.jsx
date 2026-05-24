@@ -4,122 +4,110 @@ import { ChevronDown } from 'lucide-react'
 
 const FAQS = [
   {
-    q: 'How quickly can I get started with NexusAI?',
-    a: 'Most teams are up and running within 24–48 hours. Our onboarding team handles data connector setup, model configuration, and a live walkthrough so you can start seeing value from day one.',
+    q: 'Is EstateFlow a broker? Do you charge brokerage?',
+    a: 'EstateFlow is a tech-enabled real estate advisory platform — not a traditional broker. We charge zero brokerage. You get direct builder pricing on all listed projects. Our revenue comes from builder-side partnerships, which means our interests are aligned with yours.',
   },
   {
-    q: 'Do I need to have an existing data infrastructure?',
-    a: 'No. NexusAI works with over 150 pre-built connectors including data warehouses, ERPs, CRMs, e-commerce platforms, and flat files. We meet you where your data lives.',
+    q: 'Are all projects RERA-registered and verified?',
+    a: 'Yes — 100% of projects listed on EstateFlow are RERA-registered and verified. We display the RERA ID on every project card. We also conduct independent due diligence on builder track record, delivery history, and financial health before listing any project.',
   },
   {
-    q: 'Is my data secure and compliant?',
-    a: 'Absolutely. NexusAI is SOC 2 Type II, GDPR, HIPAA, and CCPA compliant. All data is encrypted in transit and at rest. Enterprise plans include private cloud or on-premise deployment options.',
+    q: 'I am an NRI. Can I buy property in India through EstateFlow?',
+    a: 'Absolutely. We have a dedicated NRI desk that handles FEMA compliance, Power of Attorney documentation, repatriation of funds, and end-to-end coordination with builders. We\'ve helped NRI buyers from the US, UK, UAE, Singapore, and Canada invest seamlessly.',
   },
   {
-    q: 'Can I integrate NexusAI with my existing tools?',
-    a: 'Yes. We offer native integrations with Salesforce, SAP, Oracle, Snowflake, Databricks, Power BI, Looker, and 150+ other platforms. Custom integrations are available on Professional and Enterprise plans.',
+    q: 'How does the site visit process work?',
+    a: 'Submit your site visit request through the form or chatbot. Our concierge will contact you within 4 hours to confirm the slot. We arrange premium transport (cab/driver), builder VIP access, and a dedicated relationship manager who accompanies you throughout the visit.',
   },
   {
-    q: 'What kind of support do you offer?',
-    a: 'Foundation plans include standard email support with an 8-hour response SLA. Enterprise plans include priority 1-hour critical response and a dedicated Solutions Architect. Transformation engagements include 24/7 NOC & AI Ops support with an embedded engineering team. SLAs and penalty clauses are fully customisable on multi-year programs.',
+    q: 'What is the typical end-to-end timeline for purchasing a property?',
+    a: 'From consultation to final registration, the timeline varies: ready-to-move properties can close in 30–45 days. Under-construction properties involve booking, allotment letter, agreement signing, and payment milestones over 7–10 days for paperwork, with possession as per builder schedule.',
   },
   {
-    q: 'How is pricing calculated for large enterprises?',
-    a: 'Enterprise pricing is custom and based on usage volume, number of users, deployment model, and support requirements. Contact our sales team for a tailored quote and ROI analysis.',
+    q: 'Can EstateFlow help with home loan processing?',
+    a: 'Yes. We have partnerships with HDFC, SBI, ICICI, and Axis Bank for preferential interest rates and faster approvals on all EstateFlow-listed projects. Our finance desk will run a free eligibility check and connect you with the right lender.',
   },
   {
-    q: 'Do you offer professional services or implementation support?',
-    a: 'Yes. Our Professional Services team handles end-to-end implementations, custom model development, and ongoing AI strategy consulting. Packages start at a fixed project fee.',
+    q: 'What is the AI Property Assistant chatbot? How does it work?',
+    a: 'Our AI chatbot is trained on project details, RERA data, market trends, and pricing intelligence. It can answer questions about specific projects, suggest properties based on your budget, explain legal terms, and connect you to a human advisor — all within the same conversation.',
   },
   {
-    q: 'What is your uptime SLA for production deployments?',
-    a: 'Enterprise plans include a 99.9% monthly uptime SLA backed by a service credit policy. Our global infrastructure runs across multi-region cloud deployments with automated failover.',
+    q: 'What happens after I register my interest in a project?',
+    a: 'Within 24 hours, a dedicated Relationship Manager will call you to understand your requirements in detail. They\'ll share a personalized shortlist, arrange site visits, provide floor plan analysis, and guide you through the booking process at your own pace — no pressure tactics.',
   },
 ]
 
-function FAQItem({ q, a, isOpen, toggle }) {
-  return (
-    <div className="border-b border-white/10 last:border-0">
-      <button
-        onClick={toggle}
-        className="w-full flex items-center justify-between gap-4 py-5 text-left group"
-      >
-        <span className={`font-medium transition-colors ${isOpen ? 'text-brand-300' : 'text-gray-200 group-hover:text-white'}`}>
-          {q}
-        </span>
-        <ChevronDown
-          size={18}
-          className={`flex-shrink-0 text-gray-500 transition-transform duration-300 ${isOpen ? 'rotate-180 text-brand-400' : 'group-hover:text-gray-300'}`}
-        />
-      </button>
-
-      <AnimatePresence initial={false}>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{   height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="overflow-hidden"
-          >
-            <p className="pb-5 text-gray-400 leading-relaxed text-sm pr-8">{a}</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  )
-}
-
 export default function FAQ() {
-  const [open, setOpen] = useState(0)
+  const [open, setOpen] = useState(null)
 
   return (
-    <section id="faq" className="py-24 relative overflow-hidden bg-gray-950">
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-      <div className="orb w-64 h-64 bg-brand-800 bottom-10 left-10 opacity-10" />
+    <section id="faq" className="py-24 relative bg-gray-950 overflow-hidden">
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-700/20 to-transparent" />
 
-      <div className="section-wrapper">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
-          {/* Left */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="lg:sticky lg:top-24"
-          >
-            <span className="section-badge mb-4">FAQ</span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white mt-4 mb-4">
-              Frequently Asked <span className="gradient-text">Questions</span>
-            </h2>
-            <p className="text-gray-400 leading-relaxed mb-8">
-              Can't find your answer here? Our team is happy to help.
-            </p>
-            <button
-              onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-              className="btn-primary"
+      <div className="section-wrapper max-w-4xl">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-14"
+        >
+          <span className="section-badge mb-4">Common Questions</span>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mt-4 mb-4">
+            Frequently Asked{' '}
+            <span className="gradient-text">Questions</span>
+          </h2>
+          <p className="max-w-xl mx-auto text-gray-400 text-lg">
+            Everything you need to know about buying premium real estate in India through EstateFlow.
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="space-y-3"
+        >
+          {FAQS.map(({ q, a }, i) => (
+            <div
+              key={i}
+              className={`glass border rounded-2xl overflow-hidden transition-all duration-300 ${
+                open === i ? 'border-brand-700/50 shadow-gold' : 'border-white/8 hover:border-brand-800/40'
+              }`}
             >
-              Contact Support
-            </button>
-          </motion.div>
+              <button
+                onClick={() => setOpen(open === i ? null : i)}
+                className="w-full flex items-start justify-between gap-4 p-5 text-left"
+              >
+                <span className={`font-semibold text-sm sm:text-base leading-snug transition-colors ${open === i ? 'text-brand-300' : 'text-white'}`}>
+                  {q}
+                </span>
+                <motion.div
+                  animate={{ rotate: open === i ? 180 : 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="flex-shrink-0 mt-0.5"
+                >
+                  <ChevronDown size={18} className={open === i ? 'text-brand-400' : 'text-gray-500'} />
+                </motion.div>
+              </button>
 
-          {/* Right — accordion */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="glass rounded-2xl p-6 md:p-8 border border-white/10"
-          >
-            {FAQS.map((faq, i) => (
-              <FAQItem
-                key={i}
-                q={faq.q}
-                a={faq.a}
-                isOpen={open === i}
-                toggle={() => setOpen(open === i ? -1 : i)}
-              />
-            ))}
-          </motion.div>
-        </div>
+              <AnimatePresence initial={false}>
+                {open === i && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{   opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                    className="overflow-hidden"
+                  >
+                    <p className="px-5 pb-5 text-gray-400 text-sm leading-relaxed border-t border-white/5 pt-4">
+                      {a}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ))}
+        </motion.div>
       </div>
     </section>
   )

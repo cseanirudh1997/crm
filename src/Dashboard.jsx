@@ -12,7 +12,7 @@ import AdminDashboard   from './AdminDashboard'
 
 export default function Dashboard() {
   const session = getSession()
-  const tier    = session?.tier || TIERS.TRIAL
+  const tier    = session?.tier || TIERS.CUSTOMER
 
   if (tier === TIERS.ADMIN)   return <AdminDashboard   session={session} />
   if (tier === TIERS.PREMIUM) return <PremiumDashboard session={session} />

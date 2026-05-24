@@ -1,28 +1,27 @@
 import { motion } from 'framer-motion'
 
-const CLIENTS = [
-  { name: 'RetailMega',   abbr: 'RM',  color: 'from-blue-600 to-blue-800'    },
-  { name: 'FinEdge',      abbr: 'FE',  color: 'from-emerald-600 to-emerald-800' },
-  { name: 'GlobalLogix',  abbr: 'GL',  color: 'from-teal-600 to-teal-800'    },
-  { name: 'HealthFirst',  abbr: 'HF',  color: 'from-rose-600 to-rose-800'    },
-  { name: 'Luxera',       abbr: 'LX',  color: 'from-violet-600 to-violet-800' },
-  { name: 'UrbanRetail',  abbr: 'UR',  color: 'from-amber-600 to-amber-800'  },
-  { name: 'PharmaCore',   abbr: 'PC',  color: 'from-sky-600 to-sky-800'      },
-  { name: 'MegaFood Co.', abbr: 'MF',  color: 'from-orange-600 to-orange-800' },
-  { name: 'TechBridge',   abbr: 'TB',  color: 'from-indigo-600 to-indigo-800' },
-  { name: 'SwiftAuto',    abbr: 'SA',  color: 'from-cyan-600 to-cyan-800'    },
-  { name: 'DataForge',    abbr: 'DF',  color: 'from-fuchsia-600 to-fuchsia-800' },
-  { name: 'PeakInsurance',abbr: 'PI',  color: 'from-lime-600 to-lime-800'    },
+const BUILDERS = [
+  { name: 'DLF',          abbr: 'DLF', color: 'from-blue-600 to-blue-800',     tagline: 'India\'s Largest Real Estate Co.' },
+  { name: 'Sobha',        abbr: 'SB',  color: 'from-emerald-600 to-emerald-800', tagline: 'Bengaluru\'s Finest Builder'     },
+  { name: 'Lodha',        abbr: 'LH',  color: 'from-teal-600 to-teal-800',     tagline: 'World\'s No.1 Premium Developer'  },
+  { name: 'Prestige',     abbr: 'PR',  color: 'from-rose-600 to-rose-800',     tagline: 'South India\'s Iconic Builders'  },
+  { name: 'Smartworld',   abbr: 'SW',  color: 'from-brand-600 to-brand-800',   tagline: 'Gurugram Ultra-Luxury'           },
+  { name: 'ATS',          abbr: 'ATS', color: 'from-amber-600 to-amber-800',   tagline: 'Noida\'s Premium Developer'      },
+  { name: 'My Home Group',abbr: 'MH',  color: 'from-sky-600 to-sky-800',       tagline: 'Hyderabad Mega-Projects'         },
+  { name: 'Godrej',       abbr: 'GR',  color: 'from-orange-600 to-orange-800', tagline: 'Trusted Since 1897'              },
+  { name: 'Mahindra',     abbr: 'ML',  color: 'from-indigo-600 to-indigo-800', tagline: 'The Right Kind of Life'          },
+  { name: 'Brigade',      abbr: 'BG',  color: 'from-cyan-600 to-cyan-800',     tagline: 'South India\'s Trusted Brand'    },
+  { name: 'Puravankara',  abbr: 'PV',  color: 'from-fuchsia-600 to-fuchsia-800', tagline: 'Built on Trust Since 1975'    },
+  { name: 'Shapoorji',    abbr: 'SP',  color: 'from-lime-600 to-lime-800',     tagline: 'Real Estate Conglomerate'        },
 ]
 
-export default function Clients() {
-  // Duplicate for seamless infinite scroll
-  const doubled = [...CLIENTS, ...CLIENTS]
+export default function BuilderPartners() {
+  const doubled = [...BUILDERS, ...BUILDERS]
 
   return (
     <section className="py-16 relative overflow-hidden bg-gray-950">
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-      <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-700/20 to-transparent" />
+      <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-700/20 to-transparent" />
 
       <div className="section-wrapper mb-10">
         <motion.div
@@ -32,66 +31,64 @@ export default function Clients() {
           className="text-center"
         >
           <p className="text-gray-500 text-sm uppercase tracking-widest font-semibold mb-2">
-            Trusted by industry leaders worldwide
+            Partnered with India's most respected builders
           </p>
           <h2 className="text-2xl font-bold text-white">
-            Powering <span className="gradient-text">500+ Enterprises</span>
+            Trusted by <span className="gradient-text">25+ Premium Developers</span>
           </h2>
         </motion.div>
       </div>
 
-      {/* Marquee track */}
+      {/* Marquee row 1 */}
       <div className="relative">
-        {/* Fade edges */}
         <div className="absolute left-0 inset-y-0 w-32 bg-gradient-to-r from-gray-950 to-transparent z-10 pointer-events-none" />
         <div className="absolute right-0 inset-y-0 w-32 bg-gradient-to-l from-gray-950 to-transparent z-10 pointer-events-none" />
-
         <div className="flex overflow-hidden">
           <motion.div
             animate={{ x: ['0%', '-50%'] }}
-            transition={{ duration: 30, ease: 'linear', repeat: Infinity }}
-            className="flex gap-6 flex-shrink-0"
+            transition={{ duration: 35, ease: 'linear', repeat: Infinity }}
+            className="flex gap-5 flex-shrink-0"
           >
-            {doubled.map((client, i) => (
+            {doubled.map((b, i) => (
               <div
-                key={`${client.name}-${i}`}
-                className="flex-shrink-0 flex items-center gap-3 glass border border-white/10 rounded-xl px-5 py-3 hover:border-white/20 transition-all duration-300 group"
+                key={`${b.name}-${i}`}
+                className="flex-shrink-0 flex items-center gap-3 glass border border-white/8 rounded-xl px-5 py-3 hover:border-brand-700/30 transition-all duration-300 group"
               >
-                {/* Logo placeholder circle */}
-                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${client.color} flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-sm`}>
-                  {client.abbr}
+                <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${b.color} flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-sm`}>
+                  {b.abbr}
                 </div>
-                <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors whitespace-nowrap">
-                  {client.name}
-                </span>
+                <div>
+                  <div className="text-sm font-semibold text-white group-hover:text-brand-300 transition-colors whitespace-nowrap">{b.name}</div>
+                  <div className="text-xs text-gray-600 whitespace-nowrap">{b.tagline}</div>
+                </div>
               </div>
             ))}
           </motion.div>
         </div>
       </div>
 
-      {/* Second row — reversed */}
+      {/* Marquee row 2 — reversed */}
       <div className="relative mt-4">
         <div className="absolute left-0 inset-y-0 w-32 bg-gradient-to-r from-gray-950 to-transparent z-10 pointer-events-none" />
         <div className="absolute right-0 inset-y-0 w-32 bg-gradient-to-l from-gray-950 to-transparent z-10 pointer-events-none" />
-
         <div className="flex overflow-hidden">
           <motion.div
             animate={{ x: ['-50%', '0%'] }}
-            transition={{ duration: 25, ease: 'linear', repeat: Infinity }}
-            className="flex gap-6 flex-shrink-0"
+            transition={{ duration: 28, ease: 'linear', repeat: Infinity }}
+            className="flex gap-5 flex-shrink-0"
           >
-            {[...doubled].reverse().map((client, i) => (
+            {[...doubled].reverse().map((b, i) => (
               <div
-                key={`rev-${client.name}-${i}`}
-                className="flex-shrink-0 flex items-center gap-3 glass border border-white/10 rounded-xl px-5 py-3 hover:border-white/20 transition-all duration-300 group"
+                key={`rev-${b.name}-${i}`}
+                className="flex-shrink-0 flex items-center gap-3 glass border border-white/8 rounded-xl px-5 py-3 hover:border-brand-700/30 transition-all duration-300 group"
               >
-                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${client.color} flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-sm`}>
-                  {client.abbr}
+                <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${b.color} flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-sm`}>
+                  {b.abbr}
                 </div>
-                <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors whitespace-nowrap">
-                  {client.name}
-                </span>
+                <div>
+                  <div className="text-sm font-semibold text-white group-hover:text-brand-300 transition-colors whitespace-nowrap">{b.name}</div>
+                  <div className="text-xs text-gray-600 whitespace-nowrap">{b.tagline}</div>
+                </div>
               </div>
             ))}
           </motion.div>

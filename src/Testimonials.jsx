@@ -1,197 +1,191 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Quote, Star, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Quote, Star, ChevronLeft, ChevronRight, MapPin } from 'lucide-react'
 
 const TESTIMONIALS = [
   {
-    name:    'Sarah Mitchell',
-    title:   'Chief Data Officer',
-    company: 'RetailMega Corp',
-    avatar:  'SM',
+    name:    'Rahul Sharma',
+    title:   'Senior Vice President',
+    company: 'Tech Mahindra',
+    city:    'Gurugram',
+    avatar:  'RS',
     rating:  5,
-    quote:   "Deploying SmartCall AI and NexusGPT Enterprise transformed our entire customer service operation. We deflected 68% of inbound calls within the first quarter and CSAT hit 94% — results we couldn't have achieved with our legacy systems.",
+    project: 'The Arbour by DLF',
+    quote:   "EstateFlow made the entire process seamless. From shortlisting projects in Gurugram to the final registration — their concierge guided us at every step. The property has already appreciated 14% in 18 months.",
     color:   'from-brand-600 to-brand-800',
   },
   {
-    name:    'James Okonkwo',
-    title:   'VP of Technology',
-    company: 'FinEdge Financial',
-    avatar:  'JO',
+    name:    'Ananya Krishnan',
+    title:   'Director, Finance',
+    company: 'Infosys',
+    city:    'Bengaluru',
+    avatar:  'AK',
     rating:  5,
-    quote:   "The fraud detection model they built catches 99.2% of fraudulent transactions in real-time. Our false positive rate dropped by 62%. The ROI was evident within the first quarter.",
+    project: 'Prestige Lakeside Habitat',
+    quote:   "As an NRI buyer based in the US, I was nervous about a remote purchase. EstateFlow's team handled FEMA compliance, power of attorney, and full documentation. The property I bought in Whitefield has been generating 5.2% rental yield.",
     color:   'from-emerald-600 to-emerald-800',
   },
   {
-    name:    'Priya Nakashima',
-    title:   'Head of Supply Chain',
-    company: 'GlobalLogix',
-    avatar:  'PN',
+    name:    'Vikram Malhotra',
+    title:   'Managing Director',
+    company: 'IndusInd Bank',
+    city:    'Noida',
+    avatar:  'VM',
     rating:  5,
-    quote:   "AI Automation Studio eliminated manual processing across our purchase orders, invoices, and shipping docs. We cut document processing time by 74% and reduced exception rates by 38%. NexusAI had us live in production in under three weeks.",
-    color:   'from-teal-600 to-teal-800',
+    project: 'Lodha Bellavista',
+    quote:   "I've invested in multiple properties through EstateFlow. Their AI market insights flagged the Noida Expressway sector 150 opportunity before mainstream media caught on. That early signal translated into 22% appreciation in under a year.",
+    color:   'from-sky-600 to-sky-800',
   },
   {
-    name:    'Marcus Devereux',
-    title:   'CEO',
-    company: 'HealthFirst Systems',
-    avatar:  'MD',
+    name:    'Deepika Shetty',
+    title:   'Co-Founder',
+    company: 'ZeroError Technologies',
+    city:    'Hyderabad',
+    avatar:  'DS',
     rating:  5,
-    quote:   "NexusAI helped us deploy clinical NLP that saves our nurses 2 hours per shift. Patient satisfaction scores improved by 19%. The team understood our compliance needs from day one.",
-    color:   'from-rose-600 to-rose-800',
-  },
-  {
-    name:    'Lena Hoffmann',
-    title:   'Director of E-Commerce',
-    company: 'Luxera Brands',
-    avatar:  'LH',
-    rating:  5,
-    quote:   "Our conversion rate jumped 34% after deploying their AI personalisation engine. The product recommendation accuracy is exceptional — customers say the site 'feels like it reads their mind'.",
+    project: 'My Home Avatar',
+    quote:   "Zero brokerage is a game changer. We saved ₹8 lakhs in fees and got direct-builder pricing on a 3BHK in HITEC City. The property assistant chatbot answered every question we had at 11PM — truly 24×7 service.",
     color:   'from-accent-600 to-accent-800',
   },
   {
-    name:    'David Castellano',
-    title:   'Chief Analytics Officer',
-    company: 'UrbanRetail Group',
-    avatar:  'DC',
+    name:    'Arjun Nair',
+    title:   'Head of Strategy',
+    company: 'HDFC Securities',
+    city:    'Mumbai',
+    avatar:  'AN',
     rating:  5,
-    quote:   "NexusGPT Enterprise gave all 3,000 of our employees a private AI assistant connected to our internal knowledge base. Productivity metrics improved by 31% in the first month — and our teams finally stopped asking IT for information they could get instantly.",
-    color:   'from-amber-600 to-amber-800',
+    project: 'Lodha Park, Worli',
+    quote:   "Lodha Park at this price would have been impossible to close without EstateFlow's builder relationships. Their team negotiated a preferential allotment that saved us ₹35 lakhs versus the open-market price. Best real estate decision of my life.",
+    color:   'from-rose-600 to-rose-800',
   },
 ]
 
 export default function Testimonials() {
-  const [current, setCurrent] = useState(0)
-  const [auto,    setAuto]    = useState(true)
-  const total = TESTIMONIALS.length
+  const [idx,     setIdx]     = useState(0)
+  const [dir,     setDir]     = useState(1)
+  const intervalRef           = useRef(null)
 
   useEffect(() => {
-    if (!auto) return
-    const timer = setInterval(() => setCurrent((c) => (c + 1) % total), 5000)
-    return () => clearInterval(timer)
-  }, [auto, total])
+    intervalRef.current = setInterval(() => { setDir(1); setIdx((i) => (i + 1) % TESTIMONIALS.length) }, 6000)
+    return () => clearInterval(intervalRef.current)
+  }, [])
 
-  const prev = () => { setAuto(false); setCurrent((c) => (c - 1 + total) % total) }
-  const next = () => { setAuto(false); setCurrent((c) => (c + 1) % total) }
+  function goTo(next) {
+    clearInterval(intervalRef.current)
+    setDir(next > idx ? 1 : -1)
+    setIdx(next)
+  }
 
-  const t = TESTIMONIALS[current]
+  const current = TESTIMONIALS[idx]
+
+  const variants = {
+    enter:  (d) => ({ opacity: 0, x: d * 60 }),
+    center: { opacity: 1, x: 0 },
+    exit:   (d) => ({ opacity: 0, x: d * -60 }),
+  }
 
   return (
-    <section id="testimonials" className="py-24 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950" />
-      <div className="orb w-80 h-80 bg-accent-800 top-20 right-20 opacity-10" />
+    <section id="testimonials" className="py-24 relative overflow-hidden bg-gray-950">
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-700/20 to-transparent" />
+      <div className="orb w-96 h-96 bg-brand-900 -top-20 left-1/2 -translate-x-1/2 opacity-15" />
 
-      <div className="section-wrapper relative z-10">
-        {/* Header */}
+      <div className="section-wrapper">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-14"
         >
-          <span className="section-badge mb-4">Customer Stories</span>
+          <span className="section-badge mb-4">Success Stories</span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mt-4 mb-4">
-            Loved by <span className="gradient-text">Industry Leaders</span>
+            Trusted by{' '}
+            <span className="gradient-text">India's Top Investors</span>
           </h2>
+          <p className="max-w-xl mx-auto text-gray-400 text-lg">
+            From first-time home buyers to seasoned real estate investors — EstateFlow
+            delivers exceptional results across every budget and city.
+          </p>
         </motion.div>
 
-        {/* Main testimonial */}
-        <div className="max-w-4xl mx-auto">
-          <AnimatePresence mode="wait">
-          <motion.div
-            key={current}
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{   opacity: 0, x: -40 }}
-            transition={{ duration: 0.4 }}
-            className="glass p-8 md:p-12 rounded-3xl border border-white/10 relative"
-          >
-            {/* Quote icon */}
-            <Quote size={48} className="text-brand-700/40 absolute top-8 right-8" />
+        <div className="max-w-3xl mx-auto">
+          {/* Card */}
+          <div className="relative overflow-hidden">
+            <AnimatePresence mode="wait" custom={dir}>
+              <motion.div
+                key={idx}
+                custom={dir}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.4, ease: 'easeInOut' }}
+                className={`glass border border-white/10 rounded-3xl p-8 md:p-10 bg-gradient-to-br ${current.color}/10 relative`}
+              >
+                {/* Quote icon */}
+                <Quote size={40} className="text-brand-700/40 absolute top-6 right-8" />
 
-            {/* Stars */}
-            <div className="flex gap-1 mb-6">
-              {Array.from({ length: t.rating }).map((_, i) => (
-                <Star key={i} size={18} className="text-amber-400 fill-amber-400" />
-              ))}
-            </div>
+                {/* Stars */}
+                <div className="flex gap-1 mb-5">
+                  {[...Array(current.rating)].map((_, i) => (
+                    <Star key={i} size={16} className="text-brand-400 fill-brand-400" />
+                  ))}
+                </div>
 
-            {/* Quote text */}
-            <p className="text-lg md:text-xl text-gray-200 leading-relaxed mb-8 relative z-10">
-              "{t.quote}"
-            </p>
+                {/* Quote */}
+                <p className="text-white text-lg leading-relaxed mb-8 relative z-10">
+                  "{current.quote}"
+                </p>
 
-            {/* Author */}
-            <div className="flex items-center gap-4">
-              <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${t.color} flex items-center justify-center text-white font-bold text-sm shadow-glow-sm`}>
-                {t.avatar}
-              </div>
-              <div>
-                <div className="text-white font-semibold">{t.name}</div>
-                <div className="text-gray-400 text-sm">{t.title}, {t.company}</div>
-              </div>
-            </div>
-          </motion.div>
-          </AnimatePresence>
+                {/* Author */}
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${current.color} flex items-center justify-center text-white text-sm font-bold flex-shrink-0 shadow-md`}>
+                      {current.avatar}
+                    </div>
+                    <div>
+                      <div className="text-white font-semibold">{current.name}</div>
+                      <div className="text-gray-400 text-sm">{current.title}, {current.company}</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-brand-400 text-xs font-semibold">{current.project}</div>
+                    <div className="flex items-center gap-1 text-xs text-gray-500 justify-end mt-0.5">
+                      <MapPin size={10} /> {current.city}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
 
           {/* Controls */}
-          <div className="flex items-center justify-between mt-8">
-            {/* Dots */}
+          <div className="flex items-center justify-center gap-4 mt-7">
+            <button
+              onClick={() => goTo((idx - 1 + TESTIMONIALS.length) % TESTIMONIALS.length)}
+              className="w-9 h-9 rounded-full glass border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:border-brand-700/40 transition-all"
+            >
+              <ChevronLeft size={16} />
+            </button>
+
             <div className="flex gap-2">
               {TESTIMONIALS.map((_, i) => (
                 <button
                   key={i}
-                  onClick={() => { setAuto(false); setCurrent(i) }}
-                  className={`rounded-full transition-all duration-300 ${
-                    i === current
-                      ? 'w-6 h-2 bg-brand-500'
-                      : 'w-2 h-2 bg-white/20 hover:bg-white/40'
+                  onClick={() => goTo(i)}
+                  className={`transition-all duration-300 rounded-full ${
+                    i === idx ? 'w-6 h-2.5 bg-brand-500' : 'w-2.5 h-2.5 bg-white/20 hover:bg-white/40'
                   }`}
                 />
               ))}
             </div>
 
-            {/* Arrows */}
-            <div className="flex gap-2">
-              <button
-                onClick={prev}
-                className="w-10 h-10 rounded-full glass border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:border-white/30 transition-all"
-              >
-                <ChevronLeft size={18} />
-              </button>
-              <button
-                onClick={next}
-                className="w-10 h-10 rounded-full glass border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:border-white/30 transition-all"
-              >
-                <ChevronRight size={18} />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Mini cards below */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-12 max-w-4xl mx-auto">
-          {TESTIMONIALS.filter((_, i) => i !== current).slice(0, 3).map((t, i) => (
-            <motion.button
-              key={t.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              onClick={() => { setAuto(false); setCurrent(TESTIMONIALS.indexOf(t)) }}
-              className="glass rounded-xl p-4 text-left hover:border-white/20 border border-transparent transition-all hover:-translate-y-1 group"
+            <button
+              onClick={() => goTo((idx + 1) % TESTIMONIALS.length)}
+              className="w-9 h-9 rounded-full glass border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:border-brand-700/40 transition-all"
             >
-              <div className="flex items-center gap-2 mb-2">
-                <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${t.color} flex items-center justify-center text-white text-xs font-bold`}>
-                  {t.avatar}
-                </div>
-                <div>
-                  <div className="text-xs font-semibold text-white">{t.name}</div>
-                  <div className="text-xs text-gray-500">{t.company}</div>
-                </div>
-              </div>
-              <p className="text-xs text-gray-400 line-clamp-2">"{t.quote}"</p>
-            </motion.button>
-          ))}
+              <ChevronRight size={16} />
+            </button>
+          </div>
         </div>
       </div>
     </section>

@@ -1,25 +1,25 @@
 // ─────────────────────────────────────────────
-//  Chatbot helpers — enterprise-focused prompts
+//  Chatbot helpers — luxury real estate prompts
 // ─────────────────────────────────────────────
 
 export const SUGGESTED_PROMPTS = [
-  'What AI products do you offer?',
-  'How does SmartCall AI work?',
-  'Tell me about enterprise pricing',
-  'How quickly can you deploy a RAG platform?',
-  'What industries do you specialize in?',
-  'How do I book a consultation?',
+  'Show me luxury projects in Gurugram',
+  'What are the best NRI investment options?',
+  'How does site visit booking work?',
+  'Tell me about Lodha Park Mumbai',
+  'What is the current market appreciation rate?',
+  'How do I register my interest?',
 ]
 
 export const FALLBACK_RESPONSE =
-  "I'm not sure about that. Please contact our enterprise team at enterprise@nexusai.io or book a consultation using the form below."
+  "I'm not able to answer that right now. Please reach out to our concierge at concierge@estateflow.in or use the consultation form on our website."
 
 /** Build the initial bot greeting message */
 export function getWelcomeMessage() {
   return {
     id:   Date.now(),
     role: 'bot',
-    text: "👋 Hi! I'm NexusAI Assistant. Ask me about our enterprise AI products, LLM deployments, voice AI, pricing, or how to get started.",
+    text: "🏙️ Welcome to EstateFlow! I'm your AI Property Assistant. Ask me about projects, cities, pricing, site visits, NRI services, or investment insights.",
     ts:   new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
   }
 }
