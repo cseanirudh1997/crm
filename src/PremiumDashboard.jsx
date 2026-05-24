@@ -214,12 +214,20 @@ export default function PremiumDashboard({ session }) {
             <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center shadow-md`}>
               {loading ? <Loader2 size={18} className="text-white animate-spin" /> : <Icon size={18} className="text-white" />}
             </div>
-            <span className={`flex items-center gap-0.5 text-xs font-medium ${up ? 'text-emerald-400' : 'text-red-400'}`}>
-              {up ? <ArrowUpRight size={13} /> : <ArrowDownRight size={13} />}
-              {change}
-            </span>
+            {loading
+              ? <div className="shimmer h-4 w-10 rounded-full bg-white/5" />
+              : (
+                <span className={`flex items-center gap-0.5 text-xs font-medium ${up ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {up ? <ArrowUpRight size={13} /> : <ArrowDownRight size={13} />}
+                  {change}
+                </span>
+              )
+            }
           </div>
-          <div className="text-2xl font-extrabold text-white mb-1">{loading ? '—' : value}</div>
+          {loading
+            ? <div className="shimmer h-7 w-24 rounded-lg mb-1 bg-white/5" />
+            : <div className="text-2xl font-extrabold text-white mb-1">{value}</div>
+          }
           <div className="text-xs text-gray-400">{label}</div>
         </motion.div>
       ))}

@@ -21,7 +21,7 @@ const FAQS = [
   },
   {
     q: 'What kind of support do you offer?',
-    a: 'Starter plans include email support with a 24h SLA. Professional includes priority live chat and email with a 4h SLA. Enterprise gets a dedicated Customer Success Manager plus 24/7 phone support.',
+    a: 'Foundation plans include standard email support with an 8-hour response SLA. Enterprise plans include priority 1-hour critical response and a dedicated Solutions Architect. Transformation engagements include 24/7 NOC & AI Ops support with an embedded engineering team. SLAs and penalty clauses are fully customisable on multi-year programs.',
   },
   {
     q: 'How is pricing calculated for large enterprises?',

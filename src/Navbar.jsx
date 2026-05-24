@@ -1,13 +1,24 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, Zap, LogOut, LayoutDashboard, ChevronRight, Bell } from 'lucide-react'
 import { NAV_LINKS, COMPANY_NAME } from './config'
 import { getSession, clearSession, scrollToSection } from './utils'
 
+const NOTIFICATIONS = [
+  { id: 1, dot: 'bg-brand-500',   title: 'NexusGPT v2.4 deployed',        body: 'Your enterprise instance was updated successfully.',  time: '2m ago'  },
+  { id: 2, dot: 'bg-emerald-500', title: 'SmartCall AI: 99.8% uptime',     body: 'Weekly health report is ready to view.',             time: '1h ago'  },
+  { id: 3, dot: 'bg-accent-500',  title: 'New AI insight available',        body: '3 optimization recommendations found.',             time: '4h ago'  },
+  { id: 4, dot: 'bg-amber-500',   title: 'VoiceFlow deployment complete',   body: 'Enterprise voice AI is fully live.',                time: '1d ago'  },
+]
+
 export default function Navbar() {
-  const [open,     setOpen]    = useState(false)
-  const [scrolled, setScrolled] = useState(false)
+  const [open,          setOpen]          = useState(false)
+  const [scrolled,      setScrolled]      = useState(false)
+  const [activeSection, setActiveSection] = useState('')
+  const [showNotif,     setShowNotif]     = useState(false)
+  const [notifUnread,   setNotifUnread]   = useState(true)
+  const notifRef = useRef(null)
   const navigate  = useNavigate()
   const location  = useLocation()
   const session   = getSession()
@@ -19,6 +30,40 @@ export default function Navbar() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  /* Active section highlighting via IntersectionObserver */
+  useEffect(() => {
+    if (!isHome) { setActiveSection(''); return }
+    const sectionIds = NAV_LINKS.map((l) => l.href.replace('#', ''))
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) setActiveSection(entry.target.id)
+        })
+      },
+      { rootMargin: '-20% 0px -60% 0px', threshold: 0 }
+    )
+    sectionIds.forEach((id) => {
+      const el = document.getElementById(id)
+      if (el) observer.observe(el)
+    })
+    return () => observer.disconnect()
+  }, [isHome])
+
+  /* Close notification panel on outside click */
+  useEffect(() => {
+    if (!showNotif) return
+    function handleOutside(e) {
+      if (notifRef.current && !notifRef.current.contains(e.target)) setShowNotif(false)
+    }
+    document.addEventListener('mousedown', handleOutside)
+    return () => document.removeEventListener('mousedown', handleOutside)
+  }, [showNotif])
+
+  function toggleNotif() {
+    setShowNotif((v) => !v)
+    setNotifUnread(false)
+  }
 
   function handleNavClick(href) {
     setOpen(false)
@@ -61,29 +106,76 @@ export default function Navbar() {
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-1">
-            {NAV_LINKS.map((link) => (
-              <button
-                key={link.href}
-                onClick={() => handleNavClick(link.href)}
-                className="btn-ghost"
-              >
-                {link.label}
-              </button>
-            ))}
+            {NAV_LINKS.map((link) => {
+              const isActive = isHome && activeSection === link.href.replace('#', '')
+              return (
+                <button
+                  key={link.href}
+                  onClick={() => handleNavClick(link.href)}
+                  className={`btn-ghost transition-colors ${isActive ? 'text-white bg-white/10 border border-white/15' : ''}`}
+                >
+                  {link.label}
+                </button>
+              )
+            })}
           </nav>
 
           {/* Right side */}
           <div className="hidden md:flex items-center gap-3">
             {/* Notifications */}
-            <div className="relative">
+            <div className="relative" ref={notifRef}>
               <button
-                className="w-9 h-9 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-gray-400 hover:text-white"
+                onClick={toggleNotif}
+                className={`w-9 h-9 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-gray-400 hover:text-white ${showNotif ? 'bg-white/10 text-white border-white/20' : ''}`}
                 aria-label="Notifications"
-                title="Notifications"
               >
                 <Bell size={15} />
               </button>
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand-500 border border-gray-950 pointer-events-none" />
+              {notifUnread && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand-500 border border-gray-950 pointer-events-none" />
+              )}
+
+              {/* Dropdown panel */}
+              <AnimatePresence>
+                {showNotif && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0,  scale: 1    }}
+                    exit={{   opacity: 0, y: 8,  scale: 0.97 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-full mt-2 w-80 glass-dark border border-white/10 rounded-2xl shadow-glass overflow-hidden z-50"
+                  >
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+                      <span className="text-sm font-semibold text-white">Notifications</span>
+                      <button
+                        onClick={() => setNotifUnread(false)}
+                        className="text-xs text-brand-400 hover:underline"
+                      >
+                        Mark all read
+                      </button>
+                    </div>
+                    <div className="max-h-72 overflow-y-auto divide-y divide-white/5">
+                      {NOTIFICATIONS.map((n, i) => (
+                        <div key={n.id} className={`px-4 py-3 hover:bg-white/5 transition-colors cursor-pointer ${i >= 2 ? 'opacity-50' : ''}`}>
+                          <div className="flex items-start gap-3">
+                            <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${i < 2 ? n.dot : 'bg-gray-600'}`} />
+                            <div className="flex-1 min-w-0">
+                              <div className="text-xs font-semibold text-white leading-snug">{n.title}</div>
+                              <div className="text-xs text-gray-400 mt-0.5 leading-relaxed">{n.body}</div>
+                              <div className="text-xs text-gray-600 mt-1">{n.time}</div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="border-t border-white/10 px-4 py-2.5 text-center">
+                      <button className="text-xs text-gray-500 hover:text-gray-300 transition-colors">
+                        View all activity
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {session ? (
@@ -109,14 +201,47 @@ export default function Navbar() {
 
           {/* Mobile hamburger */}
           <div className="md:hidden flex items-center gap-2">
-            <div className="relative">
+            <div className="relative" ref={notifRef}>
               <button
-                className="w-9 h-9 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 text-gray-400"
+                onClick={toggleNotif}
+                className={`w-9 h-9 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 text-gray-400 hover:text-white transition-all ${showNotif ? 'bg-white/10 text-white' : ''}`}
                 aria-label="Notifications"
               >
                 <Bell size={15} />
               </button>
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand-500 border border-gray-950 pointer-events-none" />
+              {notifUnread && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand-500 border border-gray-950 pointer-events-none" />
+              )}
+              <AnimatePresence>
+                {showNotif && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0,  scale: 1    }}
+                    exit={{   opacity: 0, y: 8,  scale: 0.97 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-full mt-2 w-72 glass-dark border border-white/10 rounded-2xl shadow-glass overflow-hidden z-50"
+                  >
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+                      <span className="text-sm font-semibold text-white">Notifications</span>
+                      <button onClick={() => setNotifUnread(false)} className="text-xs text-brand-400 hover:underline">Mark all read</button>
+                    </div>
+                    <div className="max-h-60 overflow-y-auto divide-y divide-white/5">
+                      {NOTIFICATIONS.map((n, i) => (
+                        <div key={n.id} className={`px-4 py-3 hover:bg-white/5 transition-colors ${i >= 2 ? 'opacity-50' : ''}`}>
+                          <div className="flex items-start gap-3">
+                            <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${i < 2 ? n.dot : 'bg-gray-600'}`} />
+                            <div className="flex-1 min-w-0">
+                              <div className="text-xs font-semibold text-white leading-snug">{n.title}</div>
+                              <div className="text-xs text-gray-400 mt-0.5">{n.body}</div>
+                              <div className="text-xs text-gray-600 mt-1">{n.time}</div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
             <button
               onClick={() => setOpen(!open)}
@@ -140,15 +265,22 @@ export default function Navbar() {
             className="md:hidden overflow-hidden bg-gray-950/95 backdrop-blur-xl border-b border-white/10"
           >
             <div className="section-wrapper py-4 flex flex-col gap-1">
-              {NAV_LINKS.map((link) => (
-                <button
-                  key={link.href}
-                  onClick={() => handleNavClick(link.href)}
-                  className="w-full text-left px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition-all font-medium"
-                >
-                  {link.label}
-                </button>
-              ))}
+              {NAV_LINKS.map((link) => {
+                const isActive = isHome && activeSection === link.href.replace('#', '')
+                return (
+                  <button
+                    key={link.href}
+                    onClick={() => handleNavClick(link.href)}
+                    className={`w-full text-left px-4 py-3 rounded-xl transition-all font-medium ${
+                      isActive
+                        ? 'text-white bg-white/10 border border-white/15'
+                        : 'text-gray-300 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    {link.label}
+                  </button>
+                )
+              })}
               <div className="pt-2 border-t border-white/10 flex flex-col gap-2 mt-2">
                 {session ? (
                   <>

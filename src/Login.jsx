@@ -1,22 +1,38 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { Eye, EyeOff, Zap, LogIn, AlertCircle } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Eye, EyeOff, Zap, LogIn, AlertCircle, Mail, ArrowRight } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { loginUser, getUserAccess } from './api'
-import { saveSession } from './utils'
-import { COMPANY_NAME, TIERS, ONBOARDING_STAGES } from './config'
+import { saveSession, isValidEmail } from './utils'
+import { COMPANY_NAME, COMPANY_EMAIL, TIERS, ONBOARDING_STAGES } from './config'
 
 export default function Login() {
   const navigate = useNavigate()
-  const [form,    setForm]    = useState({ username: '', password: '' })
-  const [showPw,  setShowPw]  = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error,   setError]   = useState('')
+  const [form,          setForm]          = useState({ username: '', password: '' })
+  const [showPw,        setShowPw]        = useState(false)
+  const [loading,       setLoading]       = useState(false)
+  const [error,         setError]         = useState('')
+  const [showForgot,    setShowForgot]    = useState(false)
+  const [forgotEmail,   setForgotEmail]   = useState('')
+  const [forgotLoading, setForgotLoading] = useState(false)
+  const [forgotSent,    setForgotSent]    = useState(false)
 
   function handleChange(e) {
     setError('')
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }))
+  }
+
+  async function handleForgotSubmit(e) {
+    e.preventDefault()
+    if (!isValidEmail(forgotEmail)) {
+      toast.error('Please enter a valid email address.')
+      return
+    }
+    setForgotLoading(true)
+    await new Promise((r) => setTimeout(r, 1200))
+    setForgotLoading(false)
+    setForgotSent(true)
   }
 
   async function handleSubmit(e) {
@@ -115,7 +131,11 @@ export default function Login() {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="block text-sm font-medium text-gray-300">Password</label>
-                <button type="button" className="text-xs text-brand-400 hover:underline">
+                <button
+                  type="button"
+                  onClick={() => { setShowForgot((v) => !v); setForgotSent(false); setForgotEmail('') }}
+                  className="text-xs text-brand-400 hover:underline"
+                >
                   Forgot password?
                 </button>
               </div>
@@ -139,6 +159,85 @@ export default function Login() {
                 </button>
               </div>
             </div>
+
+            {/* Forgot password panel */}
+            <AnimatePresence>
+              {showForgot && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{   opacity: 0, height: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="overflow-hidden"
+                >
+                  <div className="p-4 rounded-xl bg-brand-900/20 border border-brand-700/30">
+                    {forgotSent ? (
+                      <div className="text-center py-1">
+                        <div className="w-10 h-10 rounded-full bg-emerald-600/20 border border-emerald-600/30 flex items-center justify-center mx-auto mb-3">
+                          <Mail size={18} className="text-emerald-400" />
+                        </div>
+                        <p className="text-sm font-semibold text-white mb-1">Check your inbox</p>
+                        <p className="text-xs text-gray-400 leading-relaxed mb-3">
+                          If <span className="text-white">{forgotEmail}</span> is registered,
+                          reset instructions are on their way.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => { setShowForgot(false); setForgotSent(false); setForgotEmail('') }}
+                          className="text-xs text-brand-400 hover:underline"
+                        >
+                          Back to sign in
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-xs text-gray-400 mb-3">
+                          Enter your work email and we'll send reset instructions.
+                        </p>
+                        <form onSubmit={handleForgotSubmit} className="space-y-2">
+                          <div className="relative">
+                            <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+                            <input
+                              type="email"
+                              value={forgotEmail}
+                              onChange={(e) => setForgotEmail(e.target.value)}
+                              placeholder="you@company.com"
+                              className="input-field pl-9 text-sm"
+                              required
+                            />
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              type="submit"
+                              disabled={forgotLoading}
+                              className="btn-primary flex-1 justify-center py-2 text-sm"
+                            >
+                              {forgotLoading
+                                ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                : <><ArrowRight size={14} /> Send Link</>
+                              }
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setShowForgot(false)}
+                              className="btn-secondary py-2 text-sm"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </form>
+                        <p className="text-xs text-gray-600 mt-2 text-center">
+                          Need immediate help?{' '}
+                          <a href={`mailto:${COMPANY_EMAIL}`} className="text-brand-400 hover:underline">
+                            Contact support
+                          </a>
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <button
               type="submit"

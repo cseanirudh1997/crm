@@ -9,7 +9,7 @@ const TESTIMONIALS = [
     company: 'RetailMega Corp',
     avatar:  'SM',
     rating:  5,
-    quote:   "NexusAI's RetailIQ platform transformed how we understand customer behavior. We saw a 28% lift in same-store sales within 6 months of deployment. The team's expertise in retail AI is unmatched.",
+    quote:   "Deploying SmartCall AI and NexusGPT Enterprise transformed our entire customer service operation. We deflected 68% of inbound calls within the first quarter and CSAT hit 94% — results we couldn't have achieved with our legacy systems.",
     color:   'from-brand-600 to-brand-800',
   },
   {
@@ -27,7 +27,7 @@ const TESTIMONIALS = [
     company: 'GlobalLogix',
     avatar:  'PN',
     rating:  5,
-    quote:   "AI Forecast Studio reduced our inventory carrying costs by $4.2M annually. The demand forecasts are eerily accurate even across long lead-time SKUs. Implementation was smooth and fast.",
+    quote:   "AI Automation Studio eliminated manual processing across our purchase orders, invoices, and shipping docs. We cut document processing time by 74% and reduced exception rates by 38%. NexusAI had us live in production in under three weeks.",
     color:   'from-teal-600 to-teal-800',
   },
   {
@@ -54,7 +54,7 @@ const TESTIMONIALS = [
     company: 'UrbanRetail Group',
     avatar:  'DC',
     rating:  5,
-    quote:   "GenAssist Enterprise gave all 3,000 of our employees a private AI assistant that's connected to our internal knowledge base. Productivity metrics improved by 31% in the first month.",
+    quote:   "NexusGPT Enterprise gave all 3,000 of our employees a private AI assistant connected to our internal knowledge base. Productivity metrics improved by 31% in the first month — and our teams finally stopped asking IT for information they could get instantly.",
     color:   'from-amber-600 to-amber-800',
   },
 ]

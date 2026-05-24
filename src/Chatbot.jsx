@@ -162,8 +162,8 @@ export default function Chatbot() {
                 <div ref={endRef} />
               </div>
 
-              {/* Suggested prompts */}
-              {messages.length === 1 && !loading && (
+              {/* Suggested prompts — always visible while not loading */}
+              {!loading && (
                 <div className="px-4 pb-2 flex flex-wrap gap-2">
                   {SUGGESTED_PROMPTS.slice(0, 3).map((p) => (
                     <button
