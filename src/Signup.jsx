@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Eye, EyeOff, Building2, UserPlus, AlertCircle, CheckCircle, Phone } from 'lucide-react'
+import { Eye, EyeOff, Palette, UserPlus, AlertCircle, CheckCircle, Phone } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { signupUser } from './api'
 import { saveSession, isValidEmail } from './utils'
@@ -69,7 +69,7 @@ export default function Signup() {
           tier:            TIERS.CUSTOMER,
           onboardingStage: ONBOARDING_STAGES.PENDING,
         })
-        toast.success('Account created! Welcome to EstateFlow 🏙️')
+        toast.success('Account created! Welcome to Maison Studio ✨')
         navigate('/dashboard')
       } else {
         setError(res.message || 'Signup failed. Please try again.')
@@ -98,12 +98,12 @@ export default function Signup() {
           <div className="text-center mb-8">
             <Link to="/" className="inline-flex items-center gap-2 mb-6">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-600 flex items-center justify-center shadow-glow-sm">
-                <Building2 size={20} className="text-white" />
+                <Palette size={20} className="text-white" />
               </div>
               <span className="text-2xl font-bold gradient-text">{COMPANY_NAME}</span>
             </Link>
             <h1 className="text-2xl font-extrabold text-white mb-1">Create your account</h1>
-            <p className="text-gray-400 text-sm">Create a free account to explore India's finest luxury properties.</p>
+            <p className="text-gray-400 text-sm">Create a free account to bring your interior design vision to life.</p>
           </div>
 
           {/* Error */}
@@ -217,9 +217,9 @@ export default function Signup() {
             {/* Perks */}
             <div className="pt-1 space-y-1.5">
               {[
-                'Zero brokerage — no hidden charges',
-                'RERA-verified projects only',
-                'Dedicated relationship manager',
+                'Access to curated design packages',
+                'Dedicated Maison design consultant',
+                'Exclusive style trends & mood boards',
               ].map((p) => (
                 <div key={p} className="flex items-center gap-2 text-xs text-gray-400">
                   <CheckCircle size={12} className="text-brand-400 flex-shrink-0" />

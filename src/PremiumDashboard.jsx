@@ -164,7 +164,7 @@ export default function PremiumClientDashboard({ session }) {
     { label: 'Active Projects',    value: metrics.activeProjects    ?? MY_PROJECTS.filter(p => p.stage !== 'completed').length, change: '+1 this month', icon: Home,        color: 'border-brand-700/30'   },
     { label: 'Consultations',      value: metrics.consultations     ?? MY_CONSULTATIONS.length,                                 change: '+1 upcoming',  icon: CalendarCheck,color: 'border-emerald-700/30'  },
     { label: 'Completed Designs',  value: metrics.completedDesigns  ?? MY_PROJECTS.filter(p => p.stage === 'completed').length, change: '1 this season',icon: Star,        color: 'border-accent-700/30'  },
-    { label: 'Design Insights',    value: metrics.designInsights    ?? insights.length || 6,                                    change: '2 new today',  icon: Lightbulb,   color: 'border-amber-700/30'   },
+    { label: 'Design Insights',    value: metrics.designInsights    ?? (insights.length || 6),                                 change: '2 new today',  icon: Lightbulb,   color: 'border-amber-700/30'   },
   ]
 
   return (

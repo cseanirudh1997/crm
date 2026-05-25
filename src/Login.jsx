@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Eye, EyeOff, Building2, LogIn, AlertCircle, Mail, ArrowRight } from 'lucide-react'
+import { Eye, EyeOff, Palette, LogIn, AlertCircle, Mail, ArrowRight } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { loginUser, getUserAccess } from './api'
+import { loginUser } from './api'
 import { saveSession, isValidEmail } from './utils'
 import { COMPANY_NAME, COMPANY_EMAIL, TIERS, ONBOARDING_STAGES } from './config'
 
@@ -49,17 +49,13 @@ export default function Login() {
       const res = await loginUser({ username: form.username, password: form.password })
 
       if (res.success) {
-        const userEmail = res.user?.email || ''
-        // Load tier & onboarding stage from UserAccess sheet (mock fallback if not ready)
-        const usernameForAccess = res.user?.username || form.username
-        const access = await getUserAccess(usernameForAccess).catch(() => ({}))
         saveSession({
           username:        res.user?.username || form.username,
-          email:           userEmail,
+          email:           res.user?.email    || '',
           role:            res.user?.role     || 'user',
           phone:           res.user?.phone    || '',
-          tier:            access.tier            || res.user?.tier            || TIERS.CUSTOMER,
-          onboardingStage: access.onboardingStage || res.user?.onboardingStage || ONBOARDING_STAGES.PENDING,
+          tier:            res.user?.tier            || TIERS.CUSTOMER,
+          onboardingStage: res.user?.onboardingStage || ONBOARDING_STAGES.PENDING,
         })
         toast.success(`Welcome back, ${res.user?.username || form.username}! 🎉`)
         navigate('/dashboard')
@@ -92,7 +88,7 @@ export default function Login() {
           <div className="text-center mb-8">
             <Link to="/" className="inline-flex items-center gap-2 mb-6 group">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-600 flex items-center justify-center shadow-glow-sm">
-                <Building2 size={20} className="text-white" />
+                <Palette size={20} className="text-white" />
               </div>
               <span className="text-2xl font-bold gradient-text">{COMPANY_NAME}</span>
             </Link>

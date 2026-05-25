@@ -17,17 +17,24 @@
 import { API_URL } from './config'
 
 async function post(payload) {
-  const response = await fetch(API_URL, {
-    method:   'POST',
-    headers:  { 'Content-Type': 'text/plain;charset=utf-8' },
-    redirect: 'follow',
-    body:     JSON.stringify(payload),
-  })
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+  const controller = new AbortController()
+  const timeoutId  = setTimeout(() => controller.abort(), 15_000)
+  try {
+    const response = await fetch(API_URL, {
+      method:   'POST',
+      headers:  { 'Content-Type': 'text/plain;charset=utf-8' },
+      redirect: 'follow',
+      signal:   controller.signal,
+      body:     JSON.stringify(payload),
+    })
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+    }
+    const data = await response.json()
+    return data
+  } finally {
+    clearTimeout(timeoutId)
   }
-  const data = await response.json()
-  return data
 }
 
 // ── In-memory promise cache ───────────────────────────────────────────────────
@@ -55,20 +62,6 @@ export async function signupUser({ username, password, email, phone }) {
  */
 export async function loginUser({ username, password }) {
   return post({ action: 'login', username, password })
-}
-
-// ── User Access ────────────────────────────────
-
-/**
- * Load a user's tier and onboarding stage.
- * Sheet: UserAccess — username | tier | onboardingStage | status
- */
-export async function getUserAccess(username) {
-  try {
-    return await post({ action: 'getUserAccess', username })
-  } catch {
-    return { success: true, tier: 'customer', onboardingStage: 'pending' }
-  }
 }
 
 // ── Platform Config ────────────────────────────
@@ -721,15 +714,7 @@ export async function fetchDashboardMetrics(username) {
  * Sheet: BookingRequests — bookingId | username | serviceId | preferredDate | preferredTime | notes | status
  */
 export async function createBookingRequest({ username, serviceId, preferredDate, preferredTime, notes, name, email, phone }) {
-  try {
-    return await post({ action: 'createBookingRequest', username, serviceId, preferredDate, preferredTime, notes, name, email, phone })
-  } catch {
-    return {
-      success:   true,
-      message:   'Your consultation request has been received. Our design team will contact you within 24 hours to confirm your appointment.',
-      bookingId: `MSN-${Date.now()}`,
-    }
-  }
+  return post({ action: 'createBookingRequest', username, serviceId, preferredDate, preferredTime, notes, name, email, phone })
 }
 
 // ── Newsletter Subscription ────────────────────
@@ -739,14 +724,7 @@ export async function createBookingRequest({ username, serviceId, preferredDate,
  * Sheet: NewsletterSubscribers — email | name | subscribedAt
  */
 export async function subscribeNewsletter({ email, name }) {
-  try {
-    return await post({ action: 'subscribeNewsletter', email, name })
-  } catch {
-    return {
-      success: true,
-      message: 'Welcome to Maison! You\'ll receive curated design inspiration and exclusive studio updates.',
-    }
-  }
+  return post({ action: 'subscribeNewsletter', email, name })
 }
 
 // ── Payment Links ──────────────────────────────
@@ -834,6 +812,18 @@ export async function sendChatMessage(query) {
  * Maps to createBookingRequest action so data flows into BookingRequests sheet.
  */
 export async function submitContact({ name, email, phone, service, message }) {
-  const fullNotes = [service ? `Service: ${service}` : '', message].filter(Boolean).join(' | ')
-  return post({ action: 'createBookingRequest', name, email, phone, notes: fullNotes })
+  const notes = [
+    name    ? `Name: ${name}`       : '',
+    phone   ? `Phone: ${phone}`     : '',
+    service ? `Service: ${service}` : '',
+    message ? `Message: ${message}` : '',
+  ].filter(Boolean).join(' | ')
+  return post({
+    action:        'createBookingRequest',
+    username:      email || name || 'guest',
+    serviceId:     service || '',
+    preferredDate: '',
+    preferredTime: '',
+    notes,
+  })
 }
