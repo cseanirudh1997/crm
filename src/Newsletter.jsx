@@ -16,7 +16,7 @@ export default function Newsletter() {
     setSending(true)
     try {
       const res = await subscribeNewsletter({ email, name })
-      if (res?.success !== false) {
+      if (res?.success === true) {
         setDone(true)
         toast.success('You\'re on the list! Welcome to Maison.')
       } else {

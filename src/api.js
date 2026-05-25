@@ -818,9 +818,14 @@ export async function submitContact({ name, email, phone, service, message }) {
     service ? `Service: ${service}` : '',
     message ? `Message: ${message}` : '',
   ].filter(Boolean).join(' | ')
+  // Send both the spec-required field names AND the raw contact fields so the
+  // backend can read them regardless of which column names it uses.
   return post({
     action:        'createBookingRequest',
     username:      email || name || 'guest',
+    name,
+    email,
+    phone,
     serviceId:     service || '',
     preferredDate: '',
     preferredTime: '',

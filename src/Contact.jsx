@@ -37,14 +37,17 @@ export default function Contact() {
     setSending(true)
     try {
       const res = await submitContact(form)
-      if (res?.success !== false) {
+      if (res?.success === true) {
         setDone(true)
         toast.success('Consultation request received! We\'ll contact you within 24 hours.')
       } else {
         toast.error(res?.message || 'Something went wrong. Please try again.')
       }
-    } catch {
-      toast.error('Unable to submit. Please email us directly at ' + COMPANY_EMAIL)
+    } catch (err) {
+      toast.error(err?.message?.includes('aborted')
+        ? 'Request timed out. Please check your connection and try again.'
+        : 'Unable to submit. Please email us directly at ' + COMPANY_EMAIL
+      )
     } finally {
       setSending(false)
     }
