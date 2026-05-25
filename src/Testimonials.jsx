@@ -190,6 +190,15 @@ export default function Testimonials() {
             </div>
           </div>
         )}
+
+        {/* Empty state */}
+        {!loading && testimonials.length === 0 && (
+          <div className="max-w-3xl mx-auto text-center py-16">
+            <Quote size={48} className="text-gray-700 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-white mb-2">No Reviews Yet</h3>
+            <p className="text-gray-500 text-sm">Client success stories will appear here soon.</p>
+          </div>
+        )}
       </div>
     </section>
   )

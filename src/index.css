@@ -35,11 +35,11 @@
 @layer components {
   /* Glass card */
   .glass {
-    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl;
+    @apply bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl;
   }
 
   .glass-dark {
-    @apply bg-black/30 backdrop-blur-md border border-white/10 rounded-2xl;
+    @apply bg-black/30 backdrop-blur-sm border border-white/10 rounded-2xl;
   }
 
   /* Gradient text — gold luxury */
@@ -228,4 +228,31 @@
   font-family: 'Playfair Display', Georgia, serif;
   font-feature-settings: 'liga' 1, 'kern' 1;
   letter-spacing: -0.01em;
+}
+
+/* ─────────────────────────────────────────
+   Respect user motion preferences
+───────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .btn-primary {
+    animation: none;
+    box-shadow: 0 0 20px rgba(201, 154, 26, 0.35);
+  }
+
+  .animated-bg {
+    animation: none;
+  }
+
+  .shimmer {
+    animation: none;
+  }
+}
+
+/* ─────────────────────────────────────────
+   Restore full blur on modal overlays
+   (intentional UX — not a performance card)
+───────────────────────────────────────── */
+.modal-backdrop {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }

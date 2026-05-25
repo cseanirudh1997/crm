@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect, useMemo, useCallback, memo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion' // AnimatePresence kept for modal open/close
 import { Building2, MapPin, Calendar, Shield, Heart, CalendarCheck, ChevronRight, ChevronLeft, X, Bed, Ruler, Waves, Dumbbell, Leaf, Car, Wifi, Star, Coffee } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { fetchProjects, fetchSubProjects, fetchProperties, fetchProjectImages, fetchAmenities, fetchFloorPlans } from './api'
+import { fetchProjects, fetchCities, fetchSubProjects, fetchProperties, fetchProjectImages, fetchAmenities, fetchFloorPlans } from './api'
 import { getSession } from './utils'
+import { normalizeImageUrl, getImageSrc, handleImageError, LazyImage, FALLBACK_IMG } from './imageUtils'
 
 // ── Amenity icon mapper ───────────────────────────────────────────────────────
 function getAmenityIcon(amenity) {
@@ -90,9 +91,11 @@ function ProjectModal({ project, onClose, onInterest, onVisit }) {
 
   const bhkOptions    = ['all', ...Array.from(new Set(floorPlans.map((fp) => fp.bhk)))]
   const filteredPlans = activeBhk === 'all' ? floorPlans : floorPlans.filter((fp) => fp.bhk === activeBhk)
-  const heroSrc       = tab === 'gallery' && !loadMedia && images[activeImg]
-    ? images[activeImg].imageUrl
-    : project.imageUrl
+  const heroSrc       = normalizeImageUrl(
+    tab === 'gallery' && !loadMedia && images[activeImg]
+      ? images[activeImg].imageUrl
+      : (project.imageUrl || project.image || project.featuredImage)
+  )
 
   return (
     <motion.div
@@ -112,7 +115,7 @@ function ProjectModal({ project, onClose, onInterest, onVisit }) {
         {/* ── Hero Header ────────────────────────────── */}
         <div className="relative flex-shrink-0">
           <div className={`${tab === 'gallery' ? 'h-52 sm:h-72' : 'h-28 sm:h-36'} overflow-hidden`}>
-            <img src={heroSrc} alt={project.name} className="w-full h-full object-cover" />
+            <img src={heroSrc} alt={project.name} loading="eager" onError={(e) => handleImageError(e)} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/30 to-transparent" />
           </div>
 
@@ -206,7 +209,7 @@ function ProjectModal({ project, onClose, onInterest, onVisit }) {
                         i === activeImg ? 'border-brand-500 opacity-100' : 'border-transparent opacity-50 hover:opacity-80'
                       }`}
                     >
-                      <img src={img.imageUrl} alt={img.caption} className="w-full h-full object-cover" />
+                      <img src={normalizeImageUrl(img.imageUrl)} alt={img.caption} loading="lazy" onError={(e) => handleImageError(e)} className="w-full h-full object-cover" />
                     </button>
                   ))}
                 </div>
@@ -314,8 +317,12 @@ function ProjectModal({ project, onClose, onInterest, onVisit }) {
                   {filteredPlans.map((fp) => (
                     <div key={fp.planId} className="glass border border-white/5 rounded-xl overflow-hidden hover:border-brand-700/30 transition-colors">
                       {fp.imageUrl && (
-                        <div className="h-36 overflow-hidden">
-                          <img src={fp.imageUrl} alt={`${fp.bhk} floor plan`} className="w-full h-full object-cover" />
+                        <div className="relative h-36 overflow-hidden bg-gray-900">
+                          <LazyImage
+                            src={fp.imageUrl}
+                            alt={`${fp.bhk} floor plan`}
+                            className="w-full h-full object-cover"
+                          />
                         </div>
                       )}
                       <div className="p-3">
@@ -597,11 +604,97 @@ function LeadModal({ project, type, onClose }) {
 }
 
 // ── Main FeaturedProjects ─────────────────────────────────────────────────────
-const container = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } }
-const fadeUp    = { hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0, transition: { duration: 0.5 } } }
+const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } }
+const fadeUp    = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.4 } } }
+
+// ── Project Card (memoised) ───────────────────────────────────────────────────
+const ProjectCard = memo(function ProjectCard({ project, onSelect, onLead }) {
+  return (
+    <motion.div
+      variants={fadeUp}
+      className="group glass-dark border border-white/5 hover:border-brand-700/40 hover:shadow-gold hover:-translate-y-1 transition-all duration-300 rounded-2xl overflow-hidden flex flex-col"
+    >
+      {/* Image */}
+      <div className="relative h-48 overflow-hidden bg-gray-900">
+        <LazyImage
+          src={getImageSrc(project, 'imageUrl', 'image', 'featuredImage')}
+          alt={project.projectName || project.name}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/20 to-transparent" />
+        <div className="absolute top-3 left-3 flex gap-1 flex-wrap">
+          {project.tags?.slice(0, 1).map((t) => (
+            <span key={t} className="text-xs font-semibold px-2 py-0.5 rounded-full bg-brand-600/80 text-white border border-brand-500/40">
+              {t}
+            </span>
+          ))}
+        </div>
+        <div className="absolute bottom-3 right-3 flex items-center gap-1 text-xs text-brand-300 bg-black/60 backdrop-blur-sm px-2 py-1 rounded-full border border-brand-700/40">
+          <MapPin size={10} />
+          {project.cityName || project.city}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="p-4 flex-1 flex flex-col">
+        <div className="mb-1">
+          <h3 className="text-base font-bold text-white group-hover:text-brand-300 transition-colors">
+            {project.projectName || project.name}
+          </h3>
+          <p className="text-xs text-gray-500">{project.builder} · {project.type}</p>
+        </div>
+
+        <div className="flex items-center gap-3 my-3 py-3 border-y border-white/5">
+          <div>
+            <div className="text-brand-400 font-bold text-sm">{project.startingPrice}</div>
+            <div className="text-xs text-gray-600">Starting Price</div>
+          </div>
+          <div className="h-8 w-px bg-white/5" />
+          <div>
+            <div className="flex items-center gap-1 text-white text-xs font-medium">
+              <Calendar size={10} className="text-gray-500" />
+              {project.possessionDate}
+            </div>
+            <div className="text-xs text-gray-600">Possession</div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1 mb-4">
+          <Shield size={11} className="text-emerald-400 flex-shrink-0" />
+          <span className="text-xs text-gray-500 truncate">{project.reraId || 'RERA Verified'}</span>
+        </div>
+
+        {/* Buttons */}
+        <div className="mt-auto space-y-2">
+          <button
+            onClick={() => onSelect(project)}
+            className="btn-secondary w-full justify-center py-2.5 text-xs gap-1"
+          >
+            View Details <ChevronRight size={13} />
+          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => onLead(project, 'interest')}
+              className="flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-semibold bg-brand-600/20 border border-brand-700/40 text-brand-300 hover:bg-brand-600/30 transition-colors"
+            >
+              <Heart size={11} /> Interested
+            </button>
+            <button
+              onClick={() => onLead(project, 'visit')}
+              className="flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-semibold bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 transition-colors"
+            >
+              <CalendarCheck size={11} /> Visit
+            </button>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  )
+})
 
 export default function FeaturedProjects() {
   const [projects,        setProjects]        = useState([])
+  const [cityMap,         setCityMap]         = useState({ all: 'All Cities' })
   const [loading,         setLoading]         = useState(true)
   const [selectedProject, setSelectedProject] = useState(null)
   const [leadProject,     setLeadProject]     = useState(null)
@@ -612,6 +705,13 @@ export default function FeaturedProjects() {
     fetchProjects().then((res) => {
       setProjects(res.projects || [])
       setLoading(false)
+    })
+    fetchCities().then((res) => {
+      const map = { all: 'All Cities' }
+      ;(res.cities || []).forEach((c) => {
+        map[c.id] = c.cityName || c.name || c.id
+      })
+      setCityMap(map)
     })
   }, [])
 
@@ -625,14 +725,19 @@ export default function FeaturedProjects() {
     return () => window.removeEventListener('estateflow:city-select', handleCitySelect)
   }, [])
 
-  const cities    = ['all', ...Array.from(new Set(projects.map((p) => p.cityId)))]
-  const filtered  = filter === 'all' ? projects : projects.filter((p) => p.cityId === filter)
-  const cityLabel = { all: 'All Cities', gurgaon: 'Gurugram', noida: 'Noida', bangalore: 'Bengaluru', mumbai: 'Mumbai', hyderabad: 'Hyderabad' }
+  const cityIds  = useMemo(
+    () => ['all', ...Array.from(new Set(projects.map((p) => p.cityId).filter(Boolean)))],
+    [projects],
+  )
+  const filtered = useMemo(
+    () => filter === 'all' ? projects : projects.filter((p) => p.cityId === filter),
+    [filter, projects],
+  )
 
-  function openLead(project, type) {
+  const openLead = useCallback((project, type) => {
     setLeadProject(project)
     setLeadType(type)
-  }
+  }, [])
 
   return (
     <>
@@ -661,7 +766,7 @@ export default function FeaturedProjects() {
 
           {/* City filter tabs */}
           <div className="flex flex-wrap justify-center gap-2 mb-10">
-            {cities.map((c) => (
+            {cityIds.map((c) => (
               <button
                 key={c}
                 onClick={() => setFilter(c)}
@@ -671,7 +776,7 @@ export default function FeaturedProjects() {
                     : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/10'
                 }`}
               >
-                {cityLabel[c] || c}
+                {cityMap[c] || c}
               </button>
             ))}
           </div>
@@ -693,100 +798,38 @@ export default function FeaturedProjects() {
           )}
 
           {/* Project cards */}
-          {!loading && (
+          {!loading && filtered.length > 0 && (
             <motion.div
+              key={filter}
               variants={container}
               initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, margin: '-60px' }}
+              animate="show"
               className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
             >
-              <AnimatePresence>
-                {filtered.map((project) => (
-                  <motion.div
-                    key={project.id}
-                    variants={fadeUp}
-                    layout
-                    className="group glass-dark border border-white/5 hover:border-brand-700/40 hover:shadow-gold hover:-translate-y-1 transition-all duration-300 rounded-2xl overflow-hidden flex flex-col"
-                  >
-                    {/* Image */}
-                    <div className="relative h-48 overflow-hidden">
-                      <img
-                        src={project.imageUrl}
-                        alt={project.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/20 to-transparent" />
-                      <div className="absolute top-3 left-3 flex gap-1 flex-wrap">
-                        {project.tags?.slice(0, 1).map((t) => (
-                          <span key={t} className="text-xs font-semibold px-2 py-0.5 rounded-full bg-brand-600/80 text-white border border-brand-500/40">
-                            {t}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="absolute bottom-3 right-3 flex items-center gap-1 text-xs text-brand-300 bg-black/60 backdrop-blur-sm px-2 py-1 rounded-full border border-brand-700/40">
-                        <MapPin size={10} />
-                        {project.city}
-                      </div>
-                    </div>
-
-                    {/* Content */}
-                    <div className="p-4 flex-1 flex flex-col">
-                      <div className="mb-1">
-                        <h3 className="text-base font-bold text-white group-hover:text-brand-300 transition-colors">
-                          {project.name}
-                        </h3>
-                        <p className="text-xs text-gray-500">{project.builder} · {project.type}</p>
-                      </div>
-
-                      <div className="flex items-center gap-3 my-3 py-3 border-y border-white/5">
-                        <div>
-                          <div className="text-brand-400 font-bold text-sm">{project.startingPrice}</div>
-                          <div className="text-xs text-gray-600">Starting Price</div>
-                        </div>
-                        <div className="h-8 w-px bg-white/5" />
-                        <div>
-                          <div className="flex items-center gap-1 text-white text-xs font-medium">
-                            <Calendar size={10} className="text-gray-500" />
-                            {project.possessionDate}
-                          </div>
-                          <div className="text-xs text-gray-600">Possession</div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-1 mb-4">
-                        <Shield size={11} className="text-emerald-400 flex-shrink-0" />
-                        <span className="text-xs text-gray-500 truncate">{project.reraId || 'RERA Verified'}</span>
-                      </div>
-
-                      {/* Buttons */}
-                      <div className="mt-auto space-y-2">
-                        <button
-                          onClick={() => setSelectedProject(project)}
-                          className="btn-secondary w-full justify-center py-2.5 text-xs gap-1"
-                        >
-                          View Details <ChevronRight size={13} />
-                        </button>
-                        <div className="grid grid-cols-2 gap-2">
-                          <button
-                            onClick={() => openLead(project, 'interest')}
-                            className="flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-semibold bg-brand-600/20 border border-brand-700/40 text-brand-300 hover:bg-brand-600/30 transition-colors"
-                          >
-                            <Heart size={11} /> Interested
-                          </button>
-                          <button
-                            onClick={() => openLead(project, 'visit')}
-                            className="flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-semibold bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 transition-colors"
-                          >
-                            <CalendarCheck size={11} /> Visit
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+              {filtered.map((project) => (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  onSelect={setSelectedProject}
+                  onLead={openLead}
+                />
+              ))}
             </motion.div>
+          )}
+
+          {/* Empty state — no projects match the active city filter */}
+          {!loading && filtered.length === 0 && (
+            <div className="min-h-[300px] flex flex-col items-center justify-center text-center py-16">
+              <Building2 size={48} className="text-gray-700 mb-4" />
+              <h3 className="text-lg font-semibold text-white mb-2">No Projects Found</h3>
+              <p className="text-gray-500 text-sm mb-6">No projects match the selected filter. Try a different city.</p>
+              <button
+                onClick={() => setFilter('all')}
+                className="btn-ghost text-sm px-5 py-2.5 border border-brand-700/30 hover:border-brand-600/50"
+              >
+                Clear Filter
+              </button>
+            </div>
           )}
         </div>
       </section>

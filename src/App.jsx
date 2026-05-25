@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { HashRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { Building2 } from 'lucide-react'
@@ -30,28 +30,26 @@ import Signup    from './Signup'
 import Dashboard from './Dashboard'
 
 // ─────────────────────────────────────────────
-//  Scroll progress bar
+//  Scroll progress bar — mutates the DOM directly via ref
+//  to avoid React re-renders on every scroll event.
 // ─────────────────────────────────────────────
 function ScrollProgress() {
-  const [progress, setProgress] = useState(0)
+  const barRef = useRef(null)
 
   useEffect(() => {
+    const bar = barRef.current
+    if (!bar) return
     const onScroll = () => {
       const scrollTop = window.scrollY
       const docHeight = document.documentElement.scrollHeight - window.innerHeight
       const pct       = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0
-      setProgress(pct)
+      bar.style.width = pct + '%'
     }
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  return (
-    <div
-      id="scroll-progress"
-      style={{ width: `${progress}%` }}
-    />
-  )
+  return <div ref={barRef} id="scroll-progress" />
 }
 
 // ─────────────────────────────────────────────

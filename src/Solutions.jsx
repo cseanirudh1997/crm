@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { MapPin, Building2, ArrowRight } from 'lucide-react'
 import { fetchCities } from './api'
+import { normalizeImageUrl } from './imageUtils'
 
 export default function CityShowcase() {
   const [cities,  setCities]  = useState([])
@@ -81,10 +82,11 @@ export default function CityShowcase() {
                 }`}
               >
                 {/* Image */}
-                <div className="relative h-52 overflow-hidden">
+                <div className="relative h-52 overflow-hidden bg-gray-900">
                   <img
-                    src={city.imageUrl}
+                    src={normalizeImageUrl(city.imageUrl)}
                     alt={city.name}
+                    loading="lazy"
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     onError={(e) => {
                       e.target.style.display = 'none'

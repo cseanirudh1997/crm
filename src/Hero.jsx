@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ChevronRight, MapPin, Building2, Users, TrendingUp, CalendarCheck, Phone } from 'lucide-react'
+import { normalizeImageUrl, handleImageError } from './imageUtils'
 
 const TYPING_STRINGS = [
   'Luxury Apartments in Gurugram',
@@ -244,8 +245,10 @@ export default function Hero() {
                 <div key={p.name} className="rounded-xl overflow-hidden border border-white/5 bg-white/5 group">
                   <div className="relative h-28 overflow-hidden">
                     <img
-                      src={p.img}
+                      src={normalizeImageUrl(p.img)}
                       alt={p.name}
+                      loading="lazy"
+                      onError={(e) => handleImageError(e)}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
