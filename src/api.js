@@ -344,17 +344,18 @@ export async function createInterestLead({ username, name, email, phone, project
 // ── Site Visit ─────────────────────────────────
 
 /**
- * Book a site visit.
- * Sheet: SiteVisitRequests — username | name | email | phone | projectId | projectName | preferredDate | preferredTime | submittedAt
+ * Book a luxury site visit.
+ * Sheet: SiteVisitRequests — timestamp | username | projectId | propertyId | customerName | phone | email | preferredDate | preferredTime | notes | status
+ * @param {{ username: string, projectId: string, propertyId: string, customerName: string, phone: string, email: string, preferredDate: string, preferredTime: string, notes: string }} params
  * @returns {{ success: boolean, message: string, visitId?: string }}
  */
-export async function createSiteVisit({ username, name, email, phone, projectId, projectName, preferredDate, preferredTime }) {
+export async function createSiteVisit({ username, projectId, propertyId, customerName, phone, email, preferredDate, preferredTime, notes }) {
   try {
-    return await post({ action: 'createSiteVisit', username, name, email, phone, projectId, projectName, preferredDate, preferredTime })
+    return await post({ action: 'createSiteVisit', username, projectId, propertyId, customerName, phone, email, preferredDate, preferredTime, notes })
   } catch {
     return {
       success:  true,
-      message:  'Site visit confirmed! You\'ll receive a confirmation SMS. Our concierge will arrange transport if needed.',
+      message:  'Your luxury property visit has been scheduled successfully. Our property advisor will contact you shortly.',
       visitId:  `EF-VISIT-${Date.now()}`,
     }
   }

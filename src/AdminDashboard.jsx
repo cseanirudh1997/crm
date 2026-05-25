@@ -37,10 +37,10 @@ const MOCK_LEADS = [
 
 /* ── Mock site visits (admin view) ── */
 const MOCK_VISITS = [
-  { id: 'V-001', name: 'Rahul Sharma',    project: 'The Arbour, DLF',     date: '2026-05-26', slot: 'Morning (10AM–1PM)',    status: 'confirmed', transport: true  },
-  { id: 'V-002', name: 'Vikram Malhotra', project: 'Lodha Bellavista',    date: '2026-05-25', slot: 'Afternoon (2PM–5PM)',   status: 'pending',   transport: false },
-  { id: 'V-003', name: 'Ananya Krishnan', project: 'Prestige Lakeside',   date: '2026-05-27', slot: 'Morning (10AM–1PM)',    status: 'confirmed', transport: true  },
-  { id: 'V-004', name: 'Arjun Nair',      project: 'Lodha Park, Mumbai',  date: '2026-05-28', slot: 'Evening (5PM–7PM)',     status: 'completed', transport: false },
+  { id: 'V-001', customerName: 'Rahul Sharma',    projectName: 'The Arbour, DLF',     preferredDate: '2026-05-26', preferredTime: '10:00 AM', status: 'confirmed', transport: true  },
+  { id: 'V-002', customerName: 'Vikram Malhotra', projectName: 'Lodha Bellavista',    preferredDate: '2026-05-25', preferredTime: '2:00 PM',  status: 'pending',   transport: false },
+  { id: 'V-003', customerName: 'Ananya Krishnan', projectName: 'Prestige Lakeside',   preferredDate: '2026-05-27', preferredTime: '10:00 AM', status: 'confirmed', transport: true  },
+  { id: 'V-004', customerName: 'Arjun Nair',      projectName: 'Lodha Park, Mumbai',  preferredDate: '2026-05-28', preferredTime: '5:00 PM',  status: 'completed', transport: false },
 ]
 
 /* ── Mock projects summary ── */
@@ -244,7 +244,7 @@ export default function AdminDashboard({ session }) {
         <table className="w-full">
           <thead>
             <tr className="border-b border-white/10">
-              {['ID', 'Name', 'Project', 'Date', 'Slot', 'Transport', 'Status'].map((h) => (
+              {['ID', 'Customer Name', 'Project', 'Date', 'Time', 'Transport', 'Status'].map((h) => (
                 <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
               ))}
             </tr>
@@ -253,10 +253,10 @@ export default function AdminDashboard({ session }) {
             {MOCK_VISITS.map((v) => (
               <tr key={v.id} className="hover:bg-white/5 transition-colors">
                 <td className="px-4 py-3 text-xs font-mono text-gray-500">{v.id}</td>
-                <td className="px-4 py-3 text-sm font-medium text-white whitespace-nowrap">{v.name}</td>
-                <td className="px-4 py-3 text-sm text-gray-300 whitespace-nowrap">{v.project}</td>
-                <td className="px-4 py-3 text-sm text-gray-400 whitespace-nowrap">{v.date}</td>
-                <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">{v.slot}</td>
+                <td className="px-4 py-3 text-sm font-medium text-white whitespace-nowrap">{v.customerName}</td>
+                <td className="px-4 py-3 text-sm text-gray-300 whitespace-nowrap">{v.projectName}</td>
+                <td className="px-4 py-3 text-sm text-gray-400 whitespace-nowrap">{v.preferredDate}</td>
+                <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">{v.preferredTime}</td>
                 <td className="px-4 py-3 text-xs text-center">{v.transport ? '🚗 Yes' : '–'}</td>
                 <td className="px-4 py-3"><Badge value={v.status} map={VISIT_STATUS_MAP} /></td>
               </tr>

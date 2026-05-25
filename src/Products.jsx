@@ -437,18 +437,20 @@ function ProjectModal({ project, onClose, onInterest, onVisit }) {
 }
 
 // ── Interest / Visit Modal ────────────────────────────────────────────────────
-const TIME_SLOTS_MODAL = ['Morning (10AM–1PM)', 'Afternoon (2PM–5PM)', 'Evening (5PM–7PM)']
+const VISIT_TIMES = ['9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM']
 
 function LeadModal({ project, type, onClose }) {
   const session = getSession()
+  const today   = new Date().toISOString().split('T')[0]
   const [form, setForm] = useState({
     name:          session?.username || '',
     email:         session?.email    || '',
     phone:         '',
     budget:        '',
     message:       '',
-    preferredDate: '',            // optional for site visit
-    preferredTime: TIME_SLOTS_MODAL[0],
+    notes:         '',
+    preferredDate: '',
+    preferredTime: VISIT_TIMES[1],  // 10:00 AM default
   })
   const [loading,    setLoading]    = useState(false)
   const [sent,       setSent]       = useState(false)
@@ -463,6 +465,7 @@ function LeadModal({ project, type, onClose }) {
     if (!email)               return 'Email address is required.'
     if (!isValidEmail(email)) return 'Please enter a valid email address.'
     if (type === 'interest' && !form.budget) return 'Please select a budget range.'
+    if (type === 'visit' && !form.preferredDate) return 'Please select your preferred visit date.'
     return null
   }
 
@@ -481,20 +484,20 @@ function LeadModal({ project, type, onClose }) {
           email:     form.email.trim(),
           phone:     form.phone.trim(),
           projectId: project?.id   || '',
-          projectName: project?.name || '',
           budget:    form.budget,
           message:   form.message.trim(),
         })
       } else {
         await createSiteVisit({
           username:      session?.username || '',
-          name:          form.name.trim(),
-          email:         form.email.trim(),
-          phone:         form.phone.trim(),
           projectId:     project?.id   || '',
-          projectName:   project?.name || '',
-          preferredDate: form.preferredDate,   // optional — empty string is fine
+          propertyId:    '',
+          customerName:  form.name.trim(),
+          phone:         form.phone.trim(),
+          email:         form.email.trim(),
+          preferredDate: form.preferredDate,
           preferredTime: form.preferredTime,
+          notes:         form.notes.trim(),
         })
       }
       setSent(true)
@@ -631,31 +634,46 @@ function LeadModal({ project, type, onClose }) {
                 </div>
               </>
             ) : (
-              <div className="grid grid-cols-2 gap-3">
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs text-gray-400 mb-1 block">
+                      Visit Date <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      className="input-field text-sm"
+                      min={today}
+                      value={form.preferredDate}
+                      onChange={(e) => { setFormError(''); setForm((f) => ({ ...f, preferredDate: e.target.value })) }}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-400 mb-1 block">Preferred Time</label>
+                    <select
+                      className="input-field text-sm"
+                      value={form.preferredTime}
+                      onChange={(e) => setForm((f) => ({ ...f, preferredTime: e.target.value }))}
+                    >
+                      {VISIT_TIMES.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
                 <div>
                   <label className="text-xs text-gray-400 mb-1 block">
-                    Preferred Date <span className="text-gray-600">(optional)</span>
+                    Notes <span className="text-gray-600">(optional)</span>
                   </label>
-                  <input
-                    type="date"
-                    className="input-field text-sm"
-                    value={form.preferredDate}
-                    onChange={(e) => setForm((f) => ({ ...f, preferredDate: e.target.value }))}
+                  <textarea
+                    className="input-field text-sm resize-none"
+                    rows={2}
+                    value={form.notes}
+                    onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+                    placeholder="Specific unit preference, accessibility needs, transport required…"
                   />
                 </div>
-                <div>
-                  <label className="text-xs text-gray-400 mb-1 block">Time Slot</label>
-                  <select
-                    className="input-field text-sm"
-                    value={form.preferredTime}
-                    onChange={(e) => setForm((f) => ({ ...f, preferredTime: e.target.value }))}
-                  >
-                    {TIME_SLOTS_MODAL.map((s) => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+              </>
             )}
 
             <button

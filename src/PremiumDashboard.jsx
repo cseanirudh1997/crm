@@ -38,9 +38,9 @@ const SAVED_PROJECTS = [
 
 /* ── Mock: site visits ── */
 const SITE_VISITS = [
-  { id: 'v1', project: 'The Arbour', builder: 'DLF',      city: 'Gurugram', date: '2026-06-08', slot: 'Morning (10AM–1PM)', status: 'confirmed' },
-  { id: 'v2', project: 'Lodha Park', builder: 'Lodha',    city: 'Mumbai',   date: '2026-05-18', slot: 'Afternoon (2PM–5PM)',status: 'completed' },
-  { id: 'v3', project: 'Prestige Lakeside', builder: 'Prestige', city: 'Bengaluru', date: '2026-06-22', slot: 'Morning (10AM–1PM)', status: 'pending' },
+  { id: 'v1', projectName: 'The Arbour', builder: 'DLF',      city: 'Gurugram', preferredDate: '2026-06-08', preferredTime: '10:00 AM', status: 'confirmed' },
+  { id: 'v2', projectName: 'Lodha Park', builder: 'Lodha',    city: 'Mumbai',   preferredDate: '2026-05-18', preferredTime: '2:00 PM',  status: 'completed' },
+  { id: 'v3', projectName: 'Prestige Lakeside', builder: 'Prestige', city: 'Bengaluru', preferredDate: '2026-06-22', preferredTime: '11:00 AM', status: 'pending' },
 ]
 
 /* ── Mock: market trend data ── */
@@ -332,15 +332,15 @@ export default function InvestorDashboard({ session }) {
                       <StatusIcon size={18} className={s.class.split(' ').pop()} />
                     </div>
                     <div>
-                      <div className="text-sm font-semibold text-white">{v.project}</div>
+                      <div className="text-sm font-semibold text-white">{v.projectName}</div>
                       <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
                         <span>{v.builder}</span>
                         <span>·</span>
                         <span className="flex items-center gap-0.5"><MapPin size={9} />{v.city}</span>
                       </div>
                       <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
-                        <span>📅 {v.date}</span>
-                        <span>⏰ {v.slot}</span>
+                        <span>📅 {v.preferredDate}</span>
+                        <span>⏰ {v.preferredTime}</span>
                       </div>
                     </div>
                   </div>

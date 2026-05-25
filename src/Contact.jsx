@@ -13,7 +13,7 @@ const CONTACT_METHODS = [
   { icon: MapPin, label: 'Head Office',value: COMPANY_ADDRESS, href: '#'                         },
 ]
 
-const TIME_SLOTS    = ['Morning (10AM–1PM)', 'Afternoon (2PM–5PM)', 'Evening (5PM–7PM)']
+const VISIT_TIMES   = ['9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM']
 const BUDGET_RANGES = ['Under ₹1 Cr', '₹1–2 Cr', '₹2–5 Cr', '₹5–10 Cr', '₹10 Cr+']
 
 function emptyForm(session) {
@@ -24,8 +24,9 @@ function emptyForm(session) {
     message:       '',
     budget:        '',
     projectName:   '',        // human-readable project name typed by user
-    preferredDate: '',        // optional — leave blank is fine
-    preferredTime: TIME_SLOTS[0],
+    preferredDate: '',
+    preferredTime: VISIT_TIMES[1],  // 10:00 AM default
+    notes:         '',
   }
 }
 
@@ -53,6 +54,8 @@ export default function Contact() {
     if (!isValidEmail(email)) return 'Please enter a valid email address.'
     if (activeTab === 'consultation' && !form.budget)
                              return 'Please select a budget range.'
+    if (activeTab === 'visit' && !form.preferredDate)
+                             return 'Please select your preferred visit date.'
     return null
   }
 
@@ -77,13 +80,14 @@ export default function Contact() {
       } else {
         res = await createSiteVisit({
           username:      session?.username || '',
-          name:          form.name.trim(),
-          email:         form.email.trim(),
+          projectId:     '',
+          propertyId:    '',
+          customerName:  form.name.trim(),
           phone:         form.phone.trim(),
-          projectId:     '',                       // no ID from contact form
-          projectName:   form.projectName.trim(),
-          preferredDate: form.preferredDate,       // optional
+          email:         form.email.trim(),
+          preferredDate: form.preferredDate,
           preferredTime: form.preferredTime,
+          notes:         [form.projectName.trim() ? `Project: ${form.projectName.trim()}` : '', form.notes.trim()].filter(Boolean).join(' | '),
         })
       }
 
@@ -343,25 +347,26 @@ export default function Contact() {
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <label className="block text-xs text-gray-400 mb-1.5">
-                              Preferred Date <span className="text-gray-600">(optional)</span>
+                              Visit Date <span className="text-red-400">*</span>
                             </label>
                             <input
                               name="preferredDate"
                               type="date"
+                              min={new Date().toISOString().split('T')[0]}
                               value={form.preferredDate}
                               onChange={handleChange}
                               className="input-field text-sm"
                             />
                           </div>
                           <div>
-                            <label className="block text-xs text-gray-400 mb-1.5">Time Slot</label>
+                            <label className="block text-xs text-gray-400 mb-1.5">Preferred Time</label>
                             <select
                               name="preferredTime"
                               value={form.preferredTime}
                               onChange={handleChange}
                               className="input-field text-sm"
                             >
-                              {TIME_SLOTS.map((s) => <option key={s} value={s}>{s}</option>)}
+                              {VISIT_TIMES.map((t) => <option key={t} value={t}>{t}</option>)}
                             </select>
                           </div>
                         </div>
@@ -377,6 +382,22 @@ export default function Contact() {
                             className="input-field text-sm"
                             placeholder="e.g. The Arbour, Lodha Park, or leave blank"
                           />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-400 mb-1.5">
+                            Notes <span className="text-gray-600">(optional)</span>
+                          </label>
+                          <div className="relative">
+                            <MessageSquare size={14} className="absolute left-3 top-3 text-gray-500 pointer-events-none" />
+                            <textarea
+                              name="notes"
+                              value={form.notes}
+                              onChange={handleChange}
+                              rows={2}
+                              className="input-field pl-9 text-sm resize-none"
+                              placeholder="Accessibility needs, transport required, specific unit preference…"
+                            />
+                          </div>
                         </div>
                       </>
                     )}
