@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Bell, ArrowRight, Check, MapPin } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { isValidEmail } from './utils'
+import { subscribeAlerts } from './api'
 
 const ALERT_TYPES = [
   { id: 'price_drop',    label: 'Price Drops',         desc: 'Alerts when project prices reduce' },
@@ -35,10 +36,15 @@ export default function PropertyAlerts() {
     }
 
     setLoading(true)
-    await new Promise((r) => setTimeout(r, 1100))
-    setLoading(false)
-    setSubmitted(true)
-    toast.success('Property alerts activated! 🎉')
+    try {
+      await subscribeAlerts({ email, alertTypes: selected })
+      setSubmitted(true)
+      toast.success('Property alerts activated! 🎉')
+    } catch {
+      toast.error('Something went wrong. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

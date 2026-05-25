@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion' // AnimatePresence kept for modal open/close
 import { Building2, MapPin, Calendar, Shield, Heart, CalendarCheck, ChevronRight, ChevronLeft, X, Bed, Ruler, Waves, Dumbbell, Leaf, Car, Wifi, Star, Coffee } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { fetchProjects, fetchCities, fetchSubProjects, fetchProperties, fetchProjectImages, fetchAmenities, fetchFloorPlans } from './api'
+import { fetchProjects, fetchCities, fetchSubProjects, fetchProperties, fetchProjectImages, fetchAmenities, fetchFloorPlans, createInterestLead, createSiteVisit } from './api'
 import { getSession } from './utils'
 import { normalizeImageUrl, getImageSrc, handleImageError, LazyImage, FALLBACK_IMG } from './imageUtils'
 
@@ -454,12 +454,37 @@ function LeadModal({ project, type, onClose }) {
   async function handleSubmit(e) {
     e.preventDefault()
     setLoading(true)
-    await new Promise((r) => setTimeout(r, 1200))
-    setLoading(false)
-    setSent(true)
-    toast.success(type === 'interest'
-      ? 'Interest registered! Expect a call within 24 hours.'
-      : 'Site visit booked! Confirmation SMS on its way.')
+    try {
+      if (type === 'interest') {
+        await createInterestLead({
+          username:  session?.username || '',
+          name:      form.name,
+          email:     form.email,
+          phone:     form.phone,
+          projectId: project?.id,
+          budget:    form.budget,
+          message:   form.message,
+        })
+      } else {
+        await createSiteVisit({
+          username:      session?.username || '',
+          name:          form.name,
+          email:         form.email,
+          phone:         form.phone,
+          projectId:     project?.id,
+          preferredDate: form.preferredDate,
+          timeSlot:      form.timeSlot,
+        })
+      }
+      setSent(true)
+      toast.success(type === 'interest'
+        ? 'Interest registered! Expect a call within 24 hours.'
+        : 'Site visit booked! Confirmation SMS on its way.')
+    } catch {
+      toast.error('Submission failed. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

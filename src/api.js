@@ -587,6 +587,25 @@ export function fetchFloorPlans(projectId) {
   })
 }
 
+// ── Property Alert Subscriptions ───────────────
+
+/**
+ * Subscribe to property alerts.
+ * Reuses the InterestLeads sheet via createInterestLead action so data flows into
+ * the existing Google Sheet without needing a new GAS action.
+ * Sheet: InterestLeads — name | email | phone | projectId | budget | message | submittedAt
+ * @param {{ email: string, alertTypes: string[] }} params
+ * @returns {{ success: boolean, message: string, leadId?: string }}
+ */
+export async function subscribeAlerts({ email, alertTypes }) {
+  return post({
+    action:  'createInterestLead',
+    email,
+    message: 'Property Alerts Subscription — Types: ' + (Array.isArray(alertTypes) ? alertTypes.join(', ') : String(alertTypes)),
+    tag:     'alert_subscription',
+  })
+}
+
 // ── Testimonials ───────────────────────────────
 
 /**

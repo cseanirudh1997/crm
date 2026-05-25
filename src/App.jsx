@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, lazy, Suspense } from 'react'
 import { HashRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { Building2 } from 'lucide-react'
@@ -24,10 +24,10 @@ import FAQ          from './FAQ'
 import Newsletter   from './Newsletter'
 import Contact      from './Contact'
 
-// Auth + Dashboard
-import Login     from './Login'
-import Signup    from './Signup'
-import Dashboard from './Dashboard'
+// Auth + Dashboard — lazy-loaded so they don't inflate the initial bundle
+const Login     = lazy(() => import('./Login'))
+const Signup    = lazy(() => import('./Signup'))
+const Dashboard = lazy(() => import('./Dashboard'))
 
 // ─────────────────────────────────────────────
 //  Scroll progress bar — mutates the DOM directly via ref
@@ -110,6 +110,7 @@ export default function App() {
         }}
       />
 
+      <Suspense fallback={<div className="min-h-screen bg-gray-950" />}>
       <Routes>
         {/* ── Public home page ── */}
         <Route
@@ -161,6 +162,7 @@ export default function App() {
           }
         />
       </Routes>
+      </Suspense>
     </HashRouter>
   )
 }
