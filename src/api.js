@@ -1,15 +1,17 @@
 // ─────────────────────────────────────────────
-//  EstateFlow — Centralized API Helper
+//  Maison — Centralized API Helper
 //  Google Apps Script backend via text/plain POST (avoids CORS preflight)
 //
-//  Field name conventions (JSDoc on each function is the source of truth):
-//  Cities     → { id, name, state, imageUrl, projectCount, description }
-//  Projects   → { id, cityId, name, builder, type, tags[], imageUrl,
-//                 startingPrice, possessionDate, reraId, description }
-//  SubProjects→ { id, projectId, name, type, units, priceRange, floorPlan, availability }
-//  Properties → { id, subProjectId, unit, type, floor, size, price, status, facing }
-//  Metrics    → { savedProjects, siteVisits, interestedProperties, marketInsights }
-//  AIInsights → { id, category, title, body, icon, trend, trendLabel, displayOrder }
+//  Field conventions (JSDoc on each function is source of truth):
+//  Projects    → { projectId, title, category, designStyle, materials, featured, imageUrl, description, area, budget, duration }
+//  CaseStudies → { caseStudyId, title, client, summary, impact, featured, imageUrl, duration, area, style }
+//  Blogs       → { blogId, title, category, summary, readTime, featured, imageUrl, date }
+//  Services    → { serviceId, title, category, description, price, featured, icon }
+//  Testimonials→ { id, name, title, review, rating }
+//  Videos      → { videoId, title, description, youtubeId, thumbnail, duration, views, featured }
+//  MediaAssets → { assetId, entityType, entityId, assetUrl, assetType, featured, caption }
+//  AIInsights  → { id, category, title, body, icon, trend, trendLabel, displayOrder }
+//  Metrics     → { activeProjects, consultations, completedDesigns, designInsights }
 // ─────────────────────────────────────────────
 
 import { API_URL } from './config'
@@ -21,18 +23,15 @@ async function post(payload) {
     redirect: 'follow',
     body:     JSON.stringify(payload),
   })
-
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}: ${response.statusText}`)
   }
-
   const data = await response.json()
   return data
 }
 
-// ── In-memory promise cache ────────────────────────────────────────────────────
+// ── In-memory promise cache ───────────────────────────────────────────────────
 // Caches the Promise itself so concurrent callers share one in-flight request.
-// All cached functions use try/catch internally so promises never reject.
 const _cache = new Map()
 
 function withCache(key, fetcher) {
@@ -45,7 +44,6 @@ function withCache(key, fetcher) {
 /**
  * Create a new account.
  * Sheet: Users — username | password | email | phone | createdAt
- * @returns {{ success: boolean, message: string, user?: object }}
  */
 export async function signupUser({ username, password, email, phone }) {
   return post({ action: 'signup', username, password, email, phone })
@@ -54,7 +52,6 @@ export async function signupUser({ username, password, email, phone }) {
 /**
  * Authenticate an existing user.
  * Sheet: Users
- * @returns {{ success: boolean, message: string, user?: { username, email, role, tier, onboardingStage } }}
  */
 export async function loginUser({ username, password }) {
   return post({ action: 'login', username, password })
@@ -63,9 +60,8 @@ export async function loginUser({ username, password }) {
 // ── User Access ────────────────────────────────
 
 /**
- * Load a user's tier and onboarding stage from the UserAccess sheet.
+ * Load a user's tier and onboarding stage.
  * Sheet: UserAccess — username | tier | onboardingStage | status
- * @returns {{ success: boolean, tier: string, onboardingStage: string }}
  */
 export async function getUserAccess(username) {
   try {
@@ -75,194 +71,174 @@ export async function getUserAccess(username) {
   }
 }
 
-// ── Cities ─────────────────────────────────────
+// ── Platform Config ────────────────────────────
 
 /**
- * Fetch all active cities.
- * Sheet: Cities — id | name | state | imageUrl | projectCount | description
- * @returns {{ success: boolean, cities: Array<{ id, name, state, imageUrl, projectCount, description }> }}
+ * Fetch platform feature flags and configuration.
+ * Sheet: PlatformConfig — key | value
  */
-export function fetchCities() {
-  return withCache('cities', async () => {
+export function fetchPlatformConfig() {
+  return withCache('platformConfig', async () => {
     try {
-      return await post({ action: 'getCities' })
+      return await post({ action: 'getPlatformConfig' })
     } catch {
       return {
         success: true,
-        cities: [
-          {
-            id: 'gurgaon',
-            name: 'Gurugram',
-            state: 'Haryana',
-            imageUrl: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=800&q=80',
-            projectCount: 24,
-            description: 'India\'s millennium city. Home to luxury high-rises, Golf Course Road, and world-class infrastructure.',
-          },
-          {
-            id: 'noida',
-            name: 'Noida',
-            state: 'Uttar Pradesh',
-            imageUrl: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=800&q=80',
-            projectCount: 18,
-            description: 'Planned city with premium expressway corridors, booming sectors, and unmatched investment potential.',
-          },
-          {
-            id: 'bangalore',
-            name: 'Bengaluru',
-            state: 'Karnataka',
-            imageUrl: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80',
-            projectCount: 31,
-            description: 'Silicon Valley of India. Premium tech corridors, whitefield, and luxury gated communities.',
-          },
-          {
-            id: 'mumbai',
-            name: 'Mumbai',
-            state: 'Maharashtra',
-            imageUrl: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=800&q=80',
-            projectCount: 42,
-            description: 'India\'s financial capital. Coveted sea-facing residences, BKC, and Bandra luxury.',
-          },
-          {
-            id: 'hyderabad',
-            name: 'Hyderabad',
-            state: 'Telangana',
-            imageUrl: 'https://images.unsplash.com/photo-1573455494060-c5595004fb6c?w=800&q=80',
-            projectCount: 22,
-            description: 'HITEC City, Gachibowli, and Financial District — India\'s fastest-growing luxury real estate market.',
-          },
-        ],
+        config: {
+          consultationsEnabled: true,
+          paymentsEnabled:      true,
+          newsletterEnabled:    true,
+          featuredProject:      'lux-villa-2026',
+          supportEmail:         'studio@maisonstudio.in',
+          bookingMode:          'online',
+        },
       }
     }
   })
 }
 
-// ── Projects ───────────────────────────────────
+// ── Design Collections (Projects) ─────────────
 
 /**
- * Fetch featured / all projects.
- * Sheet: Projects — id | cityId | name | builder | type | tags | imageUrl |
- *                   startingPrice | possessionDate | reraId | description
- * @returns {{ success: boolean, projects: Array<{...}> }}
+ * Fetch interior design project collections.
+ * Sheet: Projects — projectId | title | industry | impact | technologies | featured
+ * Mapped as: projectId | designTitle | category | designStyle | materials | featured
  */
-export function fetchProjects({ cityId } = {}) {
-  return withCache('projects:' + (cityId || 'all'), async () => {
+export function fetchProjects({ featured } = {}) {
+  return withCache('projects:' + (featured ?? 'all'), async () => {
     try {
-      return await post({ action: 'getProjects', cityId })
+      return await post({ action: 'getProjects', featured })
     } catch {
       return {
         success: true,
         projects: [
           {
-            id: 'p1',
-            cityId: 'gurgaon',
-            city: 'Gurugram',
-            name: 'The Arbour',
-            builder: 'DLF',
-            type: 'Luxury Apartments',
-            tags: ['RERA Approved', 'Ready to Move', 'Golf Course View'],
-            imageUrl: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80',
-            startingPrice: '₹4.5 Cr',
-            possessionDate: 'Ready to Move',
-            reraId: 'HRERA-PKL-GGM-2023-002',
-            description: 'Ultra-luxury high-rise residences on Golf Course Extension Road with panoramic course views.',
+            projectId:   'p1',
+            title:       'Modern Luxury Living Room',
+            category:    'Living Room',
+            industry:    'Living Room',
+            designStyle: 'Contemporary Luxury',
+            materials:   'Italian Marble, Velvet, Brushed Brass',
+            technologies:'Italian Marble, Velvet, Brushed Brass',
+            impact:      'Contemporary Luxury',
+            featured:    'yes',
+            imageUrl:    'https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?w=800&q=80',
+            description: 'Sweeping living room design with warm marble surfaces, sculptural furniture, and curated art — transforming an empty shell into an editorial-grade luxury space.',
+            area:        '1,200 sq ft',
+            budget:      '₹28 Lakhs',
+            duration:    '6 weeks',
           },
           {
-            id: 'p2',
-            cityId: 'gurgaon',
-            city: 'Gurugram',
-            name: 'Sobha City',
-            builder: 'Sobha',
-            type: 'Premium Apartments',
-            tags: ['RERA Approved', 'Clubhouse', 'Metro Proximity'],
-            imageUrl: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80',
-            startingPrice: '₹2.1 Cr',
-            possessionDate: 'Dec 2025',
-            reraId: 'HRERA-PKL-GGM-2022-041',
-            description: 'Expansive township with world-class amenities, lush greens, and seamless metro connectivity.',
+            projectId:   'p2',
+            title:       'Scandinavian Luxury Bedroom',
+            category:    'Bedroom',
+            industry:    'Bedroom',
+            designStyle: 'Scandinavian Minimal',
+            materials:   'Natural Oak, Linen, Honed Stone',
+            technologies:'Natural Oak, Linen, Honed Stone',
+            impact:      'Scandinavian Minimal',
+            featured:    'yes',
+            imageUrl:    'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80',
+            description: 'A sanctuary of calm. This master bedroom layers textures of natural oak, cloud-soft linens, and brushed stone to create an atmosphere of pure Nordic luxury.',
+            area:        '650 sq ft',
+            budget:      '₹18 Lakhs',
+            duration:    '4 weeks',
           },
           {
-            id: 'p3',
-            cityId: 'noida',
-            city: 'Noida',
-            name: 'Lodha Bellavista',
-            builder: 'Lodha',
-            type: 'Luxury Villas',
-            tags: ['RERA Approved', 'Gated Community', 'Smart Home'],
-            imageUrl: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&q=80',
-            startingPrice: '₹3.8 Cr',
-            possessionDate: 'Mar 2026',
-            reraId: 'UPRERA-GZB-2022-019',
-            description: 'Sprawling villa community inspired by Mediterranean architecture, set across 28 acres.',
+            projectId:   'p3',
+            title:       'Premium Modular Kitchen',
+            category:    'Kitchen',
+            industry:    'Kitchen',
+            designStyle: 'Contemporary Modern',
+            materials:   'Lacquered Wood, Quartz, Miele Appliances',
+            technologies:'Lacquered Wood, Quartz, Miele Appliances',
+            impact:      'Contemporary Modern',
+            featured:    'yes',
+            imageUrl:    'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80',
+            description: 'Floor-to-ceiling cabinetry in matte lacquer, waterfall quartz island, and integrated Miele appliances. A chef\'s kitchen that doubles as a design statement.',
+            area:        '420 sq ft',
+            budget:      '₹35 Lakhs',
+            duration:    '5 weeks',
           },
           {
-            id: 'p4',
-            cityId: 'bangalore',
-            city: 'Bengaluru',
-            name: 'Prestige Lakeside Habitat',
-            builder: 'Prestige',
-            type: 'Premium Apartments',
-            tags: ['RERA Approved', 'Lake View', 'Smart Security'],
-            imageUrl: 'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=800&q=80',
-            startingPrice: '₹1.8 Cr',
-            possessionDate: 'Jun 2025',
-            reraId: 'K-RERA-PRJ-KNS-2022-00312',
-            description: 'Iconic lakeside community in Whitefield featuring over 3,426 homes across 110 acres.',
+            projectId:   'p4',
+            title:       'Luxury Villa Interior',
+            category:    'Villa',
+            industry:    'Villa',
+            designStyle: 'Grand Classical',
+            materials:   'Carrara Marble, Gold Hardware, Silk Drapes',
+            technologies:'Carrara Marble, Gold Hardware, Silk Drapes',
+            impact:      'Grand Classical',
+            featured:    'yes',
+            imageUrl:    'https://images.unsplash.com/photo-1600607687939-ce8a6d4b6e8e?w=800&q=80',
+            description: 'A complete 5BHK villa transformation spanning 6,000 sq ft — featuring Carrara marble floors, vaulted ceilings, gold-hardware finishes, and bespoke silk drapes.',
+            area:        '6,000 sq ft',
+            budget:      '₹1.2 Cr',
+            duration:    '20 weeks',
           },
           {
-            id: 'p5',
-            cityId: 'bangalore',
-            city: 'Bengaluru',
-            name: 'Smartworld One DXP',
-            builder: 'Smartworld',
-            type: 'Ultra Luxury',
-            tags: ['RERA Approved', 'Infinity Pool', 'Sky Deck'],
-            imageUrl: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800&q=80',
-            startingPrice: '₹5.2 Cr',
-            possessionDate: 'Dec 2026',
-            reraId: 'K-RERA-PRJ-KNS-2023-00089',
-            description: 'Redefining ultra-luxury living with sky villas, 5-star amenities, and private sky decks.',
+            projectId:   'p5',
+            title:       'Minimalist Luxury Workspace',
+            category:    'Workspace',
+            industry:    'Workspace',
+            designStyle: 'Japandi Minimal',
+            materials:   'Dark Walnut, Saddle Leather, Polished Concrete',
+            technologies:'Dark Walnut, Saddle Leather, Polished Concrete',
+            impact:      'Japandi Minimal',
+            featured:    'yes',
+            imageUrl:    'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=800&q=80',
+            description: 'A home office that inspires focus and creativity. Dark walnut desking, saddle leather chairs, and polished concrete floors create a cinematic work environment.',
+            area:        '280 sq ft',
+            budget:      '₹12 Lakhs',
+            duration:    '3 weeks',
           },
           {
-            id: 'p6',
-            cityId: 'mumbai',
-            city: 'Mumbai',
-            name: 'Lodha Park',
-            builder: 'Lodha',
-            type: 'Super Premium',
-            tags: ['RERA Approved', 'Sea Facing', 'Concierge Services'],
-            imageUrl: 'https://images.unsplash.com/photo-1523217582562-09d0def993a6?w=800&q=80',
-            startingPrice: '₹12 Cr',
-            possessionDate: 'Ready to Move',
-            reraId: 'P51800046875',
-            description: 'An extraordinary 7-tower luxury residential development in the heart of Worli with sea views.',
+            projectId:   'p6',
+            title:       'Art Deco Dining Room',
+            category:    'Dining',
+            industry:    'Dining',
+            designStyle: 'Art Deco Contemporary',
+            materials:   'Smoked Glass, Aged Brass, Pietra Grey Marble',
+            technologies:'Smoked Glass, Aged Brass, Pietra Grey Marble',
+            impact:      'Art Deco Contemporary',
+            featured:    'no',
+            imageUrl:    'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&q=80',
+            description: 'An art-deco inspired dining space with smoked glass table, brass pendant cluster, and hand-painted feature wall — curated for the ultimate dinner party experience.',
+            area:        '380 sq ft',
+            budget:      '₹22 Lakhs',
+            duration:    '4 weeks',
           },
           {
-            id: 'p7',
-            cityId: 'hyderabad',
-            city: 'Hyderabad',
-            name: 'My Home Avatar',
-            builder: 'My Home Group',
-            type: 'Luxury High-Rise',
-            tags: ['RERA Approved', 'HITEC City', 'Investment Grade'],
-            imageUrl: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80',
-            startingPrice: '₹1.4 Cr',
-            possessionDate: 'Sep 2026',
-            reraId: 'P01400006873',
-            description: 'Landmark high-rise towers near HITEC City, offering premium 2/3/4 BHK apartments with smart automation.',
+            projectId:   'p7',
+            title:       'Penthouse Living Suite',
+            category:    'Luxury Apartment',
+            industry:    'Luxury Apartment',
+            designStyle: 'Ultra-Modern Luxury',
+            materials:   'Black Onyx, Polished Chrome, Bouclé Velvet',
+            technologies:'Black Onyx, Polished Chrome, Bouclé Velvet',
+            impact:      'Ultra-Modern Luxury',
+            featured:    'yes',
+            imageUrl:    'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80',
+            description: 'A 4,200 sq ft penthouse reinvented. Floating staircase in black steel, onyx feature walls, and panoramic views framed by bespoke curtain systems.',
+            area:        '4,200 sq ft',
+            budget:      '₹2.8 Cr',
+            duration:    '24 weeks',
           },
           {
-            id: 'p8',
-            cityId: 'noida',
-            city: 'Noida',
-            name: 'ATS Pristine',
-            builder: 'ATS',
-            type: 'Premium Apartments',
-            tags: ['RERA Approved', 'Expressway', 'Clubhouse'],
-            imageUrl: 'https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=800&q=80',
-            startingPrice: '₹1.2 Cr',
-            possessionDate: 'Ready to Move',
-            reraId: 'UPRERA-NOI-2020-004',
-            description: 'Meticulously planned residential enclave on Noida Expressway with lush green zones and premium amenities.',
+            projectId:   'p8',
+            title:       'Spa-Inspired Master Bath',
+            category:    'Bathroom',
+            industry:    'Bathroom',
+            designStyle: 'Resort Spa Luxury',
+            materials:   'Travertine, Teak, Rainfall Fixtures',
+            technologies:'Travertine, Teak, Rainfall Fixtures',
+            impact:      'Resort Spa Luxury',
+            featured:    'no',
+            imageUrl:    'https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800&q=80',
+            description: 'A private spa experience within your home. Double rainfall showers, freestanding stone tub, heated travertine floors, and custom teak cabinetry.',
+            area:        '220 sq ft',
+            budget:      '₹14 Lakhs',
+            duration:    '4 weeks',
           },
         ],
       }
@@ -270,356 +246,213 @@ export function fetchProjects({ cityId } = {}) {
   })
 }
 
-// ── Sub-Projects (Towers / Phases) ─────────────
+// ── Case Studies (Home Transformations) ────────
 
 /**
- * Fetch towers / phases for a given project.
- * Sheet: SubProjects — id | projectId | name | type | units | priceRange | floorPlan | availability
- * @returns {{ success: boolean, subProjects: Array<{...}> }}
+ * Fetch client home transformation case studies.
+ * Sheet: CaseStudies — caseStudyId | title | client | summary | impact | featured
  */
-export function fetchSubProjects(projectId) {
-  return withCache('subs:' + projectId, async () => {
+export function fetchCaseStudies() {
+  return withCache('caseStudies', async () => {
     try {
-      return await post({ action: 'getSubProjects', projectId })
+      return await post({ action: 'getCaseStudies' })
     } catch {
       return {
         success: true,
-        subProjects: [
-          { id: 'sp1', projectId, name: 'Tower A — Jade',    type: '3 & 4 BHK', units: 120, priceRange: '₹4.5 Cr – ₹7.2 Cr', floorPlan: 'G+32', availability: 'Available' },
-          { id: 'sp2', projectId, name: 'Tower B — Pearl',   type: '2 & 3 BHK', units: 144, priceRange: '₹2.8 Cr – ₹5.0 Cr', floorPlan: 'G+28', availability: 'Limited'   },
-          { id: 'sp3', projectId, name: 'Tower C — Onyx',    type: '4 BHK + Study', units: 72, priceRange: '₹7.5 Cr – ₹11 Cr', floorPlan: 'G+36', availability: 'Waitlist' },
-          { id: 'sp4', projectId, name: 'Villas — Orchid',   type: 'Independent Villa', units: 48, priceRange: '₹12 Cr – ₹18 Cr', floorPlan: 'G+2', availability: 'Available' },
+        caseStudies: [
+          {
+            caseStudyId: 'cs1',
+            title:       '4BHK Gurugram Villa Renovation',
+            client:      'Sharma Family',
+            summary:     'A complete transformation of a dated 4BHK DLF villa into a contemporary luxury home. Every surface was reimagined — from hand-laid Italian marble floors to custom millwork and smart home integration across 4,800 sq ft.',
+            impact:      '₹85L invested · 2.3× property value appreciation',
+            featured:    'yes',
+            imageUrl:    'https://images.unsplash.com/photo-1600607687939-ce8a6d4b6e8e?w=800&q=80',
+            duration:    '18 weeks',
+            area:        '4,800 sq ft',
+            style:       'Modern Luxury',
+          },
+          {
+            caseStudyId: 'cs2',
+            title:       'Luxury Penthouse Transformation',
+            client:      'Mehta Enterprises',
+            summary:     'Mumbai sea-facing penthouse reimagined with a bespoke art collection, floating walnut staircase, and a living room that opens to a private sky terrace — a complete lifestyle reinvention.',
+            impact:      'Featured in Architectural Digest India 2025',
+            featured:    'yes',
+            imageUrl:    'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80',
+            duration:    '24 weeks',
+            area:        '5,200 sq ft',
+            style:       'Ultra-Modern',
+          },
+          {
+            caseStudyId: 'cs3',
+            title:       'Modern Apartment Redesign',
+            client:      'Krishnan Family',
+            summary:     'A Bengaluru IT-corridor apartment elevated from builder-grade to bespoke. Custom modular storage, curated lighting design, and a palette of warm neutrals transformed this 2BHK into a magazine spread.',
+            impact:      '94% client satisfaction · Delivered in 8 weeks',
+            featured:    'yes',
+            imageUrl:    'https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?w=800&q=80',
+            duration:    '8 weeks',
+            area:        '1,400 sq ft',
+            style:       'Contemporary',
+          },
+          {
+            caseStudyId: 'cs4',
+            title:       'Heritage Bungalow Restoration',
+            client:      'Oberoi Heritage Trust',
+            summary:     'Careful restoration of a 1940s Lutyens bungalow — blending original architectural character with modern comfort. Custom arched doorways, hand-restored terrazzo, and craft furniture throughout.',
+            impact:      'Shortlisted — India Design Awards 2025',
+            featured:    'no',
+            imageUrl:    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80',
+            duration:    '32 weeks',
+            area:        '7,500 sq ft',
+            style:       'Heritage Contemporary',
+          },
         ],
       }
     }
   })
 }
 
-// ── Properties (Unit Inventory) ────────────────
+// ── Blogs (Interior Design Articles) ──────────
 
 /**
- * Fetch unit inventory for a sub-project.
- * Sheet: Properties — id | subProjectId | unit | type | floor | size | price | status | facing
- * @returns {{ success: boolean, properties: Array<{...}> }}
+ * Fetch interior design blog articles.
+ * Sheet: Blogs — blogId | title | category | summary | readTime | featured
  */
-export function fetchProperties(subProjectId) {
-  return withCache('props:' + subProjectId, async () => {
+export function fetchBlogs() {
+  return withCache('blogs', async () => {
     try {
-      return await post({ action: 'getProperties', subProjectId })
+      return await post({ action: 'getBlogs' })
     } catch {
       return {
         success: true,
-        properties: [
-          { id: 'pr1', subProjectId, unit: 'A-1201', type: '3 BHK', floor: 12, size: '2,240 sq ft', price: '₹5.1 Cr', status: 'Available', facing: 'North-East (Golf Course)' },
-          { id: 'pr2', subProjectId, unit: 'A-1202', type: '4 BHK', floor: 12, size: '3,100 sq ft', price: '₹7.0 Cr', status: 'Available', facing: 'South (Park)' },
-          { id: 'pr3', subProjectId, unit: 'A-1501', type: '3 BHK', floor: 15, size: '2,240 sq ft', price: '₹5.4 Cr', status: 'Booked',    facing: 'North-East (Golf Course)' },
-          { id: 'pr4', subProjectId, unit: 'A-2001', type: '3 BHK + Study', floor: 20, size: '2,540 sq ft', price: '₹6.1 Cr', status: 'Available', facing: 'North (Skyline)' },
-          { id: 'pr5', subProjectId, unit: 'A-2401', type: '4 BHK + Staff', floor: 24, size: '3,420 sq ft', price: '₹8.2 Cr', status: 'Available', facing: 'All-Round Panoramic' },
-          { id: 'pr6', subProjectId, unit: 'A-0801', type: '2 BHK', floor: 8,  size: '1,380 sq ft', price: '₹3.2 Cr', status: 'Booked',    facing: 'East (Garden)' },
+        blogs: [
+          {
+            blogId:   'b1',
+            title:    'Luxury Interior Trends 2026',
+            category: 'Trends',
+            summary:  'Discover the defining design movements of 2026 — from warm minimalism and textured neutrals to the resurgence of handcrafted materials and biophilic spaces.',
+            readTime: '6 min read',
+            featured: 'yes',
+            imageUrl: 'https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?w=800&q=80',
+            date:     '2026-04-15',
+          },
+          {
+            blogId:   'b2',
+            title:    'The Art of Layering Textures',
+            category: 'Design Guide',
+            summary:  'How to combine velvet, linen, marble, and raw wood to create interiors that feel rich, warm, and deeply personal — without overwhelming the senses.',
+            readTime: '5 min read',
+            featured: 'yes',
+            imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80',
+            date:     '2026-03-28',
+          },
+          {
+            blogId:   'b3',
+            title:    'Best Color Palettes for Luxury Interiors',
+            category: 'Color Theory',
+            summary:  'A curated guide to the most sophisticated color combinations — from warm off-whites and greige to moody forest greens and architectural charcoals.',
+            readTime: '4 min read',
+            featured: 'no',
+            imageUrl: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&q=80',
+            date:     '2026-03-10',
+          },
+          {
+            blogId:   'b4',
+            title:    'Space Optimization in Luxury Homes',
+            category: 'Spatial Design',
+            summary:  'How the world\'s finest interior studios create expansive-feeling spaces in compact footprints — through lighting, mirror placement, furniture scale, and material choices.',
+            readTime: '7 min read',
+            featured: 'yes',
+            imageUrl: 'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=800&q=80',
+            date:     '2026-02-20',
+          },
         ],
       }
     }
   })
 }
 
-// ── Interest Lead ──────────────────────────────
+// ── Services (Interior Design Services) ─────────
 
 /**
- * Register buyer interest in a project.
- * Sheet: InterestLeads — username | name | email | phone | projectId | budget | message | submittedAt
- * @returns {{ success: boolean, message: string, leadId?: string }}
+ * Fetch interior design services offered.
+ * Sheet: Services — serviceId | title | category | description | price | featured
  */
-export async function createInterestLead({ username, name, email, phone, projectId, budget, message }) {
-  try {
-    return await post({ action: 'createInterestLead', username, name, email, phone, projectId, budget, message })
-  } catch {
-    return {
-      success:  true,
-      message:  'Your interest has been registered. A relationship manager will call you within 24 hours.',
-      leadId:   `EF-LEAD-${Date.now()}`,
-    }
-  }
-}
-
-// ── Site Visit ─────────────────────────────────
-
-/**
- * Book a luxury site visit.
- * Sheet: SiteVisitRequests — timestamp | username | projectId | propertyId | customerName | phone | email | preferredDate | preferredTime | notes | status
- * @param {{ username: string, projectId: string, propertyId: string, customerName: string, phone: string, email: string, preferredDate: string, preferredTime: string, notes: string }} params
- * @returns {{ success: boolean, message: string, visitId?: string }}
- */
-export async function createSiteVisit({ username, projectId, propertyId, customerName, phone, email, preferredDate, preferredTime, notes }) {
-  try {
-    return await post({ action: 'createSiteVisit', username, projectId, propertyId, customerName, phone, email, preferredDate, preferredTime, notes })
-  } catch {
-    return {
-      success:  true,
-      message:  'Your luxury property visit has been scheduled successfully. Our property advisor will contact you shortly.',
-      visitId:  `EF-VISIT-${Date.now()}`,
-    }
-  }
-}
-
-// ── Dashboard Metrics ──────────────────────────
-
-/**
- * Fetch buyer dashboard metrics for logged-in user.
- * Sheet: DashboardMetrics — username | savedProjects | siteVisits | interestedProperties | marketInsights
- * @returns {{ success: boolean, metrics: { savedProjects, siteVisits, interestedProperties, marketInsights } }}
- */
-export async function fetchDashboardMetrics(username) {
-  try {
-    return await post({ action: 'getDashboardMetrics', username })
-  } catch {
-    return {
-      success: true,
-      metrics: {
-        savedProjects:          6,
-        siteVisits:             3,
-        interestedProperties:   12,
-        marketInsights:         8,
-      },
-    }
-  }
-}
-
-// ── AI Insights ────────────────────────────────
-
-/**
- * Fetch AI-generated real estate market insights.
- * Sheet: AIInsights — id | category | title | body | icon | trend | trendLabel | displayOrder
- * @returns {{ success: boolean, insights: Array<{...}> }}
- */
-export async function fetchAIInsights() {
-  try {
-    return await post({ action: 'getAIInsights' })
-  } catch {
-    return {
-      success: true,
-      insights: [
-        {
-          id: 'ai1',
-          category: 'Market Trend',
-          title: 'Gurugram Capital Appreciation',
-          body: 'Golf Course Extension Road properties have appreciated 18.4% YoY. Demand from NRI buyers up 34% in Q1 2026.',
-          icon: 'TrendingUp',
-          trend: '+18.4%',
-          trendLabel: 'YoY Appreciation',
-          displayOrder: 1,
-        },
-        {
-          id: 'ai2',
-          category: 'Investment Alert',
-          title: 'Noida Expressway — High ROI Zone',
-          body: 'Sectors 150–168 showing 22% price surge post-infrastructure announcements. Early investors report 2.1x returns.',
-          icon: 'AlertCircle',
-          trend: '+22%',
-          trendLabel: 'Price Surge',
-          displayOrder: 2,
-        },
-        {
-          id: 'ai3',
-          category: 'Demand Signal',
-          title: 'Bengaluru Luxury Segment Boom',
-          body: 'Whitefield and Sarjapur Road see 3x increase in ₹2Cr+ enquiries. IT sector growth driving premium demand.',
-          icon: 'BarChart2',
-          trend: '3×',
-          trendLabel: 'Enquiry Growth',
-          displayOrder: 3,
-        },
-        {
-          id: 'ai4',
-          category: 'Policy Update',
-          title: 'RERA Compliance Strengthened',
-          body: 'New RERA amendments protect buyers across Maharashtra, Haryana & Karnataka. All listed projects are fully compliant.',
-          icon: 'Shield',
-          trend: '100%',
-          trendLabel: 'Compliance Rate',
-          displayOrder: 4,
-        },
-        {
-          id: 'ai5',
-          category: 'Rental Yield',
-          title: 'Hyderabad — Best Rental Yields',
-          body: 'HITEC City corridor delivering 4.2–5.8% gross rental yields, outperforming all tier-1 cities for investor buyers.',
-          icon: 'Home',
-          trend: '5.8%',
-          trendLabel: 'Gross Yield',
-          displayOrder: 5,
-        },
-      ],
-    }
-  }
-}
-
-// ── Chatbot ────────────────────────────────────
-
-/**
- * Send a property assistant chat message.
- * @returns {{ success: boolean, response: string }}
- */
-export async function sendChatMessage(query) {
-  return post({ action: 'chat', query })
-}
-
-// ── Contact / Consultation ─────────────────────
-
-/**
- * Submit a general consultation / callback request.
- * Sheet: InterestLeads — name | email | phone | budget | message | submittedAt
- * @returns {{ success: boolean, message: string }}
- */
-export async function submitContact({ name, email, phone, budget, message }) {
-  // Encode budget into message so it always reaches the sheet even if GAS drops unknown fields
-  const fullMessage = [
-    budget ? `Budget: ${budget}` : '',
-    message,
-  ].filter(Boolean).join(' | ')
-
-  return post({ action: 'createInterestLead', name, email, phone, budget, message: fullMessage })
-}
-
-// ── Project Images ─────────────────────────────
-
-/**
- * Fetch gallery images for a specific project.
- * Sheet: ProjectImages — imageId | projectId | imageUrl | imageType | caption
- * imageType: 'exterior' | 'interior' | 'amenity' | 'aerial'
- * @returns {{ success: boolean, images: Array<{ imageId, projectId, imageUrl, imageType, caption }> }}
- */
-export function fetchProjectImages(projectId) {
-  return withCache('images:' + projectId, async () => {
+export function fetchServices() {
+  return withCache('services', async () => {
     try {
-      return await post({ action: 'getProjectImages', projectId })
+      return await post({ action: 'getServices' })
     } catch {
       return {
         success: true,
-        images: [
-          { imageId: 'img1', projectId, imageUrl: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&q=80', imageType: 'exterior', caption: 'Grand entrance and facade' },
-          { imageId: 'img2', projectId, imageUrl: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80', imageType: 'exterior', caption: 'Tower overview at dusk' },
-          { imageId: 'img3', projectId, imageUrl: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=1200&q=80', imageType: 'interior', caption: 'Signature living room — 4 BHK' },
-          { imageId: 'img4', projectId, imageUrl: 'https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=1200&q=80', imageType: 'interior', caption: 'Master bedroom with city view' },
-          { imageId: 'img5', projectId, imageUrl: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=80', imageType: 'amenity',  caption: 'Infinity pool and sky deck' },
-          { imageId: 'img6', projectId, imageUrl: 'https://images.unsplash.com/photo-1523217582562-09d0def993a6?w=1200&q=80', imageType: 'amenity',  caption: 'Grand clubhouse foyer' },
-          { imageId: 'img7', projectId, imageUrl: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=1200&q=80', imageType: 'aerial',   caption: 'Aerial view — master plan' },
-        ],
-      }
-    }
-  })
-}
-
-// ── Amenities ──────────────────────────────────
-
-/**
- * Fetch amenities. Pass projectId for project-specific; omit for global platform amenities.
- * Sheet: Amenities — amenityId | projectId | amenity | description | category
- * @returns {{ success: boolean, amenities: Array<{ amenityId, projectId?, amenity, description, category }> }}
- */
-export function fetchAmenities(projectId) {
-  return withCache('amenities:' + projectId, async () => {
-    try {
-      return await post({ action: 'getAmenities', projectId })
-    } catch {
-      return {
-        success: true,
-        amenities: [
-          { amenityId: 'am1', projectId, amenity: 'Infinity Pool & Spa',     description: 'Temperature-controlled infinity pools with hydrotherapy jets, steam rooms, and a full-service wellness spa.', category: 'Wellness'     },
-          { amenityId: 'am2', projectId, amenity: 'Sky Lounge & Clubhouse',  description: 'Double-height grand clubhouse with sky lounges, private event halls, and resident concierge services.',        category: 'Social'       },
-          { amenityId: 'am3', projectId, amenity: 'Sports Arena',            description: 'Badminton, squash, basketball courts, cricket nets, tennis courts, and a dedicated jogging track.',              category: 'Sports'       },
-          { amenityId: 'am4', projectId, amenity: 'Smart Security',          description: '3-tier smart access with ANPR, facial recognition, video analytics, and 24×7 trained personnel.',               category: 'Security'     },
-          { amenityId: 'am5', projectId, amenity: 'Landscape & Green Zones', description: 'Japanese zen gardens, reflexology paths, children\'s adventure zones, and 60%+ open green landscape.',         category: 'Green'        },
-          { amenityId: 'am6', projectId, amenity: 'Smart Parking & EV',      description: 'Multi-level basement parking with EV charging for every unit, valet services, and car wash bays.',              category: 'Convenience'  },
-          { amenityId: 'am7', projectId, amenity: 'Smart Home Automation',   description: 'Pre-wired automation — voice-controlled lighting, climate, security, and app-based guest access.',               category: 'Technology'   },
-          { amenityId: 'am8', projectId, amenity: 'Retail & Dining',         description: 'Fine dining, cafés, convenience stores, salon, and premium lifestyle brands within the community.',              category: 'Lifestyle'    },
-        ],
-      }
-    }
-  })
-}
-
-// ── Floor Plans ────────────────────────────────
-
-/**
- * Fetch floor plans for a specific project.
- * Sheet: FloorPlans — planId | projectId | bhk | area | price | imageUrl | balconies | bathrooms | description
- * @returns {{ success: boolean, floorPlans: Array<{ planId, projectId, bhk, area, price, imageUrl, balconies, bathrooms, description }> }}
- */
-export function fetchFloorPlans(projectId) {
-  return withCache('floorplans:' + projectId, async () => {
-    try {
-      return await post({ action: 'getFloorPlans', projectId })
-    } catch {
-      return {
-        success: true,
-        floorPlans: [
+        services: [
           {
-            planId: 'fp1', projectId,
-            bhk: '2 BHK', area: '1,380 sq ft', price: '₹3.1 Cr',
-            imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',
-            balconies: 1, bathrooms: 2,
-            description: 'Efficient 2 BHK with open living-dining, modular kitchen, and east-facing balcony.',
+            serviceId:   's1',
+            title:       'Full Home Interior',
+            category:    'Complete Design',
+            description: 'End-to-end interior design — from concept and 3D visualization to procurement, execution, and final styling. We transform your complete home.',
+            price:       '₹80/sq ft onwards',
+            featured:    'yes',
+            icon:        'Home',
           },
           {
-            planId: 'fp2', projectId,
-            bhk: '3 BHK', area: '2,240 sq ft', price: '₹5.0 Cr',
-            imageUrl: 'https://images.unsplash.com/photo-1572120360610-d971b9d7767c?w=600&q=80',
-            balconies: 2, bathrooms: 3,
-            description: 'Spacious 3 BHK with master en-suite, double balconies, and panoramic city views.',
+            serviceId:   's2',
+            title:       'Luxury Modular Kitchen',
+            category:    'Kitchen',
+            description: 'Premium modular kitchen with European hardware, lacquered cabinetry, quartz countertops, and integrated smart appliances. Functional luxury for culinary enthusiasts.',
+            price:       '₹8 Lakhs onwards',
+            featured:    'yes',
+            icon:        'ChefHat',
           },
           {
-            planId: 'fp3', projectId,
-            bhk: '3 BHK', area: '2,540 sq ft', price: '₹5.7 Cr',
-            imageUrl: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=600&q=80',
-            balconies: 2, bathrooms: 3,
-            description: '3 BHK + Study. Premium corner unit with wrap-around views and private foyer.',
+            serviceId:   's3',
+            title:       'Living Room Design',
+            category:    'Living Spaces',
+            description: 'Transform your living room into a cinematic social space — curated furniture, custom upholstery, accent walls, and bespoke lighting design.',
+            price:       '₹5 Lakhs onwards',
+            featured:    'yes',
+            icon:        'Sofa',
           },
           {
-            planId: 'fp4', projectId,
-            bhk: '4 BHK', area: '3,100 sq ft', price: '₹7.0 Cr',
-            imageUrl: 'https://images.unsplash.com/photo-1560185127-6a8dfa5efe15?w=600&q=80',
-            balconies: 3, bathrooms: 4,
-            description: 'Grand 4 BHK with separate family lounge, staff quarters, and three private balconies.',
+            serviceId:   's4',
+            title:       '3D Visualization',
+            category:    'Visualization',
+            description: 'Photorealistic 3D renders and virtual walkthroughs of your space before execution begins. See your dream interior in stunning cinematic detail.',
+            price:       '₹75,000 onwards',
+            featured:    'yes',
+            icon:        'Layers',
           },
           {
-            planId: 'fp5', projectId,
-            bhk: '4 BHK', area: '3,420 sq ft', price: '₹8.2 Cr',
-            imageUrl: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=600&q=80',
-            balconies: 3, bathrooms: 5,
-            description: '4 BHK + Staff. Penthouse-level sky villa with all-round panoramic views and private terrace.',
+            serviceId:   's5',
+            title:       'Luxury Bedroom Design',
+            category:    'Bedroom',
+            description: 'A private sanctuary designed around you — custom headboards, luxury linen selection, bespoke wardrobes, and ambient lighting create the perfect sleep environment.',
+            price:       '₹6 Lakhs onwards',
+            featured:    'yes',
+            icon:        'Bed',
+          },
+          {
+            serviceId:   's6',
+            title:       'Commercial Interior Design',
+            category:    'Commercial',
+            description: 'Office spaces, boutique hotels, restaurants, and retail — we design commercial interiors that create lasting impressions and enhance brand identity.',
+            price:       'Custom Quote',
+            featured:    'yes',
+            icon:        'Building2',
           },
         ],
       }
     }
-  })
-}
-
-// ── Property Alert Subscriptions ───────────────
-
-/**
- * Subscribe to property alerts.
- * Reuses the InterestLeads sheet via createInterestLead action so data flows into
- * the existing Google Sheet without needing a new GAS action.
- * Sheet: InterestLeads — name | email | phone | projectId | budget | message | submittedAt
- * @param {{ email: string, alertTypes: string[] }} params
- * @returns {{ success: boolean, message: string, leadId?: string }}
- */
-export async function subscribeAlerts({ email, alertTypes }) {
-  return post({
-    action:  'createInterestLead',
-    email,
-    message: 'Property Alerts Subscription — Types: ' + (Array.isArray(alertTypes) ? alertTypes.join(', ') : String(alertTypes)),
-    tag:     'alert_subscription',
   })
 }
 
 // ── Testimonials ───────────────────────────────
 
 /**
- * Fetch buyer testimonials.
- * Sheet: Testimonials — id | name | city | review | rating
- * Optional fields returned by backend: title | company | project | avatar
- * @returns {{ success: boolean, testimonials: Array<{ id, name, city, review, rating }> }}
+ * Fetch client testimonials.
+ * Sheet: Testimonials — id | name | title | review | rating
  */
 export function fetchTestimonials() {
   return withCache('testimonials', async () => {
@@ -630,32 +463,377 @@ export function fetchTestimonials() {
         success: true,
         testimonials: [
           {
-            id: 't1', name: 'Rahul Sharma',    city: 'Gurugram',
-            review: 'EstateFlow made the entire process seamless. From shortlisting projects to the final registration — their concierge guided us at every step. The property has already appreciated 14% in 18 months.',
+            id:     't1',
+            name:   'Priya Sharma',
+            title:  'Homeowner · Gurugram',
+            city:   'Gurugram',
+            review: 'Maison completely transformed our DLF villa. Every detail — from the hand-laid marble to the custom millwork — was executed with extraordinary precision. Our home is now regularly featured in design magazines.',
             rating: 5,
           },
           {
-            id: 't2', name: 'Ananya Krishnan', city: 'Bengaluru',
-            review: 'As an NRI buyer based in the US, I was nervous about a remote purchase. EstateFlow\'s team handled FEMA compliance, power of attorney, and full documentation. The property I bought is generating 5.2% rental yield.',
+            id:     't2',
+            name:   'Vikram Malhotra',
+            title:  'Managing Director · Mumbai',
+            city:   'Mumbai',
+            review: 'They turned our sea-facing penthouse into a masterpiece. The floating staircase alone is a conversation piece at every dinner party. Maison doesn\'t just design spaces — they craft experiences.',
             rating: 5,
           },
           {
-            id: 't3', name: 'Vikram Malhotra', city: 'Noida',
-            review: 'Their AI market insights flagged the Noida Expressway sector 150 opportunity before mainstream media caught on. That early signal translated into 22% appreciation in under a year.',
+            id:     't3',
+            name:   'Ananya Krishnan',
+            title:  'Software Executive · Bengaluru',
+            city:   'Bengaluru',
+            review: 'I was amazed at how they transformed my compact 2BHK into something that feels like a luxury boutique hotel. The 3D visualizations helped me trust the process completely.',
             rating: 5,
           },
           {
-            id: 't4', name: 'Deepika Shetty',  city: 'Hyderabad',
-            review: 'Zero brokerage is a game changer. We saved ₹8 lakhs in fees and got direct-builder pricing on a 3BHK in HITEC City. The property assistant chatbot answered every question at 11PM — truly 24×7 service.',
+            id:     't4',
+            name:   'Rahul Oberoi',
+            title:  'Entrepreneur · Delhi',
+            city:   'Delhi',
+            review: 'Our heritage bungalow restoration was a complex project. Maison treated it with the respect it deserved — blending original architectural character with modern luxury seamlessly.',
             rating: 5,
           },
           {
-            id: 't5', name: 'Arjun Nair',      city: 'Mumbai',
-            review: 'Lodha Park at this price would have been impossible without EstateFlow\'s builder relationships. Their team negotiated a preferential allotment that saved us ₹35 lakhs versus the open-market price.',
+            id:     't5',
+            name:   'Deepika Nair',
+            title:  'Creative Director · Hyderabad',
+            city:   'Hyderabad',
+            review: 'The modular kitchen they designed for us is pure perfection — waterfall quartz island, integrated Miele appliances, and storage solutions I didn\'t think were possible. Worth every rupee.',
             rating: 5,
           },
         ],
       }
     }
   })
+}
+
+// ── YouTube Videos (Design Walkthroughs) ─────────
+
+/**
+ * Fetch YouTube design walkthrough videos.
+ * Sheet: YouTubeVideos — videoId | title | description | youtubeId | thumbnail | duration | views | featured
+ */
+export function fetchYouTubeVideos() {
+  return withCache('youtubeVideos', async () => {
+    try {
+      return await post({ action: 'getYouTubeVideos' })
+    } catch {
+      return {
+        success: true,
+        videos: [
+          {
+            videoId:     'v1',
+            title:       'Luxury Villa Interior Walkthrough — Gurugram',
+            description: 'A cinematic tour through our award-winning 4BHK Gurugram villa project — marble floors, bespoke millwork, and panoramic city views.',
+            youtubeId:   'dQw4w9WgXcQ',
+            thumbnail:   'https://images.unsplash.com/photo-1600607687939-ce8a6d4b6e8e?w=800&q=80',
+            duration:    '8:42',
+            views:       '124K views',
+            featured:    'yes',
+          },
+          {
+            videoId:     'v2',
+            title:       'Modern Kitchen Design — Before & After',
+            description: 'Watch our design team transform a dated builder-grade kitchen into a premium culinary studio with European cabinetry and smart appliances.',
+            youtubeId:   'dQw4w9WgXcQ',
+            thumbnail:   'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80',
+            duration:    '12:15',
+            views:       '89K views',
+            featured:    'yes',
+          },
+          {
+            videoId:     'v3',
+            title:       'Penthouse Transformation — Mumbai Sea-Facing',
+            description: 'From empty shell to architectural masterpiece — 24 weeks of crafting a Mumbai penthouse featured in Architectural Digest India.',
+            youtubeId:   'dQw4w9WgXcQ',
+            thumbnail:   'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80',
+            duration:    '15:30',
+            views:       '218K views',
+            featured:    'yes',
+          },
+        ],
+      }
+    }
+  })
+}
+
+// ── Media Assets (Gallery / Hero Visuals) ─────────
+
+/**
+ * Fetch media assets for galleries, hero banners, before-after images.
+ * Sheet: MediaAssets — assetId | entityType | entityId | assetUrl | assetType | featured
+ * @param {{ entityType?: string, entityId?: string }} params
+ */
+export function fetchMediaAssets({ entityType, entityId } = {}) {
+  const key = `assets:${entityType ?? 'all'}:${entityId ?? 'all'}`
+  return withCache(key, async () => {
+    try {
+      return await post({ action: 'getMediaAssets', entityType, entityId })
+    } catch {
+      return {
+        success: true,
+        assets: [
+          {
+            assetId:   'a1',
+            entityType,
+            entityId,
+            assetUrl:  'https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?w=1200&q=80',
+            assetType: 'hero',
+            featured:  'yes',
+            caption:   'Modern luxury living room — warm palette',
+          },
+          {
+            assetId:   'a2',
+            entityType,
+            entityId,
+            assetUrl:  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1200&q=80',
+            assetType: 'gallery',
+            featured:  'yes',
+            caption:   'Master bedroom — Scandinavian minimal',
+          },
+          {
+            assetId:   'a3',
+            entityType,
+            entityId,
+            assetUrl:  'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&q=80',
+            assetType: 'gallery',
+            featured:  'no',
+            caption:   'Premium modular kitchen',
+          },
+          {
+            assetId:   'a4',
+            entityType,
+            entityId,
+            assetUrl:  'https://images.unsplash.com/photo-1600607687939-ce8a6d4b6e8e?w=1200&q=80',
+            assetType: 'gallery',
+            featured:  'no',
+            caption:   'Villa interior — grand entrance',
+          },
+          {
+            assetId:   'a5',
+            entityType,
+            entityId,
+            assetUrl:  'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=1200&q=80',
+            assetType: 'gallery',
+            featured:  'no',
+            caption:   'Minimalist workspace design',
+          },
+          {
+            assetId:   'a6',
+            entityType,
+            entityId,
+            assetUrl:  'https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=1200&q=80',
+            assetType: 'gallery',
+            featured:  'no',
+            caption:   'Spa-inspired master bathroom',
+          },
+        ],
+      }
+    }
+  })
+}
+
+// ── AI / Design Insights ────────────────────────
+
+/**
+ * Fetch AI-generated design insights and market intelligence.
+ * Sheet: AIInsights — id | category | title | body | icon | trend | trendLabel | displayOrder
+ */
+export async function fetchAIInsights() {
+  try {
+    return await post({ action: 'getAIInsights' })
+  } catch {
+    return {
+      success: true,
+      insights: [
+        {
+          id:           'ai1',
+          category:     'Design Trend',
+          title:        'Warm Minimalism Dominates 2026',
+          body:         'Tactile materials — boucle, travertine, aged brass — are replacing cold modernism. Premium Indian homes are shifting from stark white to warm, layered, richly textured interiors.',
+          icon:         'TrendingUp',
+          trend:        '+38%',
+          trendLabel:   'Demand Increase',
+          displayOrder: 1,
+        },
+        {
+          id:           'ai2',
+          category:     'Market Insight',
+          title:        'Luxury Renovation Market Surging',
+          body:         'Premium home renovation in India projected to grow at 22% CAGR through 2028. NRI buyers driving demand for complete redesigns in Gurugram, Mumbai, and Bengaluru.',
+          icon:         'BarChart2',
+          trend:        '22%',
+          trendLabel:   'Market CAGR',
+          displayOrder: 2,
+        },
+        {
+          id:           'ai3',
+          category:     'Style Report',
+          title:        'Japandi — Most Requested Aesthetic',
+          body:         'The blend of Japanese wabi-sabi and Scandinavian minimalism is now the most requested luxury interior style in India, prized for its calm, disciplined, and premium sensibility.',
+          icon:         'Sparkles',
+          trend:        '#1',
+          trendLabel:   'Requested Style',
+          displayOrder: 3,
+        },
+        {
+          id:           'ai4',
+          category:     'Investment ROI',
+          title:        'Interior Design Multiplies Property Value',
+          body:         'Premium interior investments of ₹50–100L on luxury homes consistently yield 1.8–2.5× returns on resale value, making it one of India\'s highest-ROI lifestyle investments.',
+          icon:         'TrendingUp',
+          trend:        '2.3×',
+          trendLabel:   'Average ROI',
+          displayOrder: 4,
+        },
+      ],
+    }
+  }
+}
+
+// ── Dashboard Metrics ──────────────────────────
+
+/**
+ * Fetch design client dashboard metrics.
+ * Sheet: DashboardMetrics — username | activeProjects | consultations | completedDesigns | designInsights
+ */
+export async function fetchDashboardMetrics(username) {
+  try {
+    return await post({ action: 'getDashboardMetrics', username })
+  } catch {
+    return {
+      success: true,
+      metrics: {
+        activeProjects:   3,
+        consultations:    8,
+        completedDesigns: 12,
+        designInsights:   24,
+      },
+    }
+  }
+}
+
+// ── Booking Request (Consultations) ──────────────
+
+/**
+ * Create an interior design consultation booking request.
+ * Sheet: BookingRequests — bookingId | username | serviceId | preferredDate | preferredTime | notes | status
+ */
+export async function createBookingRequest({ username, serviceId, preferredDate, preferredTime, notes, name, email, phone }) {
+  try {
+    return await post({ action: 'createBookingRequest', username, serviceId, preferredDate, preferredTime, notes, name, email, phone })
+  } catch {
+    return {
+      success:   true,
+      message:   'Your consultation request has been received. Our design team will contact you within 24 hours to confirm your appointment.',
+      bookingId: `MSN-${Date.now()}`,
+    }
+  }
+}
+
+// ── Newsletter Subscription ────────────────────
+
+/**
+ * Subscribe to the Maison design inspiration newsletter.
+ * Sheet: NewsletterSubscribers — email | name | subscribedAt
+ */
+export async function subscribeNewsletter({ email, name }) {
+  try {
+    return await post({ action: 'subscribeNewsletter', email, name })
+  } catch {
+    return {
+      success: true,
+      message: 'Welcome to Maison! You\'ll receive curated design inspiration and exclusive studio updates.',
+    }
+  }
+}
+
+// ── Payment Links ──────────────────────────────
+
+/**
+ * Fetch Razorpay payment links for design packages.
+ * Sheet: PaymentLinks — id | title | description | amount | url | featured
+ */
+export function fetchPaymentLinks() {
+  return withCache('paymentLinks', async () => {
+    try {
+      return await post({ action: 'getPaymentLinks' })
+    } catch {
+      return {
+        success: true,
+        paymentLinks: [
+          {
+            id:          'pl1',
+            title:       'Design Consultation',
+            description: '60-minute design consultation with a senior Maison designer.',
+            amount:      '₹5,000',
+            url:         'https://rzp.io/l/maison-consult',
+            featured:    'yes',
+          },
+          {
+            id:          'pl2',
+            title:       'Full Home Design Deposit',
+            description: 'Secure your full home interior design package with 10% deposit.',
+            amount:      '₹50,000',
+            url:         'https://rzp.io/l/maison-deposit',
+            featured:    'yes',
+          },
+          {
+            id:          'pl3',
+            title:       '3D Visualization Package',
+            description: 'Photorealistic 3D renders and virtual tour of your entire space.',
+            amount:      '₹75,000',
+            url:         'https://rzp.io/l/maison-3d',
+            featured:    'yes',
+          },
+        ],
+      }
+    }
+  })
+}
+
+// ── Social Links ───────────────────────────────
+
+/**
+ * Fetch social media links from the backend.
+ * Sheet: SocialLinks — platform | url
+ */
+export function fetchSocialLinks() {
+  return withCache('socialLinks', async () => {
+    try {
+      return await post({ action: 'getSocialLinks' })
+    } catch {
+      return {
+        success: true,
+        socialLinks: [
+          { platform: 'instagram', url: 'https://instagram.com/maisonstudio' },
+          { platform: 'pinterest', url: 'https://pinterest.com/maisonstudio' },
+          { platform: 'youtube',   url: 'https://youtube.com/@maisonstudio'  },
+          { platform: 'linkedin',  url: 'https://linkedin.com/company/maisonstudio' },
+        ],
+      }
+    }
+  })
+}
+
+// ── Chatbot ────────────────────────────────────
+
+/**
+ * Send a design assistant chat message.
+ * @returns {{ success: boolean, response: string }}
+ */
+export async function sendChatMessage(query) {
+  return post({ action: 'chat', query })
+}
+
+// ── General Contact / Consultation ─────────────
+
+/**
+ * Submit a general consultation or callback request.
+ * Maps to createBookingRequest action so data flows into BookingRequests sheet.
+ */
+export async function submitContact({ name, email, phone, service, message }) {
+  const fullNotes = [service ? `Service: ${service}` : '', message].filter(Boolean).join(' | ')
+  return post({ action: 'createBookingRequest', name, email, phone, notes: fullNotes })
 }

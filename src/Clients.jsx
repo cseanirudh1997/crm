@@ -1,85 +1,87 @@
-import { motion } from 'framer-motion'
+// ─────────────────────────────────────────────
+//  DesignPartners — marquee of luxury brand partners
+//  & design accolades (compositor-threaded animation)
+// ─────────────────────────────────────────────
 
-const BUILDERS = [
-  { name: 'DLF',          abbr: 'DLF', color: 'from-blue-600 to-blue-800',       tagline: 'India\'s Largest Real Estate Co.' },
-  { name: 'Sobha',        abbr: 'SB',  color: 'from-emerald-600 to-emerald-800', tagline: 'Bengaluru\'s Finest Builder'      },
-  { name: 'Lodha',        abbr: 'LH',  color: 'from-teal-600 to-teal-800',       tagline: 'World\'s No.1 Premium Developer'  },
-  { name: 'Prestige',     abbr: 'PR',  color: 'from-rose-600 to-rose-800',       tagline: 'South India\'s Iconic Builders'   },
-  { name: 'Smartworld',   abbr: 'SW',  color: 'from-brand-600 to-brand-800',     tagline: 'Gurugram Ultra-Luxury'            },
-  { name: 'ATS',          abbr: 'ATS', color: 'from-amber-600 to-amber-800',     tagline: 'Noida\'s Premium Developer'       },
-  { name: 'My Home Group',abbr: 'MH',  color: 'from-sky-600 to-sky-800',         tagline: 'Hyderabad Mega-Projects'          },
-  { name: 'Godrej',       abbr: 'GR',  color: 'from-orange-600 to-orange-800',   tagline: 'Trusted Since 1897'               },
-  { name: 'Mahindra',     abbr: 'ML',  color: 'from-indigo-600 to-indigo-800',   tagline: 'The Right Kind of Life'           },
-  { name: 'Brigade',      abbr: 'BG',  color: 'from-cyan-600 to-cyan-800',       tagline: 'South India\'s Trusted Brand'     },
-  { name: 'Puravankara',  abbr: 'PV',  color: 'from-fuchsia-600 to-fuchsia-800', tagline: 'Built on Trust Since 1975'        },
-  { name: 'Shapoorji',    abbr: 'SP',  color: 'from-lime-600 to-lime-800',       tagline: 'Real Estate Conglomerate'         },
+import { motion } from 'framer-motion'
+import { Award } from 'lucide-react'
+
+const PARTNERS_ROW1 = [
+  { name: 'Poliform',           tag: 'Italian Furniture'      },
+  { name: 'Miele',              tag: 'Premium Appliances'     },
+  { name: 'Häfele',             tag: 'Hardware & Fittings'    },
+  { name: 'Minotti',            tag: 'Luxury Sofas'           },
+  { name: 'Versace Home',       tag: 'Luxury Furnishings'     },
+  { name: 'Armani Casa',        tag: 'Designer Collection'    },
+  { name: 'Boffi',              tag: 'Premium Kitchens'       },
+  { name: 'Flos',               tag: 'Architectural Lighting' },
+  { name: 'Poliform',           tag: 'Italian Furniture'      },
+  { name: 'Miele',              tag: 'Premium Appliances'     },
+  { name: 'Häfele',             tag: 'Hardware & Fittings'    },
+  { name: 'Minotti',            tag: 'Luxury Sofas'           },
 ]
 
-function BuilderCard({ b, keyPrefix, i }) {
+const AWARDS_ROW2 = [
+  { name: 'AD100 Studio 2025',      tag: 'Architectural Digest'    },
+  { name: 'Elle Décor Award',       tag: 'Best Interior Studio'    },
+  { name: 'India Design Awards',    tag: 'Residential Category'    },
+  { name: 'CII Design Excellence',  tag: '2024 Winner'             },
+  { name: 'Houzz Best of Design',   tag: '5 Consecutive Years'     },
+  { name: 'FX International Award', tag: 'Residential Project'     },
+  { name: 'CNBC Awaaz RE Award',    tag: 'Design Partner 2025'     },
+  { name: 'AD100 Studio 2025',      tag: 'Architectural Digest'    },
+  { name: 'Elle Décor Award',       tag: 'Best Interior Studio'    },
+  { name: 'India Design Awards',    tag: 'Residential Category'    },
+  { name: 'CII Design Excellence',  tag: '2024 Winner'             },
+  { name: 'Houzz Best of Design',   tag: '5 Consecutive Years'     },
+]
+
+function MarqueeTrack({ items, direction = 'fwd' }) {
+  const cls = direction === 'fwd' ? 'marquee-fwd' : 'marquee-rev'
   return (
-    <div
-      key={`${keyPrefix}-${b.name}-${i}`}
-      className="flex-shrink-0 flex items-center gap-3 bg-gray-900/80 border border-white/8 rounded-xl px-5 py-3 hover:border-brand-700/30 transition-colors duration-300 group"
-    >
-      <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${b.color} flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-sm`}>
-        {b.abbr}
-      </div>
-      <div>
-        <div className="text-sm font-semibold text-white group-hover:text-brand-300 transition-colors whitespace-nowrap">{b.name}</div>
-        <div className="text-xs text-gray-600 whitespace-nowrap">{b.tagline}</div>
+    <div className="overflow-hidden">
+      <div className={`flex gap-3 w-max ${cls}`}>
+        {items.map((item, i) => (
+          <div
+            key={`${item.name}-${i}`}
+            className="flex-shrink-0 flex items-center gap-2.5 px-5 py-3 rounded-xl glass border border-white/8 hover:border-brand-700/40 transition-all duration-300 cursor-default"
+          >
+            <div className="w-7 h-7 rounded-lg bg-brand-900/60 border border-brand-700/30 flex items-center justify-center">
+              <Award size={12} className="text-brand-400" />
+            </div>
+            <div>
+              <div className="text-xs font-semibold text-gray-200 whitespace-nowrap">{item.name}</div>
+              <div className="text-xs text-gray-500 whitespace-nowrap">{item.tag}</div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )
 }
 
-export default function BuilderPartners() {
-  const doubled = [...BUILDERS, ...BUILDERS]
-
+export default function DesignPartners() {
   return (
-    <section className="py-16 relative overflow-hidden bg-gray-950">
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-700/20 to-transparent" />
-      <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-700/20 to-transparent" />
+    <section className="py-14 relative overflow-hidden border-y border-white/5">
+      {/* Fade edges */}
+      <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-gray-950 to-transparent z-10 pointer-events-none" />
+      <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-gray-950 to-transparent z-10 pointer-events-none" />
 
-      <div className="section-wrapper mb-10">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center"
-        >
-          <p className="text-gray-500 text-sm uppercase tracking-widest font-semibold mb-2">
-            Partnered with India's most respected builders
-          </p>
-          <h2 className="text-2xl font-bold text-white">
-            Trusted by <span className="gradient-text">25+ Premium Developers</span>
-          </h2>
-        </motion.div>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+        className="text-center mb-8"
+      >
+        <p className="text-xs text-gray-500 uppercase tracking-widest font-semibold">
+          Trusted by — premium brands · award-winning designs · global partners
+        </p>
+      </motion.div>
 
-      {/* Marquee row 1 — CSS compositor-threaded, no JS RAF loop */}
-      <div className="relative">
-        <div className="absolute left-0 inset-y-0 w-32 bg-gradient-to-r from-gray-950 to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 inset-y-0 w-32 bg-gradient-to-l from-gray-950 to-transparent z-10 pointer-events-none" />
-        <div className="flex overflow-hidden">
-          <div className="marquee-fwd flex gap-5">
-            {doubled.map((b, i) => (
-              <BuilderCard key={`fwd-${b.name}-${i}`} b={b} keyPrefix="fwd" i={i} />
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Marquee row 2 — reversed */}
-      <div className="relative mt-4">
-        <div className="absolute left-0 inset-y-0 w-32 bg-gradient-to-r from-gray-950 to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 inset-y-0 w-32 bg-gradient-to-l from-gray-950 to-transparent z-10 pointer-events-none" />
-        <div className="flex overflow-hidden">
-          <div className="marquee-rev flex gap-5">
-            {[...doubled].reverse().map((b, i) => (
-              <BuilderCard key={`rev-${b.name}-${i}`} b={b} keyPrefix="rev" i={i} />
-            ))}
-          </div>
-        </div>
+      <div className="flex flex-col gap-3">
+        <MarqueeTrack items={PARTNERS_ROW1} direction="fwd" />
+        <MarqueeTrack items={AWARDS_ROW2}   direction="rev" />
       </div>
     </section>
   )

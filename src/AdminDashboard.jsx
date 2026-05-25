@@ -1,13 +1,13 @@
 // ─────────────────────────────────────────────
-//  AdminDashboard — real estate operations view
+//  AdminDashboard — interior design studio operations
 // ─────────────────────────────────────────────
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
-  LayoutDashboard, Users, CalendarCheck, Building2,
+  LayoutDashboard, Users, CalendarCheck, Home,
   BarChart2, CheckCircle, Clock, AlertCircle, Loader2,
-  ArrowUpRight, TrendingUp, Shield, Heart, MapPin,
+  ArrowUpRight, TrendingUp, Shield, Palette, Star,
 } from 'lucide-react'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -18,86 +18,90 @@ import { fetchDashboardMetrics } from './api'
 
 /* ── Nav ── */
 const NAV_ITEMS = [
-  { id: 'overview',  label: 'Overview',        icon: LayoutDashboard },
-  { id: 'leads',     label: 'Interest Leads',  icon: Heart           },
-  { id: 'visits',    label: 'Site Visits',     icon: CalendarCheck   },
-  { id: 'projects',  label: 'Projects',        icon: Building2       },
-  { id: 'analytics', label: 'Analytics',       icon: BarChart2       },
+  { id: 'overview',      label: 'Overview',       icon: LayoutDashboard },
+  { id: 'consultations', label: 'Consultations',  icon: CalendarCheck   },
+  { id: 'projects',      label: 'Projects',       icon: Home            },
+  { id: 'clients',       label: 'Clients',        icon: Users           },
+  { id: 'analytics',     label: 'Analytics',      icon: BarChart2       },
 ]
 
-/* ── Mock interest leads (admin view) ── */
-const MOCK_LEADS = [
-  { id: 'L-001', name: 'Rahul Sharma',    phone: '+91 98101 23456', project: 'The Arbour, DLF',          budget: '₹4–6 Cr',   status: 'contacted',   submitted: '10m ago'  },
-  { id: 'L-002', name: 'Ananya Krishnan', phone: '+91 91234 56789', project: 'Prestige Lakeside',        budget: '₹2–5 Cr',   status: 'pending',     submitted: '2h ago'   },
-  { id: 'L-003', name: 'Vikram Malhotra', phone: '+91 99871 23456', project: 'Lodha Bellavista',         budget: '₹3–5 Cr',   status: 'site_visit',  submitted: '1d ago'   },
-  { id: 'L-004', name: 'Deepika Shetty',  phone: '+91 87654 32109', project: 'Smartworld One DXP',      budget: '₹5–8 Cr',   status: 'negotiation', submitted: '2d ago'   },
-  { id: 'L-005', name: 'Arjun Nair',      phone: '+91 70001 23456', project: 'Lodha Park, Mumbai',      budget: '₹8–12 Cr',  status: 'booked',      submitted: '4d ago'   },
-  { id: 'L-006', name: 'Priya Mehta',     phone: '+91 93456 78901', project: 'ATS Homekraft',            budget: '₹1–2 Cr',   status: 'pending',     submitted: '5h ago'   },
+/* ── Mock consultation bookings ── */
+const MOCK_BOOKINGS = [
+  { id: 'B-001', name: 'Rahul Sharma',     phone: '+91 98101 23456', service: 'Full Home Interior',   budget: '₹10–15L',  status: 'confirmed',   submitted: '10m ago' },
+  { id: 'B-002', name: 'Ananya Krishnan',  phone: '+91 91234 56789', service: 'Modular Kitchen',      budget: '₹3–5L',    status: 'pending',     submitted: '2h ago'  },
+  { id: 'B-003', name: 'Vikram Malhotra',  phone: '+91 99871 23456', service: 'Luxury Villa Design',  budget: '₹30–50L',  status: 'in_progress', submitted: '1d ago'  },
+  { id: 'B-004', name: 'Deepika Shetty',   phone: '+91 87654 32109', service: 'Premium Bedroom Suite',budget: '₹4–6L',    status: 'completed',   submitted: '2d ago'  },
+  { id: 'B-005', name: 'Arjun Nair',       phone: '+91 70001 23456', service: 'Full Home Interior',   budget: '₹12–18L',  status: 'confirmed',   submitted: '4d ago'  },
+  { id: 'B-006', name: 'Priya Mehta',      phone: '+91 93456 78901', service: 'Living Room Makeover', budget: '₹2–3L',    status: 'pending',     submitted: '5h ago'  },
 ]
 
-/* ── Mock site visits (admin view) ── */
-const MOCK_VISITS = [
-  { id: 'V-001', customerName: 'Rahul Sharma',    projectName: 'The Arbour, DLF',     preferredDate: '2026-05-26', preferredTime: '10:00 AM', status: 'confirmed', transport: true  },
-  { id: 'V-002', customerName: 'Vikram Malhotra', projectName: 'Lodha Bellavista',    preferredDate: '2026-05-25', preferredTime: '2:00 PM',  status: 'pending',   transport: false },
-  { id: 'V-003', customerName: 'Ananya Krishnan', projectName: 'Prestige Lakeside',   preferredDate: '2026-05-27', preferredTime: '10:00 AM', status: 'confirmed', transport: true  },
-  { id: 'V-004', customerName: 'Arjun Nair',      projectName: 'Lodha Park, Mumbai',  preferredDate: '2026-05-28', preferredTime: '5:00 PM',  status: 'completed', transport: false },
-]
-
-/* ── Mock projects summary ── */
+/* ── Mock active design projects ── */
 const MOCK_PROJECTS = [
-  { id: 'P-001', name: 'The Arbour',        builder: 'DLF',        city: 'Gurugram',   leads: 18, visits: 7, status: 'active' },
-  { id: 'P-002', name: 'Prestige Lakeside', builder: 'Prestige',   city: 'Bengaluru',  leads: 12, visits: 4, status: 'active' },
-  { id: 'P-003', name: 'Lodha Bellavista',  builder: 'Lodha',      city: 'Noida',      leads: 21, visits: 9, status: 'active' },
-  { id: 'P-004', name: 'Smartworld DXP',    builder: 'Smartworld', city: 'Gurugram',   leads: 9,  visits: 3, status: 'active' },
-  { id: 'P-005', name: 'Lodha Park',        builder: 'Lodha',      city: 'Mumbai',     leads: 31, visits: 14,status: 'active' },
-  { id: 'P-006', name: 'ATS Homekraft',     builder: 'ATS',        city: 'Noida',      leads: 7,  visits: 2, status: 'active' },
+  { id: 'P-001', name: '3BHK — Bandra West',        client: 'Rahul Sharma',   service: 'Full Home Interior',  stage: 'execution',    designer: 'Aisha Kapoor', area: '1,850 sq ft' },
+  { id: 'P-002', name: 'Villa — Whitefield',         client: 'Vikram Malhotra',service: 'Luxury Villa Design', stage: 'design',       designer: 'Rohan Mehta',  area: '4,200 sq ft' },
+  { id: 'P-003', name: 'Kitchen — DLF Cyber City',   client: 'Deepika Shetty', service: 'Modular Kitchen',     stage: 'completed',    designer: 'Priya Nair',   area: '380 sq ft'   },
+  { id: 'P-004', name: 'Penthouse — Juhu',           client: 'Arjun Nair',     service: 'Premium Living Suite',stage: 'consultation', designer: 'Aisha Kapoor', area: '2,600 sq ft' },
+  { id: 'P-005', name: 'Office Lobby — BKC',         client: 'Mehta Corp.',    service: 'Commercial Interior', stage: 'design',       designer: 'Rohan Mehta',  area: '900 sq ft'   },
+  { id: 'P-006', name: 'Bedroom Suite — Powai',      client: 'Ananya Krishnan',service: 'Bedroom & Bath Suite',stage: 'pending',      designer: 'TBD',          area: '480 sq ft'   },
 ]
 
-/* ── Sales pipeline stages ── */
+/* ── Mock clients ── */
+const MOCK_CLIENTS = [
+  { id: 'C-001', name: 'Rahul Sharma',    tier: 'premium', projects: 2, since: 'Jan 2025', status: 'active'   },
+  { id: 'C-002', name: 'Vikram Malhotra', tier: 'premium', projects: 1, since: 'Oct 2024', status: 'active'   },
+  { id: 'C-003', name: 'Deepika Shetty',  tier: 'client',  projects: 1, since: 'Mar 2025', status: 'completed'},
+  { id: 'C-004', name: 'Arjun Nair',      tier: 'premium', projects: 1, since: 'Feb 2026', status: 'active'   },
+  { id: 'C-005', name: 'Ananya Krishnan', tier: 'client',  projects: 1, since: 'Apr 2026', status: 'new'      },
+  { id: 'C-006', name: 'Priya Mehta',     tier: 'client',  projects: 0, since: 'May 2026', status: 'new'      },
+]
+
+/* ── Design pipeline stages ── */
 const PIPELINE_STAGES = [
-  { stage: 'pending',      label: 'Pending',     count: 8,  color: 'bg-gray-500'     },
-  { stage: 'contacted',    label: 'Contacted',   count: 12, color: 'bg-amber-500'    },
-  { stage: 'site_visit',   label: 'Site Visit',  count: 7,  color: 'bg-brand-500'    },
-  { stage: 'negotiation',  label: 'Negotiation', count: 4,  color: 'bg-accent-500'   },
-  { stage: 'booked',       label: 'Booked',      count: 5,  color: 'bg-emerald-500'  },
+  { stage: 'pending',      label: 'Pending',     count: 1, color: 'bg-gray-500'   },
+  { stage: 'consultation', label: 'Consult',     count: 2, color: 'bg-accent-500' },
+  { stage: 'design',       label: 'Design',      count: 2, color: 'bg-brand-500'  },
+  { stage: 'execution',    label: 'Execution',   count: 2, color: 'bg-amber-500'  },
+  { stage: 'completed',    label: 'Completed',   count: 1, color: 'bg-emerald-500'},
 ]
 
-/* ── Lead analytics chart data ── */
-const LEADS_CHART = [
-  { month: 'Nov', leads: 14, visits: 5  },
-  { month: 'Dec', leads: 18, visits: 8  },
-  { month: 'Jan', leads: 22, visits: 11 },
-  { month: 'Feb', leads: 19, visits: 9  },
-  { month: 'Mar', leads: 28, visits: 13 },
-  { month: 'Apr', leads: 35, visits: 17 },
-  { month: 'May', leads: 42, visits: 20 },
+/* ── Monthly bookings & projects chart ── */
+const ANALYTICS_CHART = [
+  { month: 'Nov', bookings: 8,  projects: 4  },
+  { month: 'Dec', bookings: 12, projects: 6  },
+  { month: 'Jan', bookings: 15, projects: 9  },
+  { month: 'Feb', bookings: 11, projects: 7  },
+  { month: 'Mar', bookings: 18, projects: 11 },
+  { month: 'Apr', bookings: 22, projects: 14 },
+  { month: 'May', bookings: 28, projects: 16 },
 ]
 
-/* ── Status badge ── */
+/* ── Status maps ── */
+const BOOKING_STATUS_MAP = {
+  pending:     { label: 'Pending',     cls: 'bg-gray-800/60 border-gray-700/40 text-gray-400'          },
+  confirmed:   { label: 'Confirmed',   cls: 'bg-brand-900/40 border-brand-700/40 text-brand-300'       },
+  in_progress: { label: 'In Progress', cls: 'bg-amber-900/40 border-amber-700/40 text-amber-300'       },
+  completed:   { label: 'Completed ✓', cls: 'bg-emerald-900/40 border-emerald-700/40 text-emerald-300' },
+  cancelled:   { label: 'Cancelled',   cls: 'bg-red-900/40 border-red-700/40 text-red-300'             },
+}
+
+const PROJECT_STAGE_MAP = {
+  pending:     { label: 'Pending',     cls: 'bg-gray-800/60 border-gray-700/40 text-gray-400'          },
+  consultation:{ label: 'Consultation',cls: 'bg-accent-900/40 border-accent-700/40 text-accent-300'    },
+  design:      { label: 'Design',      cls: 'bg-brand-900/40 border-brand-700/40 text-brand-300'       },
+  execution:   { label: 'Execution',   cls: 'bg-amber-900/40 border-amber-700/40 text-amber-300'       },
+  completed:   { label: 'Completed ✓', cls: 'bg-emerald-900/40 border-emerald-700/40 text-emerald-300' },
+}
+
+const CLIENT_STATUS_MAP = {
+  active:    { label: 'Active',    cls: 'bg-emerald-900/40 border-emerald-700/40 text-emerald-300' },
+  new:       { label: 'New',       cls: 'bg-brand-900/40 border-brand-700/40 text-brand-300'       },
+  completed: { label: 'Completed', cls: 'bg-gray-800/60 border-gray-700/40 text-gray-400'          },
+}
+
+/* ── Shared badge ── */
 function Badge({ value, map }) {
   const { label, cls } = map[value] || { label: value, cls: 'bg-gray-800 text-gray-400 border-gray-700' }
   return <span className={`px-2 py-0.5 rounded-full border text-xs font-semibold ${cls}`}>{label}</span>
-}
-
-const LEAD_STATUS_MAP = {
-  pending:     { label: 'Pending',     cls: 'bg-gray-800/60 border-gray-700/40 text-gray-400'          },
-  contacted:   { label: 'Contacted',   cls: 'bg-amber-900/40 border-amber-700/40 text-amber-300'        },
-  site_visit:  { label: 'Site Visit',  cls: 'bg-brand-900/40 border-brand-700/40 text-brand-300'        },
-  negotiation: { label: 'Negotiation', cls: 'bg-accent-900/40 border-accent-700/40 text-accent-300'     },
-  booked:      { label: 'Booked 🎉',  cls: 'bg-emerald-900/40 border-emerald-700/40 text-emerald-300'   },
-}
-
-const VISIT_STATUS_MAP = {
-  pending:   { label: 'Pending',   cls: 'bg-amber-900/40 border-amber-700/40 text-amber-300'      },
-  confirmed: { label: 'Confirmed', cls: 'bg-brand-900/40 border-brand-700/40 text-brand-300'      },
-  completed: { label: 'Completed', cls: 'bg-emerald-900/40 border-emerald-700/40 text-emerald-300' },
-  cancelled: { label: 'Cancelled', cls: 'bg-red-900/40 border-red-700/40 text-red-300'            },
-}
-
-const PROJECT_STATUS_MAP = {
-  active:   { label: 'Active',   cls: 'bg-emerald-900/40 border-emerald-700/40 text-emerald-300' },
-  upcoming: { label: 'Upcoming', cls: 'bg-amber-900/40 border-amber-700/40 text-amber-300'       },
-  sold_out: { label: 'Sold Out', cls: 'bg-gray-800/60 border-gray-700/40 text-gray-400'          },
 }
 
 const fadeUp = (delay = 0) => ({
@@ -106,9 +110,9 @@ const fadeUp = (delay = 0) => ({
   transition: { delay, duration: 0.4 },
 })
 
-/* ════════════════════════════════════════════
+/* ════════════════════════════════════════
    AdminDashboard
-   ════════════════════════════════════════════ */
+   ════════════════════════════════════════ */
 export default function AdminDashboard({ session }) {
   const [activeNav, setActiveNav] = useState('overview')
   const [metrics,   setMetrics]   = useState(null)
@@ -123,17 +127,18 @@ export default function AdminDashboard({ session }) {
 
   useEffect(() => { loadData() }, [])
 
-  /* ── Derived totals for admin ── */
-  const totalLeads      = MOCK_LEADS.length
-  const pendingLeads    = MOCK_LEADS.filter(l => l.status === 'pending').length
-  const bookedLeads     = MOCK_LEADS.filter(l => l.status === 'booked').length
-  const confirmedVisits = MOCK_VISITS.filter(v => v.status === 'confirmed').length
+  /* ── Derived totals ── */
+  const totalBookings    = MOCK_BOOKINGS.length
+  const pendingBookings  = MOCK_BOOKINGS.filter(b => b.status === 'pending').length
+  const confirmedBookings= MOCK_BOOKINGS.filter(b => b.status === 'confirmed').length
+  const activeProjects   = MOCK_PROJECTS.filter(p => p.stage !== 'completed').length
+  const completedProjects= MOCK_PROJECTS.filter(p => p.stage === 'completed').length
 
   const ADMIN_METRICS = [
-    { label: 'Total Leads',      value: totalLeads,      sub: `${pendingLeads} pending`,   icon: Heart,         color: 'from-brand-600 to-brand-800',    bg: 'bg-brand-900/20',   border: 'border-brand-700/30',   change: '+24%' },
-    { label: 'Site Visits',      value: MOCK_VISITS.length, sub: `${confirmedVisits} confirmed`, icon: CalendarCheck, color: 'from-emerald-600 to-emerald-800', bg: 'bg-emerald-900/20', border: 'border-emerald-700/30', change: '+18%' },
-    { label: 'Deals Closed',     value: bookedLeads,     sub: 'this month',                icon: CheckCircle,   color: 'from-accent-600 to-accent-800',  bg: 'bg-accent-900/20',  border: 'border-accent-700/30',  change: '+12%' },
-    { label: 'Active Projects',  value: MOCK_PROJECTS.length, sub: '6 cities',             icon: Building2,     color: 'from-teal-600 to-teal-800',      bg: 'bg-teal-900/20',    border: 'border-teal-700/30',    change: '+3'   },
+    { label: 'Total Consultations', value: totalBookings,     sub: `${pendingBookings} pending`,   icon: CalendarCheck, color: 'from-brand-600 to-brand-800',    bg: 'bg-brand-900/20',   border: 'border-brand-700/30',   change: '+28%' },
+    { label: 'Active Projects',     value: activeProjects,    sub: 'in-progress',                  icon: Home,          color: 'from-emerald-600 to-emerald-800', bg: 'bg-emerald-900/20', border: 'border-emerald-700/30', change: '+15%' },
+    { label: 'Completed Designs',   value: completedProjects, sub: 'this season',                  icon: Star,          color: 'from-accent-600 to-accent-800',   bg: 'bg-accent-900/20',  border: 'border-accent-700/30',  change: '+9%'  },
+    { label: 'Total Clients',       value: MOCK_CLIENTS.length, sub: `${MOCK_CLIENTS.filter(c => c.tier === 'premium').length} premium`, icon: Users, color: 'from-teal-600 to-teal-800', bg: 'bg-teal-900/20', border: 'border-teal-700/30', change: '+4'  },
   ]
 
   /* ── Shared metric cards ── */
@@ -161,14 +166,14 @@ export default function AdminDashboard({ session }) {
     </div>
   )
 
-  /* ── Sales pipeline panel ── */
-  const SalesPipeline = (
+  /* ── Design pipeline panel ── */
+  const DesignPipeline = (
     <motion.div {...fadeUp(0.05)} className="glass border border-white/10 rounded-2xl p-5 sm:p-6">
-      <h3 className="font-semibold text-white mb-0.5">Sales Pipeline</h3>
-      <p className="text-xs text-gray-500 mb-5">Leads by conversion stage</p>
+      <h3 className="font-semibold text-white mb-0.5">Design Pipeline</h3>
+      <p className="text-xs text-gray-500 mb-5">Projects by stage</p>
       <div className="flex flex-wrap gap-3 mb-5">
         {PIPELINE_STAGES.map(({ label, count, color }) => (
-          <div key={label} className="flex-1 min-w-[90px] p-4 rounded-xl bg-white/5 border border-white/5 text-center">
+          <div key={label} className="flex-1 min-w-[80px] p-4 rounded-xl bg-white/5 border border-white/5 text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
               <div className={`w-2.5 h-2.5 rounded-full ${color}`} />
               <span className="text-xs text-gray-400 font-medium">{label}</span>
@@ -185,9 +190,9 @@ export default function AdminDashboard({ session }) {
             contentStyle={{ background: '#111827', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', fontSize: '12px' }}
             cursor={{ fill: 'rgba(255,255,255,0.05)' }}
           />
-          <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+          <Bar dataKey="count" name="Projects" radius={[4, 4, 0, 0]}>
             {PIPELINE_STAGES.map((_, i) => (
-              <Cell key={i} fill={['#6b7280','#f59e0b','#c99a1a','#b8915a','#10b981'][i]} />
+              <Cell key={i} fill={['#6b7280','#b8915a','#c99a1a','#f59e0b','#10b981'][i]} />
             ))}
           </Bar>
         </BarChart>
@@ -195,70 +200,34 @@ export default function AdminDashboard({ session }) {
     </motion.div>
   )
 
-  /* ── Leads table ── */
-  const LeadsTable = (
+  /* ── Bookings table ── */
+  const BookingsTable = (
     <motion.div {...fadeUp(0.05)} className="glass border border-white/10 rounded-2xl overflow-hidden">
       <div className="flex items-center justify-between p-5 border-b border-white/10">
         <div>
-          <h3 className="font-semibold text-white">Interest Leads</h3>
-          <p className="text-xs text-gray-500 mt-0.5">{totalLeads} total · {pendingLeads} need follow-up</p>
+          <h3 className="font-semibold text-white">Consultation Bookings</h3>
+          <p className="text-xs text-gray-500 mt-0.5">{totalBookings} total · {pendingBookings} need follow-up</p>
         </div>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b border-white/10">
-              {['ID', 'Name', 'Phone', 'Project', 'Budget', 'Status', 'Received'].map((h) => (
+              {['ID', 'Client', 'Phone', 'Service', 'Budget', 'Status', 'Received'].map((h) => (
                 <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
-            {MOCK_LEADS.map((lead) => (
-              <tr key={lead.id} className="hover:bg-white/5 transition-colors">
-                <td className="px-4 py-3 text-xs font-mono text-gray-500">{lead.id}</td>
-                <td className="px-4 py-3 text-sm font-medium text-white whitespace-nowrap">{lead.name}</td>
-                <td className="px-4 py-3 text-sm text-gray-400 whitespace-nowrap">{lead.phone}</td>
-                <td className="px-4 py-3 text-sm text-gray-300 whitespace-nowrap">{lead.project}</td>
-                <td className="px-4 py-3 text-sm text-brand-300 whitespace-nowrap font-medium">{lead.budget}</td>
-                <td className="px-4 py-3"><Badge value={lead.status} map={LEAD_STATUS_MAP} /></td>
-                <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">{lead.submitted}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </motion.div>
-  )
-
-  /* ── Visits table ── */
-  const VisitsTable = (
-    <motion.div {...fadeUp(0.05)} className="glass border border-white/10 rounded-2xl overflow-hidden">
-      <div className="flex items-center justify-between p-5 border-b border-white/10">
-        <div>
-          <h3 className="font-semibold text-white">Site Visit Requests</h3>
-          <p className="text-xs text-gray-500 mt-0.5">{MOCK_VISITS.length} scheduled · {confirmedVisits} confirmed</p>
-        </div>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-white/10">
-              {['ID', 'Customer Name', 'Project', 'Date', 'Time', 'Transport', 'Status'].map((h) => (
-                <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/5">
-            {MOCK_VISITS.map((v) => (
-              <tr key={v.id} className="hover:bg-white/5 transition-colors">
-                <td className="px-4 py-3 text-xs font-mono text-gray-500">{v.id}</td>
-                <td className="px-4 py-3 text-sm font-medium text-white whitespace-nowrap">{v.customerName}</td>
-                <td className="px-4 py-3 text-sm text-gray-300 whitespace-nowrap">{v.projectName}</td>
-                <td className="px-4 py-3 text-sm text-gray-400 whitespace-nowrap">{v.preferredDate}</td>
-                <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">{v.preferredTime}</td>
-                <td className="px-4 py-3 text-xs text-center">{v.transport ? '🚗 Yes' : '–'}</td>
-                <td className="px-4 py-3"><Badge value={v.status} map={VISIT_STATUS_MAP} /></td>
+            {MOCK_BOOKINGS.map((b) => (
+              <tr key={b.id} className="hover:bg-white/5 transition-colors">
+                <td className="px-4 py-3 text-xs font-mono text-gray-500">{b.id}</td>
+                <td className="px-4 py-3 text-sm font-medium text-white whitespace-nowrap">{b.name}</td>
+                <td className="px-4 py-3 text-sm text-gray-400 whitespace-nowrap">{b.phone}</td>
+                <td className="px-4 py-3 text-sm text-gray-300 whitespace-nowrap">{b.service}</td>
+                <td className="px-4 py-3 text-sm text-brand-300 whitespace-nowrap font-medium">{b.budget}</td>
+                <td className="px-4 py-3"><Badge value={b.status} map={BOOKING_STATUS_MAP} /></td>
+                <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">{b.submitted}</td>
               </tr>
             ))}
           </tbody>
@@ -272,15 +241,15 @@ export default function AdminDashboard({ session }) {
     <motion.div {...fadeUp(0.05)} className="glass border border-white/10 rounded-2xl overflow-hidden">
       <div className="flex items-center justify-between p-5 border-b border-white/10">
         <div>
-          <h3 className="font-semibold text-white">Project Overview</h3>
-          <p className="text-xs text-gray-500 mt-0.5">{MOCK_PROJECTS.length} active listings on platform</p>
+          <h3 className="font-semibold text-white">Design Projects</h3>
+          <p className="text-xs text-gray-500 mt-0.5">{MOCK_PROJECTS.length} total · {activeProjects} active</p>
         </div>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b border-white/10">
-              {['Project', 'Builder', 'City', 'Leads', 'Visits', 'Status'].map((h) => (
+              {['Project', 'Client', 'Service', 'Designer', 'Area', 'Stage'].map((h) => (
                 <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
               ))}
             </tr>
@@ -289,15 +258,54 @@ export default function AdminDashboard({ session }) {
             {MOCK_PROJECTS.map((p) => (
               <tr key={p.id} className="hover:bg-white/5 transition-colors">
                 <td className="px-4 py-3 text-sm font-medium text-white whitespace-nowrap">{p.name}</td>
-                <td className="px-4 py-3 text-sm text-gray-400 whitespace-nowrap">{p.builder}</td>
+                <td className="px-4 py-3 text-sm text-gray-400 whitespace-nowrap">{p.client}</td>
+                <td className="px-4 py-3 text-sm text-gray-300 whitespace-nowrap">{p.service}</td>
+                <td className="px-4 py-3 text-sm text-brand-300 whitespace-nowrap">{p.designer}</td>
+                <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">{p.area}</td>
+                <td className="px-4 py-3"><Badge value={p.stage} map={PROJECT_STAGE_MAP} /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </motion.div>
+  )
+
+  /* ── Clients table ── */
+  const ClientsTable = (
+    <motion.div {...fadeUp(0.05)} className="glass border border-white/10 rounded-2xl overflow-hidden">
+      <div className="flex items-center justify-between p-5 border-b border-white/10">
+        <div>
+          <h3 className="font-semibold text-white">Client Directory</h3>
+          <p className="text-xs text-gray-500 mt-0.5">{MOCK_CLIENTS.length} registered clients</p>
+        </div>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-white/10">
+              {['ID', 'Name', 'Tier', 'Projects', 'Client Since', 'Status'].map((h) => (
+                <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/5">
+            {MOCK_CLIENTS.map((c) => (
+              <tr key={c.id} className="hover:bg-white/5 transition-colors">
+                <td className="px-4 py-3 text-xs font-mono text-gray-500">{c.id}</td>
+                <td className="px-4 py-3 text-sm font-medium text-white whitespace-nowrap">{c.name}</td>
                 <td className="px-4 py-3">
-                  <span className="flex items-center gap-1 text-xs text-gray-400 whitespace-nowrap">
-                    <MapPin size={10} />{p.city}
+                  <span className={`text-xs px-2 py-0.5 rounded-full border font-semibold ${
+                    c.tier === 'premium'
+                      ? 'bg-brand-900/40 border-brand-700/40 text-brand-300'
+                      : 'bg-gray-800/60 border-gray-700/40 text-gray-400'
+                  }`}>
+                    {c.tier === 'premium' ? '⭐ Premium' : 'Design Client'}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-sm font-semibold text-brand-300">{p.leads}</td>
-                <td className="px-4 py-3 text-sm font-semibold text-emerald-400">{p.visits}</td>
-                <td className="px-4 py-3"><Badge value={p.status} map={PROJECT_STATUS_MAP} /></td>
+                <td className="px-4 py-3 text-sm text-gray-400 text-center">{c.projects}</td>
+                <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">{c.since}</td>
+                <td className="px-4 py-3"><Badge value={c.status} map={CLIENT_STATUS_MAP} /></td>
               </tr>
             ))}
           </tbody>
@@ -310,16 +318,14 @@ export default function AdminDashboard({ session }) {
     <DashboardLayout
       session={session}
       title="Admin Dashboard"
-      subtitle="Real Estate Operations & Lead Management"
+      subtitle="Interior Design Studio Operations"
       navItems={NAV_ITEMS}
       activeNav={activeNav}
       onNavChange={setActiveNav}
       onRefresh={loadData}
     >
 
-      {/* ══════════════════════════════════
-          OVERVIEW
-          ══════════════════════════════════ */}
+      {/* ══ OVERVIEW ══ */}
       {activeNav === 'overview' && (
         <>
           {/* Welcome banner */}
@@ -331,22 +337,22 @@ export default function AdminDashboard({ session }) {
               <div>
                 <div className="flex items-center gap-2 mb-0.5">
                   <span className="px-2 py-0.5 rounded-full bg-red-500/20 border border-red-500/40 text-red-300 text-xs font-semibold uppercase tracking-wide">Admin</span>
-                  <span className="text-gray-400 text-xs">Full operational access</span>
+                  <span className="text-gray-400 text-xs">Full studio access</span>
                 </div>
-                <h2 className="font-bold text-white">Welcome, {session?.username}. Manage leads, visits, and listings below.</h2>
+                <h2 className="font-bold text-white">Welcome, {session?.username}. Manage consultations, projects, and clients below.</h2>
               </div>
             </div>
           </motion.div>
 
           {MetricCards}
-          {SalesPipeline}
+          {DesignPipeline}
 
           {/* Quick nav cards */}
           <div className="grid sm:grid-cols-3 gap-4">
             {[
-              { label: 'Pending Leads',   count: pendingLeads,    sub: 'awaiting contact', nav: 'leads',    color: 'text-amber-400'   },
-              { label: 'Upcoming Visits', count: confirmedVisits, sub: 'confirmed',         nav: 'visits',   color: 'text-brand-400'   },
-              { label: 'Active Projects', count: MOCK_PROJECTS.length, sub: 'on platform',  nav: 'projects', color: 'text-emerald-400' },
+              { label: 'Pending Bookings', count: pendingBookings,  sub: 'need follow-up',    nav: 'consultations', color: 'text-amber-400'   },
+              { label: 'Active Projects',  count: activeProjects,   sub: 'in-progress',       nav: 'projects',      color: 'text-brand-400'   },
+              { label: 'Total Clients',    count: MOCK_CLIENTS.length, sub: 'registered',     nav: 'clients',       color: 'text-emerald-400' },
             ].map(({ label, count, sub, nav, color }) => (
               <button
                 key={label}
@@ -364,69 +370,62 @@ export default function AdminDashboard({ session }) {
         </>
       )}
 
-      {/* ══════════════════════════════════
-          LEADS
-          ══════════════════════════════════ */}
-      {activeNav === 'leads' && (
+      {/* ══ CONSULTATIONS ══ */}
+      {activeNav === 'consultations' && (
         <>
           <motion.div {...fadeUp(0)}>
-            <h2 className="text-lg font-bold text-white mb-1">Interest Leads</h2>
-            <p className="text-sm text-gray-400 mb-5">All buyer interest registrations across all projects.</p>
+            <h2 className="text-lg font-bold text-white mb-1">Consultation Bookings</h2>
+            <p className="text-sm text-gray-400 mb-5">All client consultation requests across all design services.</p>
           </motion.div>
-          {MOCK_LEADS.some(l => l.status === 'pending') && (
+          {pendingBookings > 0 && (
             <motion.div {...fadeUp(0.03)} className="flex items-center gap-3 p-4 rounded-xl bg-amber-900/20 border border-amber-700/40 text-amber-300 text-sm">
               <AlertCircle size={16} className="shrink-0" />
-              <span>{pendingLeads} lead(s) awaiting initial contact — follow up within 24 hours.</span>
+              <span>{pendingBookings} booking(s) awaiting confirmation — follow up within 24 hours.</span>
             </motion.div>
           )}
-          {LeadsTable}
+          {BookingsTable}
         </>
       )}
 
-      {/* ══════════════════════════════════
-          VISITS
-          ══════════════════════════════════ */}
-      {activeNav === 'visits' && (
-        <>
-          <motion.div {...fadeUp(0)}>
-            <h2 className="text-lg font-bold text-white mb-1">Site Visit Requests</h2>
-            <p className="text-sm text-gray-400 mb-5">All scheduled and completed property visits.</p>
-          </motion.div>
-          {VisitsTable}
-        </>
-      )}
-
-      {/* ══════════════════════════════════
-          PROJECTS
-          ══════════════════════════════════ */}
+      {/* ══ PROJECTS ══ */}
       {activeNav === 'projects' && (
         <>
           <motion.div {...fadeUp(0)}>
-            <h2 className="text-lg font-bold text-white mb-1">Project Management</h2>
-            <p className="text-sm text-gray-400 mb-5">All listed projects and their lead performance.</p>
+            <h2 className="text-lg font-bold text-white mb-1">Design Projects</h2>
+            <p className="text-sm text-gray-400 mb-5">All active and completed interior design projects.</p>
           </motion.div>
-          {SalesPipeline}
+          {DesignPipeline}
           {ProjectsTable}
         </>
       )}
 
-      {/* ══════════════════════════════════
-          ANALYTICS
-          ══════════════════════════════════ */}
+      {/* ══ CLIENTS ══ */}
+      {activeNav === 'clients' && (
+        <>
+          <motion.div {...fadeUp(0)}>
+            <h2 className="text-lg font-bold text-white mb-1">Client Directory</h2>
+            <p className="text-sm text-gray-400 mb-5">All registered clients and their design journey status.</p>
+          </motion.div>
+          {ClientsTable}
+        </>
+      )}
+
+      {/* ══ ANALYTICS ══ */}
       {activeNav === 'analytics' && (
         <>
           <motion.div {...fadeUp(0)}>
-            <h2 className="text-lg font-bold text-white mb-1">Platform Analytics</h2>
-            <p className="text-sm text-gray-400 mb-5">Monthly lead and site visit trends.</p>
+            <h2 className="text-lg font-bold text-white mb-1">Studio Analytics</h2>
+            <p className="text-sm text-gray-400 mb-5">Monthly consultation and project activity trends.</p>
           </motion.div>
+
           {MetricCards}
 
-          {/* Leads vs Visits chart */}
+          {/* Bookings vs Projects chart */}
           <motion.div {...fadeUp(0.1)} className="glass border border-white/10 rounded-2xl p-5 sm:p-6">
-            <h3 className="font-semibold text-white mb-0.5">Leads &amp; Visits — Last 7 Months</h3>
-            <p className="text-xs text-gray-500 mb-5">Monthly inbound interest registrations and site visits</p>
+            <h3 className="font-semibold text-white mb-0.5">Bookings &amp; Projects — Last 7 Months</h3>
+            <p className="text-xs text-gray-500 mb-5">Monthly consultation bookings and new project starts</p>
             <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={LEADS_CHART} margin={{ top: 5, right: 10, bottom: 0, left: -20 }}>
+              <BarChart data={ANALYTICS_CHART} margin={{ top: 5, right: 10, bottom: 0, left: -20 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
                 <XAxis dataKey="month" tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} />
@@ -434,17 +433,17 @@ export default function AdminDashboard({ session }) {
                   contentStyle={{ background: '#111827', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', fontSize: '12px' }}
                   cursor={{ fill: 'rgba(255,255,255,0.04)' }}
                 />
-                <Bar dataKey="leads"  name="Leads"  radius={[4,4,0,0]} fill="#c99a1a" />
-                <Bar dataKey="visits" name="Visits" radius={[4,4,0,0]} fill="#5eead4" />
+                <Bar dataKey="bookings" name="Consultations" radius={[4,4,0,0]} fill="#c99a1a" />
+                <Bar dataKey="projects" name="Projects"      radius={[4,4,0,0]} fill="#5eead4" />
               </BarChart>
             </ResponsiveContainer>
             <div className="flex items-center gap-5 mt-3 justify-center">
-              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-[#c99a1a]" /><span className="text-xs text-gray-400">Leads</span></div>
-              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-[#5eead4]" /><span className="text-xs text-gray-400">Site Visits</span></div>
+              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-[#c99a1a]" /><span className="text-xs text-gray-400">Consultations</span></div>
+              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-[#5eead4]" /><span className="text-xs text-gray-400">Projects</span></div>
             </div>
           </motion.div>
 
-          {SalesPipeline}
+          {DesignPipeline}
         </>
       )}
 

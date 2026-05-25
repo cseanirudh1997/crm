@@ -1,170 +1,113 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { TrendingUp, AlertCircle, BarChart2, Shield, Home, ArrowUpRight } from 'lucide-react'
-import { fetchAIInsights } from './api'
+import { Play, BookOpen, Clock, ArrowRight, Sparkles, Eye } from 'lucide-react'
+import { fetchYouTubeVideos, fetchBlogs } from './api'
+import { normalizeImageUrl, handleImageError } from './imageUtils'
 
-const ICON_MAP = {
-  TrendingUp,
-  AlertCircle,
-  BarChart2,
-  Shield,
-  Home,
+function VideoCard({ video }) {
+  const [playing, setPlaying] = useState(false)
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }} className="group glass border border-white/5 rounded-2xl overflow-hidden card-glow hover:border-brand-700/40">
+      <div className="relative aspect-video overflow-hidden cursor-pointer" onClick={() => setPlaying(true)}>
+        {playing ? (
+          <iframe src={`https://www.youtube.com/embed/${video.youtubeId}?autoplay=1`} title={video.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="absolute inset-0 w-full h-full" />
+        ) : (
+          <>
+            <img src={normalizeImageUrl(video.thumbnail, { width: 800, quality: 75 })} alt={video.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" onError={(e) => handleImageError(e)} />
+            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+              <div className="w-14 h-14 rounded-full bg-brand-600/90 border-2 border-brand-400/50 flex items-center justify-center shadow-glow group-hover:scale-110 transition-transform">
+                <Play size={22} className="text-white ml-1" fill="white" />
+              </div>
+            </div>
+            <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/70 text-white text-xs font-mono">{video.duration}</div>
+            <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/60 text-xs text-gray-300"><Eye size={9} />{video.views}</div>
+          </>
+        )}
+      </div>
+      <div className="p-4">
+        <h3 className="text-sm font-bold text-white leading-snug mb-1 group-hover:text-brand-200 transition-colors">{video.title}</h3>
+        <p className="text-xs text-gray-500 leading-relaxed">{video.description}</p>
+      </div>
+    </motion.div>
+  )
 }
 
-const TREND_COLORS = [
-  'from-brand-900/60 to-gray-900  border-brand-700/30',
-  'from-amber-900/60 to-gray-900  border-amber-700/30',
-  'from-sky-900/60   to-gray-900  border-sky-700/30',
-  'from-emerald-900/60 to-gray-900 border-emerald-700/30',
-  'from-rose-900/60  to-gray-900  border-rose-700/30',
-]
+function BlogCard({ blog }) {
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }} className="group glass border border-white/5 rounded-2xl overflow-hidden card-glow hover:border-brand-700/40 cursor-pointer">
+      <div className="relative h-40 overflow-hidden">
+        <img src={normalizeImageUrl(blog.imageUrl, { width: 600, quality: 70 })} alt={blog.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" onError={(e) => handleImageError(e)} />
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-950/80 to-transparent" />
+        <div className="absolute top-3 left-3"><span className="property-badge">{blog.category}</span></div>
+      </div>
+      <div className="p-4">
+        <h3 className="text-sm font-bold text-white leading-snug mb-2 group-hover:text-brand-200 transition-colors">{blog.title}</h3>
+        <p className="text-xs text-gray-500 leading-relaxed mb-3 line-clamp-2">{blog.summary}</p>
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-gray-600 flex items-center gap-1"><Clock size={9} />{blog.readTime}</span>
+          <div className="flex items-center gap-1 text-xs text-brand-400 font-medium group-hover:gap-2 transition-all">Read <ArrowRight size={10} /></div>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
 
-const ACCENT_COLORS = [
-  'text-brand-400',
-  'text-amber-400',
-  'text-sky-400',
-  'text-emerald-400',
-  'text-rose-400',
-]
-
-const MARKET_STATS = [
-  { label: 'Avg. Price Appreciation (Gurugram)', value: '18.4%', sub: 'YoY — Golf Course Road corridor' },
-  { label: 'NRI Investment Surge',               value: '34%',   sub: 'Increase in NRI buyer enquiries Q1 2026' },
-  { label: 'RERA Registered Projects',           value: '100%',  sub: 'All EstateFlow listed properties' },
-  { label: 'Avg. Rental Yield (HITEC City)',      value: '5.8%',  sub: 'Gross yield — Hyderabad premium segment' },
-]
-
-export default function InvestmentInsights() {
-  const [insights, setInsights] = useState([])
-  const [loading,  setLoading]  = useState(true)
+export default function Inspirations() {
+  const [videos, setVideos] = useState([])
+  const [blogs, setBlogs] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [tab, setTab] = useState('videos')
 
   useEffect(() => {
-    fetchAIInsights().then((res) => {
-      setInsights(res.insights || [])
+    Promise.allSettled([fetchYouTubeVideos(), fetchBlogs()]).then(([vRes, bRes]) => {
+      if (vRes.status === 'fulfilled') setVideos(vRes.value?.videos || [])
+      if (bRes.status === 'fulfilled') setBlogs(bRes.value?.blogs || [])
       setLoading(false)
     })
   }, [])
 
   return (
-    <section id="insights" className="py-24 relative bg-gray-950 overflow-hidden">
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-700/20 to-transparent" />
-      <div className="orb w-96 h-96 bg-brand-900 top-0 -right-20 opacity-15" />
-
-      <div className="section-wrapper">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-14"
-        >
-          <span className="section-badge mb-4">AI Market Intelligence</span>
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white mt-4 mb-4">
-            Real Estate{' '}
-            <span className="gradient-text">Investment Insights</span>
+    <section id="inspirations" className="py-20 relative">
+      <div className="absolute inset-0 dot-grid opacity-10 pointer-events-none" />
+      <div className="orb w-80 h-80 bg-brand-800 top-0 -right-20 opacity-8" />
+      <div className="section-wrapper relative z-10">
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="text-center mb-10">
+          <span className="section-badge mb-4"><Sparkles size={11} /> Design Inspirations</span>
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
+            Stories, Walkthroughs <span className="gradient-text">&amp; Insights</span>
           </h2>
-          <p className="max-w-2xl mx-auto text-gray-400 text-lg">
-            Our AI engine continuously analyses market trends, RERA filings, demand signals,
-            and builder performance to surface the best investment opportunities.
+          <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+            Explore cinematic design walkthroughs, expert articles, and interior inspiration curated by the Maison studio team.
           </p>
         </motion.div>
 
-        {/* Market stat tiles */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12"
-        >
-          {MARKET_STATS.map(({ label, value, sub }) => (
-            <div key={label} className="glass border border-brand-800/30 rounded-2xl p-5 text-center">
-              <div className="text-3xl font-black gradient-text mb-1">{value}</div>
-              <div className="text-xs font-semibold text-white mb-1">{label}</div>
-              <div className="text-xs text-gray-500">{sub}</div>
-            </div>
+        {/* Tab switcher */}
+        <div className="flex justify-center gap-2 mb-10">
+          {[{ id: 'videos', label: 'Video Walkthroughs', icon: Play }, { id: 'blogs', label: 'Design Articles', icon: BookOpen }].map(({ id, label, icon: Icon }) => (
+            <button key={id} onClick={() => setTab(id)} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${tab === id ? 'bg-brand-600 text-white shadow-glow-sm' : 'glass border border-white/10 text-gray-400 hover:text-white'}`}>
+              <Icon size={14} /> {label}
+            </button>
           ))}
-        </motion.div>
+        </div>
 
-        {/* AI Insight cards */}
         {loading ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="rounded-2xl overflow-hidden border border-white/5">
-                <div className="p-6 space-y-3">
-                  <div className="shimmer h-4 w-1/3 rounded bg-white/5" />
-                  <div className="shimmer h-5 w-3/4 rounded bg-white/5" />
-                  <div className="shimmer h-12 rounded bg-white/5" />
-                  <div className="shimmer h-8 w-1/3 rounded-xl bg-white/5" />
-                </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="glass border border-white/5 rounded-2xl overflow-hidden">
+                <div className="aspect-video shimmer bg-white/5" />
+                <div className="p-4 space-y-2"><div className="h-4 w-3/4 shimmer bg-white/5 rounded-full" /><div className="h-3 w-full shimmer bg-white/5 rounded-full" /></div>
               </div>
             ))}
           </div>
+        ) : tab === 'videos' ? (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {videos.map((v) => <VideoCard key={v.videoId} video={v} />)}
+          </div>
         ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
-            {insights.map((insight, i) => {
-              const Icon     = ICON_MAP[insight.icon] || TrendingUp
-              const gradient = TREND_COLORS[i % TREND_COLORS.length]
-              const accent   = ACCENT_COLORS[i % ACCENT_COLORS.length]
-
-              return (
-                <motion.div
-                  key={insight.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.08 }}
-                  className={`glass-dark bg-gradient-to-br ${gradient} border rounded-2xl p-6 flex flex-col gap-3 hover:shadow-gold hover:-translate-y-1 transition-all duration-300`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <span className={`text-xs font-semibold uppercase tracking-wider ${accent}`}>
-                      {insight.category}
-                    </span>
-                    <div className={`flex items-center gap-1 text-sm font-black ${accent}`}>
-                      {insight.trend}
-                      <ArrowUpRight size={14} />
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Icon size={18} className={accent} />
-                    </div>
-                    <div>
-                      <h3 className="text-base font-bold text-white leading-snug mb-1">{insight.title}</h3>
-                      <p className="text-gray-400 text-sm leading-relaxed">{insight.body}</p>
-                    </div>
-                  </div>
-
-                  <div className={`mt-auto pt-3 border-t border-white/5 text-xs font-medium ${accent}`}>
-                    {insight.trendLabel}
-                  </div>
-                </motion.div>
-              )
-            })}
-          </motion.div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {blogs.map((b) => <BlogCard key={b.blogId} blog={b} />)}
+          </div>
         )}
-
-        {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mt-12 text-center"
-        >
-          <p className="text-gray-500 text-sm mb-4">
-            Get personalised investment recommendations based on your budget and goals.
-          </p>
-          <button
-            onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-            className="btn-primary px-10"
-          >
-            <TrendingUp size={16} /> Book Investment Consultation
-          </button>
-        </motion.div>
       </div>
     </section>
   )

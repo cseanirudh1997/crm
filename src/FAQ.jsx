@@ -1,112 +1,52 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown } from 'lucide-react'
+import { HelpCircle, ChevronDown } from 'lucide-react'
 
 const FAQS = [
-  {
-    q: 'Is EstateFlow a broker? Do you charge brokerage?',
-    a: 'EstateFlow is a tech-enabled real estate advisory platform — not a traditional broker. We charge zero brokerage. You get direct builder pricing on all listed projects. Our revenue comes from builder-side partnerships, which means our interests are aligned with yours.',
-  },
-  {
-    q: 'Are all projects RERA-registered and verified?',
-    a: 'Yes — 100% of projects listed on EstateFlow are RERA-registered and verified. We display the RERA ID on every project card. We also conduct independent due diligence on builder track record, delivery history, and financial health before listing any project.',
-  },
-  {
-    q: 'I am an NRI. Can I buy property in India through EstateFlow?',
-    a: 'Absolutely. We have a dedicated NRI desk that handles FEMA compliance, Power of Attorney documentation, repatriation of funds, and end-to-end coordination with builders. We\'ve helped NRI buyers from the US, UK, UAE, Singapore, and Canada invest seamlessly.',
-  },
-  {
-    q: 'How does the site visit process work?',
-    a: 'Submit your site visit request through the form or chatbot. Our concierge will contact you within 4 hours to confirm the slot. We arrange premium transport (cab/driver), builder VIP access, and a dedicated relationship manager who accompanies you throughout the visit.',
-  },
-  {
-    q: 'What is the typical end-to-end timeline for purchasing a property?',
-    a: 'From consultation to final registration, the timeline varies: ready-to-move properties can close in 30–45 days. Under-construction properties involve booking, allotment letter, agreement signing, and payment milestones over 7–10 days for paperwork, with possession as per builder schedule.',
-  },
-  {
-    q: 'Can EstateFlow help with home loan processing?',
-    a: 'Yes. We have partnerships with HDFC, SBI, ICICI, and Axis Bank for preferential interest rates and faster approvals on all EstateFlow-listed projects. Our finance desk will run a free eligibility check and connect you with the right lender.',
-  },
-  {
-    q: 'What is the AI Property Assistant chatbot? How does it work?',
-    a: 'Our AI chatbot is trained on project details, RERA data, market trends, and pricing intelligence. It can answer questions about specific projects, suggest properties based on your budget, explain legal terms, and connect you to a human advisor — all within the same conversation.',
-  },
-  {
-    q: 'What happens after I register my interest in a project?',
-    a: 'Within 24 hours, a dedicated Relationship Manager will call you to understand your requirements in detail. They\'ll share a personalized shortlist, arrange site visits, provide floor plan analysis, and guide you through the booking process at your own pace — no pressure tactics.',
-  },
+  { q: 'What is included in a full home interior design package?', a: 'Our full home package covers everything — from an initial design consultation and concept development, to 3D visualization, material selection, procurement, execution oversight, and final styling. We manage every detail so you don\'t have to.' },
+  { q: 'How long does a complete home interior project take?', a: 'Timelines vary based on project scope. A single room design typically takes 3–5 weeks. A full apartment (2-3BHK) takes 8–14 weeks. Villa projects can run 16–32 weeks. We provide detailed timelines after the initial consultation.' },
+  { q: 'Do you provide 3D visualization before starting work?', a: 'Absolutely. All projects include photorealistic 3D renders and virtual walkthroughs of every room before a single nail is hammered. You see exactly what your finished space will look like before we begin.' },
+  { q: 'Can I choose my own materials and furniture brands?', a: 'Yes. We work with a curated network of premium brands (Poliform, Miele, Häfele, and more) but we can also incorporate your preferred brands and vendors. Your vision guides every decision.' },
+  { q: 'What is the minimum project investment you work with?', a: 'We typically work with projects starting at ₹5 Lakhs for single-room designs. Full home interior packages start from ₹80 per sq ft. We offer a free initial consultation to understand your space and budget before proposing a package.' },
+  { q: 'Do you work outside Gurugram — in Mumbai, Bengaluru, Hyderabad?', a: 'Yes, we are a pan-India studio. Our senior designers travel to your location for site assessments. We have completed projects in Delhi NCR, Mumbai, Bengaluru, Hyderabad, Pune, and internationally.' },
+  { q: 'How do I book an initial consultation?', a: 'Simply fill out the consultation form on this page or call us directly. We respond within 24 hours to schedule a 60-minute complimentary design consultation at your home or virtually.' },
+  { q: 'Do you handle post-completion issues or touch-ups?', a: 'Yes. All our projects come with a 1-year warranty on workmanship. We have a dedicated after-care team that handles any touch-ups, repairs, or minor additions within the warranty period.' },
 ]
 
 export default function FAQ() {
   const [open, setOpen] = useState(null)
-
   return (
-    <section id="faq" className="py-24 relative bg-gray-950 overflow-hidden">
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-700/20 to-transparent" />
-
-      <div className="section-wrapper max-w-4xl">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-14"
-        >
-          <span className="section-badge mb-4">Common Questions</span>
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white mt-4 mb-4">
-            Frequently Asked{' '}
-            <span className="gradient-text">Questions</span>
+    <section id="faq" className="py-20 relative">
+      <div className="section-wrapper">
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="text-center mb-12">
+          <span className="section-badge mb-4"><HelpCircle size={11} /> FAQ</span>
+          <h2 className="font-display text-3xl sm:text-4xl font-bold text-white mb-4">
+            Frequently Asked <span className="gradient-text">Questions</span>
           </h2>
-          <p className="max-w-xl mx-auto text-gray-400 text-lg">
-            Everything you need to know about buying premium real estate in India through EstateFlow.
-          </p>
+          <p className="text-gray-400 text-base max-w-xl mx-auto">Everything you need to know about working with Maison Interior Design Studio.</p>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="space-y-3"
-        >
+        <div className="max-w-3xl mx-auto space-y-3">
           {FAQS.map(({ q, a }, i) => (
-            <div
-              key={i}
-              className={`glass border rounded-2xl overflow-hidden transition-all duration-300 ${
-                open === i ? 'border-brand-700/50 shadow-gold' : 'border-white/8 hover:border-brand-800/40'
-              }`}
-            >
-              <button
-                onClick={() => setOpen(open === i ? null : i)}
-                className="w-full flex items-start justify-between gap-4 p-5 text-left"
-              >
-                <span className={`font-semibold text-sm sm:text-base leading-snug transition-colors ${open === i ? 'text-brand-300' : 'text-white'}`}>
-                  {q}
-                </span>
-                <motion.div
-                  animate={{ rotate: open === i ? 180 : 0 }}
-                  transition={{ duration: 0.25 }}
-                  className="flex-shrink-0 mt-0.5"
-                >
-                  <ChevronDown size={18} className={open === i ? 'text-brand-400' : 'text-gray-500'} />
-                </motion.div>
+            <motion.div key={i} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: i * 0.04 }} className={`glass border rounded-2xl overflow-hidden transition-all duration-300 ${open === i ? 'border-brand-700/40 shadow-gold' : 'border-white/5 hover:border-white/10'}`}>
+              <button onClick={() => setOpen(open === i ? null : i)} className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left">
+                <span className={`text-sm font-semibold leading-snug transition-colors ${open === i ? 'text-brand-300' : 'text-white'}`}>{q}</span>
+                <ChevronDown size={16} className={`flex-shrink-0 text-gray-400 transition-transform duration-300 ${open === i ? 'rotate-180 text-brand-400' : ''}`} />
               </button>
-
-              <AnimatePresence initial={false}>
+              <AnimatePresence>
                 {open === i && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{   opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3, ease: 'easeInOut' }}
-                    className="overflow-hidden"
-                  >
-                    <p className="px-5 pb-5 text-gray-400 text-sm leading-relaxed border-t border-white/5 pt-4">
-                      {a}
-                    </p>
+                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3 }} className="overflow-hidden">
+                    <p className="px-5 pb-5 text-sm text-gray-400 leading-relaxed">{a}</p>
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
+            </motion.div>
           ))}
+        </div>
+
+        <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mt-10">
+          <p className="text-gray-500 text-sm mb-3">Still have questions?</p>
+          <button onClick={() => document.getElementById('consult')?.scrollIntoView({ behavior: 'smooth' })} className="btn-primary">Book a Free Consultation</button>
         </motion.div>
       </div>
     </section>

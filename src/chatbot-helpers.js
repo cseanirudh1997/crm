@@ -1,25 +1,25 @@
 // ─────────────────────────────────────────────
-//  Chatbot helpers — luxury real estate prompts
+//  Maison — Chatbot helpers (interior design assistant)
 // ─────────────────────────────────────────────
 
 export const SUGGESTED_PROMPTS = [
-  'Show me luxury projects in Gurugram',
-  'What are the best NRI investment options?',
-  'How does site visit booking work?',
-  'Tell me about Lodha Park Mumbai',
-  'What is the current market appreciation rate?',
-  'How do I register my interest?',
+  'Show modern luxury interiors',
+  'Explain modular kitchen packages',
+  'How do consultations work?',
+  'Show villa transformation ideas',
+  'What design styles are available?',
+  'What is the cost of full home interior?',
 ]
 
 export const FALLBACK_RESPONSE =
-  "I'm not able to answer that right now. Please reach out to our concierge at concierge@estateflow.in or use the consultation form on our website."
+  "I'm unable to fetch a response right now. Please reach out directly at studio@maisonstudio.in or use the consultation form on our website — our design team responds within 24 hours."
 
 /** Build the initial bot greeting message */
 export function getWelcomeMessage() {
   return {
     id:   Date.now(),
     role: 'bot',
-    text: "🏙️ Welcome to EstateFlow! I'm your AI Property Assistant. Ask me about projects, cities, pricing, site visits, NRI services, or investment insights.",
+    text: '✨ Welcome to Maison! I\'m your AI Design Assistant. Ask me about our interior design collections, modular kitchens, 3D visualization, consultation packages, or luxury design styles.',
     ts:   new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
   }
 }

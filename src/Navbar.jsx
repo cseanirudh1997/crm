@@ -1,15 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Building2, LogOut, LayoutDashboard, ChevronRight, Bell } from 'lucide-react'
+import { Menu, X, Palette, LogOut, LayoutDashboard, ChevronRight, Bell, Sparkles } from 'lucide-react'
 import { NAV_LINKS, COMPANY_NAME } from './config'
 import { getSession, clearSession, scrollToSection } from './utils'
 
 const NOTIFICATIONS = [
-  { id: 1, dot: 'bg-brand-500',   title: 'Price Drop Alert — The Arbour',      body: 'DLF Gurugram: Starting price revised to ₹4.2 Cr. Limited inventory.',  time: '2m ago'  },
-  { id: 2, dot: 'bg-emerald-500', title: 'New Launch — Lodha Bellavista',      body: 'Phase 2 towers launched in Noida. Bookings now open.',                  time: '1h ago'  },
-  { id: 3, dot: 'bg-accent-500',  title: 'Market Insight Ready',               body: 'Gurugram appreciation hits 18.4% YoY — view full AI report.',           time: '4h ago'  },
-  { id: 4, dot: 'bg-amber-500',   title: 'Site Visit Confirmed',               body: 'Your visit to Prestige Lakeside, Bengaluru is scheduled for tomorrow.', time: '1d ago'  },
+  { id: 1, dot: 'bg-brand-500',   title: 'New Trend Report — Spring 2026',       body: 'Warm Minimalism & Japandi styles dominate the season. See our curated collection.',   time: '2m ago' },
+  { id: 2, dot: 'bg-emerald-500', title: 'Your Consultation is Confirmed',        body: 'Your design consultation has been scheduled for tomorrow at 11:00 AM.',               time: '1h ago' },
+  { id: 3, dot: 'bg-accent-500',  title: 'New Design Collection Live',            body: 'Luxury Penthouse Living Suite — 4,200 sq ft. View the full photo gallery.',           time: '4h ago' },
+  { id: 4, dot: 'bg-amber-500',   title: '3D Visualization Package Updated',      body: 'Enhanced photorealistic renders now available for your approved design brief.',        time: '1d ago' },
 ]
 
 export default function Navbar() {
@@ -19,10 +19,10 @@ export default function Navbar() {
   const [showNotif,     setShowNotif]     = useState(false)
   const [notifUnread,   setNotifUnread]   = useState(true)
   const notifRef = useRef(null)
-  const navigate  = useNavigate()
-  const location  = useLocation()
-  const session   = getSession()
-  const isHome    = location.pathname === '/'
+  const navigate = useNavigate()
+  const location = useLocation()
+  const session  = getSession()
+  const isHome   = location.pathname === '/'
 
   /* Scroll detection */
   useEffect(() => {
@@ -93,15 +93,19 @@ export default function Navbar() {
     >
       <div className="section-wrapper">
         <div className="flex items-center justify-between h-16">
+
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group" onClick={() => setOpen(false)}>
+          <Link to="/" className="flex items-center gap-2.5 group" onClick={() => setOpen(false)}>
             <div className="relative">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-accent-600 flex items-center justify-center shadow-glow-sm group-hover:shadow-glow transition-all duration-300">
-                <Building2 size={16} className="text-white" />
+                <Palette size={15} className="text-white" />
               </div>
               <div className="absolute inset-0 w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-accent-600 blur-md opacity-40 group-hover:opacity-70 transition-opacity" />
             </div>
-            <span className="text-xl font-bold tracking-tight gradient-text">{COMPANY_NAME}</span>
+            <div className="flex flex-col leading-none">
+              <span className="text-lg font-bold tracking-tight gradient-text">{COMPANY_NAME}</span>
+              <span className="text-[9px] text-gray-500 uppercase tracking-widest font-medium hidden sm:block">Interior Design Studio</span>
+            </div>
           </Link>
 
           {/* Desktop nav */}
@@ -120,9 +124,9 @@ export default function Navbar() {
             })}
           </nav>
 
-          {/* Right side */}
+          {/* Right side controls */}
           <div className="hidden md:flex items-center gap-3">
-            {/* Notifications */}
+            {/* Notification bell */}
             <div className="relative" ref={notifRef}>
               <button
                 onClick={toggleNotif}
@@ -134,23 +138,20 @@ export default function Navbar() {
               {notifUnread && (
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand-500 border border-gray-950 pointer-events-none" />
               )}
-
-              {/* Dropdown panel */}
               <AnimatePresence>
                 {showNotif && (
                   <motion.div
                     initial={{ opacity: 0, y: 8, scale: 0.97 }}
-                    animate={{ opacity: 1, y: 0,  scale: 1    }}
-                    exit={{   opacity: 0, y: 8,  scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1    }}
+                    exit={{   opacity: 0, y: 8, scale: 0.97 }}
                     transition={{ duration: 0.15 }}
                     className="absolute right-0 top-full mt-2 w-80 glass-dark border border-white/10 rounded-2xl shadow-glass overflow-hidden z-50"
                   >
                     <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-                      <span className="text-sm font-semibold text-white">Notifications</span>
-                      <button
-                        onClick={() => setNotifUnread(false)}
-                        className="text-xs text-brand-400 hover:underline"
-                      >
+                      <span className="text-sm font-semibold text-white flex items-center gap-1.5">
+                        <Sparkles size={12} className="text-brand-400" /> Studio Updates
+                      </span>
+                      <button onClick={() => setNotifUnread(false)} className="text-xs text-brand-400 hover:underline">
                         Mark all read
                       </button>
                     </div>
@@ -170,7 +171,7 @@ export default function Navbar() {
                     </div>
                     <div className="border-t border-white/10 px-4 py-2.5 text-center">
                       <button className="text-xs text-gray-500 hover:text-gray-300 transition-colors">
-                        View all activity
+                        View all updates
                       </button>
                     </div>
                   </motion.div>
@@ -216,13 +217,13 @@ export default function Navbar() {
                 {showNotif && (
                   <motion.div
                     initial={{ opacity: 0, y: 8, scale: 0.97 }}
-                    animate={{ opacity: 1, y: 0,  scale: 1    }}
-                    exit={{   opacity: 0, y: 8,  scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1    }}
+                    exit={{   opacity: 0, y: 8, scale: 0.97 }}
                     transition={{ duration: 0.15 }}
                     className="absolute right-0 top-full mt-2 w-72 glass-dark border border-white/10 rounded-2xl shadow-glass overflow-hidden z-50"
                   >
                     <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-                      <span className="text-sm font-semibold text-white">Notifications</span>
+                      <span className="text-sm font-semibold text-white">Studio Updates</span>
                       <button onClick={() => setNotifUnread(false)} className="text-xs text-brand-400 hover:underline">Mark all read</button>
                     </div>
                     <div className="max-h-60 overflow-y-auto divide-y divide-white/5">

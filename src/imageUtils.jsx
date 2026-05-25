@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 // ─── Central fallback image ────────────────────────────────────────────────────
 export const FALLBACK_IMG =
-  'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80'
+  'https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?w=800&auto=format&fit=crop&q=80'
 
 const UNSPLASH_RE = /^https?:\/\/images\.unsplash\.com\//
 

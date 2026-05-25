@@ -1,39 +1,41 @@
 // ─────────────────────────────────────────────
-//  EstateFlow — Global Configuration
+//  Maison — Global Configuration
+//  Premium Interior Design & Luxury Spaces
 // ─────────────────────────────────────────────
 
 export const API_URL =
-  'https://script.google.com/macros/s/AKfycbwysf5_3XUVtvRoHHj-Zb0lDsEsC6LoZDJMk8V3L_YrTLunl6THQWKj6gj5E7nqJSQVQg/exec'
+  'https://script.google.com/macros/s/AKfycbzVulNq3OJDhedqXtHcNKt25ntv9rYdJRBX1jfJetsrwXKLP4TYw9KJ087lEzQfM5xF/exec'
 
-export const COMPANY_NAME    = 'EstateFlow'
-export const COMPANY_TAGLINE = 'Premium Indian Real Estate Platform'
-export const COMPANY_EMAIL   = 'concierge@estateflow.in'
+export const COMPANY_NAME    = 'Maison'
+export const COMPANY_TAGLINE = 'Premium Interior Design & Luxury Spaces'
+export const COMPANY_EMAIL   = 'studio@maisonstudio.in'
 export const COMPANY_PHONE   = '+91 98765 43210'
 export const COMPANY_ADDRESS = 'DLF Cyber City, Sector 24, Gurugram, Haryana 122002'
 
 export const SOCIAL_LINKS = {
-  twitter:   'https://twitter.com/estateflow',
-  linkedin:  'https://linkedin.com/company/estateflow',
-  instagram: 'https://instagram.com/estateflow',
-  youtube:   'https://youtube.com/@estateflow',
+  instagram: 'https://instagram.com/maisonstudio',
+  pinterest: 'https://pinterest.com/maisonstudio',
+  youtube:   'https://youtube.com/@maisonstudio',
+  linkedin:  'https://linkedin.com/company/maisonstudio',
 }
 
 export const NAV_LINKS = [
-  { label: 'Cities',    href: '#cities'     },
-  { label: 'Projects',  href: '#projects'   },
-  { label: 'Amenities', href: '#amenities'  },
-  { label: 'Insights',  href: '#insights'   },
-  { label: 'Contact',   href: '#contact'    },
+  { label: 'Collections',     href: '#collections'     },
+  { label: 'Transformations', href: '#transformations' },
+  { label: 'Services',        href: '#services'        },
+  { label: 'Inspirations',    href: '#inspirations'    },
+  { label: 'Consult',         href: '#consult'         },
 ]
 
-// ── Payments feature flag ──────────────────────
-// Set to true once Razorpay integration is wired up
-export const paymentsEnabled = false
+// ── Feature flags — driven by PlatformConfig at runtime ──────────────────
+export const paymentsEnabled      = true
+export const consultationsEnabled = true
+export const newsletterEnabled    = true
 
 // ── Tier constants ─────────────────────────────
 export const TIERS = {
-  CUSTOMER: 'customer',   // free registered user
-  PREMIUM:  'premium',    // verified investor / premium buyer
+  CUSTOMER: 'customer',   // free registered client
+  PREMIUM:  'premium',    // premium design client
   ADMIN:    'admin',
 }
 
@@ -47,9 +49,9 @@ export const ROLES = {
 export const ONBOARDING_STAGES = {
   PENDING:      'pending',
   CONSULTATION: 'consultation',
-  SITE_VISIT:   'site_visit',
-  NEGOTIATION:  'negotiation',
-  BOOKED:       'booked',
+  DESIGN:       'design',
+  EXECUTION:    'execution',
+  COMPLETED:    'completed',
 }
 
 // ── LocalStorage keys ──────────────────────────

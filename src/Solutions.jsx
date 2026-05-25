@@ -1,186 +1,129 @@
+// CaseStudies — Home Transformation showcase
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { MapPin, Building2, ArrowRight } from 'lucide-react'
-import { fetchCities } from './api'
-import { normalizeImageUrl } from './imageUtils'
+import { motion, AnimatePresence } from 'framer-motion'
+import { BookOpen, Clock, Ruler, Sparkles, TrendingUp, ChevronRight, ArrowRight } from 'lucide-react'
+import { fetchCaseStudies } from './api'
+import { normalizeImageUrl, handleImageError } from './imageUtils'
 
-export default function CityShowcase() {
-  const [cities,  setCities]  = useState([])
+// SkeletonCard, DetailPanel, and CaseStudies main export
+
+function SkeletonCard() {
+  return (
+    <div className="glass border border-white/5 rounded-2xl overflow-hidden">
+      <div className="h-28 shimmer bg-white/5" />
+      <div className="p-4 space-y-2"><div className="h-3 w-3/4 shimmer bg-white/5 rounded-full" /><div className="h-3 w-1/2 shimmer bg-white/5 rounded-full" /></div>
+    </div>
+  )
+}
+
+export default function CaseStudies() {
+  const [caseStudies, setCaseStudies] = useState([])
   const [loading, setLoading] = useState(true)
-  const [active,  setActive]  = useState(null)
+  const [selected, setSelected] = useState(null)
 
   useEffect(() => {
-    fetchCities().then((res) => {
-      if (res.success && res.cities?.length) {
-        setCities(res.cities)
-        setActive(res.cities[0].id)
-      }
-      setLoading(false)
-    })
+    fetchCaseStudies()
+      .then((res) => {
+        const data = res?.caseStudies || []
+        setCaseStudies(data)
+        if (data.length > 0) setSelected(data[0])
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
   }, [])
 
-  function scrollToProjects(cityId) {
-    // Notify FeaturedProjects to filter by this city
-    window.dispatchEvent(new CustomEvent('estateflow:city-select', { detail: { cityId } }))
-    document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })
-  }
-
   return (
-    <section id="cities" className="py-24 relative bg-gray-950 overflow-hidden">
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-700/30 to-transparent" />
-      <div className="orb w-96 h-96 bg-brand-900 bottom-0 right-0 opacity-10" />
-
-      <div className="section-wrapper">
+    <section id="transformations" className="py-20 relative">
+      <div className="orb w-80 h-80 bg-accent-800 -bottom-20 -left-20 opacity-8" />
+      <div className="section-wrapper relative z-10">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-14"
-        >
-          <span className="section-badge mb-4">Prime Locations</span>
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white mt-4 mb-4">
-            India's Most Coveted{' '}
-            <span className="gradient-text">Real Estate Markets</span>
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="text-center mb-12">
+          <span className="section-badge mb-4"><BookOpen size={11} /> Transformation Stories</span>
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
+            Real Homes, <span className="gradient-text">Extraordinary Transformations</span>
           </h2>
-          <p className="max-w-2xl mx-auto text-gray-400 text-lg">
-            From the millennium city of Gurugram to Mumbai's iconic sea-facing boulevards —
-            curated luxury across India's fastest-appreciating markets.
+          <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+            From concept to completion — explore how we've transformed ordinary spaces into extraordinary luxury experiences for clients across India.
           </p>
         </motion.div>
 
-        {/* Skeleton loaders */}
-        {loading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="rounded-2xl overflow-hidden border border-white/5">
-                <div className="shimmer h-48 bg-white/5" />
-                <div className="p-4 space-y-2">
-                  <div className="shimmer h-4 w-3/4 rounded-md bg-white/5" />
-                  <div className="shimmer h-3 w-1/2 rounded-md bg-white/5" />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* City cards grid */}
-        {!loading && cities.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
-            {cities.map((city, i) => (
+        <div className="grid lg:grid-cols-5 gap-8 items-start">
+          {/* Left: card list */}
+          <div className="lg:col-span-2 space-y-3">
+            {loading ? [...Array(4)].map((_, i) => <SkeletonCard key={i} />) : caseStudies.map((cs, i) => (
               <motion.div
-                key={city.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
-                onClick={() => setActive(city.id)}
-                className={`group relative rounded-2xl overflow-hidden cursor-pointer border transition-all duration-300 ${
-                  active === city.id
-                    ? 'border-brand-600/60 shadow-gold scale-[1.02]'
-                    : 'border-white/5 hover:border-brand-700/40 hover:shadow-gold hover:-translate-y-1'
-                }`}
+                key={cs.caseStudyId}
+                initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: i * 0.07 }}
+                onClick={() => setSelected(cs)}
+                className={`group cursor-pointer rounded-2xl overflow-hidden border transition-all duration-300 ${selected?.caseStudyId === cs.caseStudyId ? 'border-brand-600/60 shadow-gold bg-brand-950/30' : 'glass border-white/5 hover:border-brand-700/40'}`}
               >
-                {/* Image */}
-                <div className="relative h-52 overflow-hidden bg-gray-900">
-                  <img
-                    src={normalizeImageUrl(city.imageUrl)}
-                    alt={city.name}
-                    loading="lazy"
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    onError={(e) => {
-                      e.target.style.display = 'none'
-                      e.target.nextSibling.style.display = 'flex'
-                    }}
-                  />
-                  {/* Fallback gradient */}
-                  <div
-                    className="w-full h-full hidden items-center justify-center"
-                    style={{
-                      background: `linear-gradient(135deg, hsl(${i * 55 + 30}, 30%, 18%), hsl(${i * 55 + 60}, 20%, 10%))`,
-                    }}
-                  >
-                    <Building2 size={40} className="text-brand-600/40" />
+                <div className="flex gap-0">
+                  <div className="relative w-28 flex-shrink-0 overflow-hidden">
+                    <img src={normalizeImageUrl(cs.imageUrl, { width: 300, quality: 70 })} alt={cs.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 min-h-[100px]" onError={(e) => handleImageError(e)} />
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent to-gray-950/20" />
                   </div>
-
-                  {/* Gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/40 to-transparent" />
-
-                  {/* Project count badge */}
-                  <div className="absolute top-3 right-3 px-2 py-1 rounded-full bg-brand-600/80 backdrop-blur-sm border border-brand-500/50 text-xs font-bold text-white">
-                    {city.projectCount} Projects
+                  <div className="flex-1 p-3 min-w-0">
+                    {cs.style && <div className="text-[10px] text-brand-400 font-semibold mb-1 uppercase tracking-wide">{cs.style}</div>}
+                    <h3 className="text-xs font-bold text-white leading-snug mb-1 group-hover:text-brand-200 transition-colors">{cs.title}</h3>
+                    <p className="text-[11px] text-gray-500 mb-1.5 line-clamp-2 leading-relaxed">{cs.summary}</p>
+                    <div className="flex items-center gap-1 text-[10px] text-brand-400 font-medium group-hover:gap-2 transition-all">View story <ChevronRight size={9} /></div>
                   </div>
-
-                  {/* Active indicator */}
-                  {active === city.id && (
-                    <div className="absolute top-3 left-3 px-2 py-1 rounded-full bg-brand-500 text-xs font-bold text-white flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse-slow inline-block" />
-                      Selected
-                    </div>
-                  )}
-                </div>
-
-                {/* Content */}
-                <div className="p-4 bg-gradient-to-b from-gray-900/80 to-gray-950">
-                  <div className="flex items-start justify-between mb-1">
-                    <h3 className="text-base font-bold text-white group-hover:text-brand-300 transition-colors">
-                      {city.name}
-                    </h3>
-                    <ArrowRight
-                      size={14}
-                      className="text-gray-600 group-hover:text-brand-400 group-hover:translate-x-0.5 transition-all mt-0.5 shrink-0"
-                    />
-                  </div>
-                  <div className="flex items-center gap-1 text-xs text-gray-500 mb-2">
-                    <MapPin size={10} />
-                    {city.state}
-                  </div>
-                  {city.description && (
-                    <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">
-                      {city.description}
-                    </p>
-                  )}
                 </div>
               </motion.div>
             ))}
           </div>
-        )}
 
-        {/* Selected city detail panel */}
-        {!loading && active && (() => {
-          const city = cities.find((c) => c.id === active)
-          if (!city) return null
-          return (
-            <motion.div
-              key={active}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="mt-8 glass border border-brand-800/30 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-start gap-6"
-            >
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <MapPin size={16} className="text-brand-400" />
-                  <span className="text-brand-400 text-sm font-semibold">{city.state}</span>
-                </div>
-                <h3 className="text-2xl font-extrabold text-white mb-2">{city.name}</h3>
-                <p className="text-gray-400 leading-relaxed">{city.description}</p>
-              </div>
-              <div className="flex flex-col sm:flex-row md:flex-col gap-3 shrink-0">
-                <div className="glass rounded-2xl px-6 py-4 text-center border border-brand-800/30 min-w-[120px]">
-                  <div className="text-3xl font-black text-brand-400">{city.projectCount}+</div>
-                  <div className="text-xs text-gray-400 mt-1">Curated Projects</div>
-                </div>
-                <button
-                  onClick={() => scrollToProjects(city.id)}
-                  className="btn-primary justify-center py-3 px-6 text-sm whitespace-nowrap"
-                >
-                  View Projects <ArrowRight size={14} />
-                </button>
-              </div>
-            </motion.div>
-          )
-        })()}
+          {/* Right: detail panel */}
+          <div className="lg:col-span-3 lg:sticky lg:top-24">
+            {loading ? (
+              <div className="glass border border-white/5 rounded-2xl h-[480px] shimmer bg-white/5" />
+            ) : selected ? (
+              <AnimatePresence mode="wait">
+                <motion.div key={selected.caseStudyId} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.35 }} className="glass border border-brand-700/30 rounded-2xl overflow-hidden">
+                  <div className="relative h-64 overflow-hidden">
+                    <img src={normalizeImageUrl(selected.imageUrl, { width: 900, quality: 80 })} alt={selected.title} className="w-full h-full object-cover" onError={(e) => handleImageError(e)} />
+                    <div className="absolute inset-0 bg-gradient-to-t from-gray-950/95 via-gray-950/50 to-transparent" />
+                    <div className="absolute bottom-4 left-5 right-5">
+                      {selected.style && <span className="section-badge text-[10px] mb-2 inline-flex">{selected.style}</span>}
+                      <h3 className="font-display text-xl font-bold text-white leading-tight">{selected.title}</h3>
+                      <p className="text-xs text-brand-300 font-medium mt-1">{selected.client}</p>
+                    </div>
+                  </div>
+                  <div className="p-5 space-y-4">
+                    <p className="text-gray-300 text-sm leading-relaxed">{selected.summary}</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      {[{ label: 'Duration', value: selected.duration || '—', icon: Clock }, { label: 'Area', value: selected.area || '—', icon: Ruler }].map(({ label, value, icon: Icon }) => (
+                        <div key={label} className="glass p-3 rounded-xl border border-white/5">
+                          <div className="flex items-center gap-1.5 mb-1"><Icon size={12} className="text-brand-400" /><span className="text-xs text-gray-500">{label}</span></div>
+                          <div className="text-sm font-semibold text-white">{value}</div>
+                        </div>
+                      ))}
+                    </div>
+                    {selected.impact && (
+                      <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-brand-900/20 border border-brand-700/30">
+                        <TrendingUp size={14} className="text-brand-400 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <div className="text-xs text-brand-400 font-semibold mb-0.5">Impact & Outcome</div>
+                          <div className="text-xs text-gray-300 leading-relaxed">{selected.impact}</div>
+                        </div>
+                      </div>
+                    )}
+                    <button onClick={() => document.getElementById('consult')?.scrollIntoView({ behavior: 'smooth' })} className="btn-primary w-full justify-center text-sm">
+                      Transform My Space <ArrowRight size={14} />
+                    </button>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            ) : null}
+          </div>
+        </div>
+
+        <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mt-14">
+          <p className="text-gray-500 text-sm mb-4">Ready to write your own transformation story?</p>
+          <button onClick={() => document.getElementById('consult')?.scrollIntoView({ behavior: 'smooth' })} className="btn-primary px-8 py-4">
+            <Sparkles size={16} /> Start Your Transformation
+          </button>
+        </motion.div>
       </div>
     </section>
   )

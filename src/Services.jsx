@@ -1,123 +1,82 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Waves, Dumbbell, Shield, Leaf, Car, Wifi, Coffee, Star } from 'lucide-react'
-import { fetchAmenities } from './api'
+import { Home, ChefHat, Sofa, Layers, Bed, Building2, Sparkles, CalendarCheck, ArrowRight } from 'lucide-react'
+import { fetchServices } from './api'
 
-// Map amenity name keywords → Lucide icon + gradient + glow
-function getAmenityMeta(amenity) {
-  const n = (amenity || '').toLowerCase()
-  if (n.includes('pool') || n.includes('spa') || n.includes('swim'))
-    return { Icon: Waves,    color: 'from-sky-600 to-sky-800',       glow: 'group-hover:shadow-[0_0_30px_rgba(2,132,199,0.35)]'   }
-  if (n.includes('sport') || n.includes('gym') || n.includes('fitness') || n.includes('arena'))
-    return { Icon: Dumbbell, color: 'from-emerald-600 to-emerald-800', glow: 'group-hover:shadow-[0_0_30px_rgba(5,150,105,0.35)]'   }
-  if (n.includes('security') || n.includes('safe') || n.includes('access'))
-    return { Icon: Shield,   color: 'from-accent-600 to-accent-800',  glow: 'group-hover:shadow-glow-purple'                       }
-  if (n.includes('garden') || n.includes('green') || n.includes('land') || n.includes('nature'))
-    return { Icon: Leaf,     color: 'from-lime-600 to-lime-800',      glow: 'group-hover:shadow-[0_0_30px_rgba(101,163,13,0.35)]'  }
-  if (n.includes('park') || n.includes('ev') || n.includes('car') || n.includes('garage'))
-    return { Icon: Car,      color: 'from-slate-600 to-slate-800',    glow: 'group-hover:shadow-[0_0_30px_rgba(100,116,139,0.35)]' }
-  if (n.includes('smart') || n.includes('auto') || n.includes('wifi') || n.includes('tech') || n.includes('home'))
-    return { Icon: Wifi,     color: 'from-violet-600 to-violet-800',  glow: 'group-hover:shadow-[0_0_30px_rgba(124,58,237,0.35)]'  }
-  if (n.includes('lounge') || n.includes('club') || n.includes('sky') || n.includes('concierge'))
-    return { Icon: Star,     color: 'from-brand-600 to-brand-800',    glow: 'group-hover:shadow-gold'                              }
-  if (n.includes('retail') || n.includes('dining') || n.includes('cafe') || n.includes('food'))
-    return { Icon: Coffee,   color: 'from-amber-600 to-amber-800',    glow: 'group-hover:shadow-[0_0_30px_rgba(245,158,11,0.35)]'  }
-  return   { Icon: Star,     color: 'from-brand-600 to-brand-800',    glow: 'group-hover:shadow-gold'                              }
+const ICON_MAP = { Home, ChefHat, Sofa, Layers, Bed, Building2 }
+
+function SkeletonCard() {
+  return (
+    <div className="glass border border-white/5 rounded-2xl p-6 space-y-3">
+      <div className="w-12 h-12 rounded-2xl shimmer bg-white/5" />
+      <div className="h-4 w-2/3 shimmer bg-white/5 rounded-full" />
+      <div className="h-3 w-full shimmer bg-white/5 rounded-full" />
+      <div className="h-3 w-3/4 shimmer bg-white/5 rounded-full" />
+    </div>
+  )
 }
 
-const container = {
-  hidden: {},
-  show:   { transition: { staggerChildren: 0.08 } },
-}
-
-const item = {
-  hidden: { opacity: 0, y: 30 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.5 } },
-}
-
-export default function LuxuryAmenities() {
-  const [amenities, setAmenities] = useState([])
-  const [loading,   setLoading]   = useState(true)
+export default function Services() {
+  const [services, setServices] = useState([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchAmenities().then((res) => {
-      setAmenities(res.amenities || [])
-      setLoading(false)
-    })
+    fetchServices()
+      .then((res) => setServices(res?.services || []))
+      .catch(() => {})
+      .finally(() => setLoading(false))
   }, [])
 
   return (
-    <section id="amenities" className="py-24 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gray-950" />
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-700/20 to-transparent" />
-      <div className="orb w-80 h-80 bg-brand-800 top-0 right-0 opacity-10" />
-
+    <section id="services" className="py-20 relative">
+      <div className="absolute inset-0 dot-grid opacity-10 pointer-events-none" />
+      <div className="orb w-96 h-96 bg-brand-900 -top-20 right-0 opacity-8" />
       <div className="section-wrapper relative z-10">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <span className="section-badge mb-4">World-Class Lifestyle</span>
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white mt-4 mb-4">
-            Amenities That Define{' '}
-            <span className="gradient-text">Luxury Living</span>
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="text-center mb-12">
+          <span className="section-badge mb-4"><Sparkles size={11} /> Our Services</span>
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
+            Premium <span className="gradient-text">Design Services</span>
           </h2>
-          <p className="max-w-2xl mx-auto text-gray-400 text-lg">
-            Every project in our portfolio is curated for residents who demand more than just
-            a home — they demand a lifestyle that reflects their success.
+          <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+            From a single room to a complete villa transformation — our bespoke interior design services are crafted for those who demand the extraordinary.
           </p>
         </motion.div>
 
-        {/* Skeleton loaders */}
-        {loading && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="glass rounded-2xl p-6 border border-white/10 space-y-4">
-                <div className="shimmer w-12 h-12 rounded-xl bg-white/5" />
-                <div className="shimmer h-4 w-3/4 rounded bg-white/5" />
-                <div className="shimmer h-12 rounded bg-white/5" />
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {loading
+            ? [...Array(6)].map((_, i) => <SkeletonCard key={i} />)
+            : services.map((svc, i) => {
+                const Icon = ICON_MAP[svc.icon] || Home
+                return (
+                  <motion.div
+                    key={svc.serviceId}
+                    initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: i * 0.07 }}
+                    className="group glass border border-white/5 rounded-2xl p-6 card-glow hover:border-brand-700/40 cursor-pointer"
+                    onClick={() => document.getElementById('consult')?.scrollIntoView({ behavior: 'smooth' })}
+                  >
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-600/20 to-accent-600/20 border border-brand-700/30 flex items-center justify-center mb-4 group-hover:from-brand-600/30 group-hover:to-accent-600/30 transition-all">
+                      <Icon size={22} className="text-brand-400" />
+                    </div>
+                    {svc.category && <div className="text-xs text-brand-400 font-semibold uppercase tracking-wide mb-1">{svc.category}</div>}
+                    <h3 className="text-base font-bold text-white mb-2 group-hover:text-brand-200 transition-colors">{svc.title}</h3>
+                    <p className="text-sm text-gray-400 leading-relaxed mb-4">{svc.description}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-brand-400 text-sm font-bold">{svc.price}</span>
+                      <div className="flex items-center gap-1 text-xs text-brand-400 font-medium group-hover:gap-2 transition-all">
+                        Enquire <ArrowRight size={11} />
+                      </div>
+                    </div>
+                  </motion.div>
+                )
+              })}
+        </div>
 
-        {/* Amenity cards */}
-        {!loading && (
-          <motion.div
-            variants={container}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: '-80px' }}
-            className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
-          >
-            {amenities.map((a) => {
-              const { Icon, color, glow } = getAmenityMeta(a.amenity)
-              return (
-                <motion.div
-                  key={a.amenityId}
-                  variants={item}
-                  className={`group glass p-6 rounded-2xl cursor-default transition-all duration-300 border border-white/10 hover:border-brand-700/30 ${glow} hover:-translate-y-2`}
-                >
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center mb-5 shadow-md group-hover:scale-110 transition-transform duration-300`}>
-                    <Icon size={22} className="text-white" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">{a.amenity}</h3>
-                  <p className="text-gray-400 text-sm leading-relaxed">{a.description}</p>
-                  <div className="mt-4 flex items-center gap-1 text-brand-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    Explore amenity
-                    <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                </motion.div>
-              )
-            })}
-          </motion.div>
-        )}
+        <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mt-12">
+          <button onClick={() => document.getElementById('consult')?.scrollIntoView({ behavior: 'smooth' })} className="btn-primary px-8 py-4">
+            <CalendarCheck size={16} /> Book a Free Consultation
+          </button>
+          <p className="text-xs text-gray-500 mt-3">Custom design packages available · No-obligation initial consultation</p>
+        </motion.div>
       </div>
     </section>
   )

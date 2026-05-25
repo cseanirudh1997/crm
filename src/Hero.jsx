@@ -1,18 +1,19 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ChevronRight, MapPin, Building2, Users, TrendingUp, CalendarCheck, Phone } from 'lucide-react'
+import { ChevronRight, Sparkles, Home, Eye, CalendarCheck, Award, Users, Star } from 'lucide-react'
 import { normalizeImageUrl, handleImageError } from './imageUtils'
 
 const TYPING_STRINGS = [
-  'Luxury Apartments in Gurugram',
-  'Premium Villas in Bengaluru',
-  'Ultra-Premium High-Rises in Mumbai',
-  'Investment-Grade Projects in Noida',
-  'Smart Homes in Hyderabad',
+  'Transforming Spaces Into Timeless Luxury',
+  'Crafting Premium Living Rooms & Villas',
+  'Bespoke Modular Kitchen Experiences',
+  'Architectural Visualization & 3D Planning',
+  'Luxury Bedroom & Master Suite Design',
+  'From Concept to Cinematic Reality',
 ]
 
-function useTypingEffect(strings, speed = 80, pause = 2000) {
+function useTypingEffect(strings, speed = 70, pause = 2200) {
   const [displayed, setDisplayed] = useState('')
   const [idx,       setIdx]       = useState(0)
   const [charIdx,   setCharIdx]   = useState(0)
@@ -41,15 +42,15 @@ function useTypingEffect(strings, speed = 80, pause = 2000) {
 }
 
 const STATS = [
-  { value: 5,    suffix: '+',   label: 'Premium Cities',     icon: MapPin     },
-  { value: 100,  suffix: '+',   label: 'Curated Projects',   icon: Building2  },
-  { value: 25,   suffix: '+',   label: 'Trusted Builders',   icon: Users      },
-  { value: 18.4, suffix: '%',   label: 'Avg Appreciation',   icon: TrendingUp },
+  { value: 500,  suffix: '+',  label: 'Projects Completed', icon: Home    },
+  { value: 98,   suffix: '%',  label: 'Client Satisfaction', icon: Star   },
+  { value: 12,   suffix: '+',  label: 'Years of Expertise',  icon: Award  },
+  { value: 2500, suffix: '+',  label: 'Happy Clients',       icon: Users  },
 ]
 
 function AnimatedCounter({ target, suffix, duration = 2000 }) {
-  const [count, setCount] = useState(0)
-  const ref = useRef(null)
+  const [count,  setCount]  = useState(0)
+  const ref     = useRef(null)
   const started = useRef(false)
 
   useEffect(() => {
@@ -78,6 +79,30 @@ function AnimatedCounter({ target, suffix, duration = 2000 }) {
   return <span ref={ref}>{count}{suffix}</span>
 }
 
+const FEATURED_DESIGNS = [
+  {
+    name:    'Modern Luxury Living Room',
+    style:   'Contemporary',
+    area:    '1,200 sq ft',
+    badge:   'Featured Collection',
+    img:     'https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?w=400&q=70',
+  },
+  {
+    name:    'Scandinavian Master Bedroom',
+    style:   'Minimal Luxury',
+    area:    '650 sq ft',
+    badge:   'Award Winning',
+    img:     'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=70',
+  },
+  {
+    name:    'Premium Modular Kitchen',
+    style:   'Modern Contemporary',
+    area:    '420 sq ft',
+    badge:   'Client Favorite',
+    img:     'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=70',
+  },
+]
+
 const fadeUp = { hidden: { opacity: 0, y: 30 }, show: { opacity: 1, y: 0 } }
 
 export default function Hero() {
@@ -85,40 +110,40 @@ export default function Hero() {
 
   return (
     <section className="relative min-h-screen flex items-center pt-16 overflow-hidden animated-bg">
-      {/* Background grid */}
-      <div className="absolute inset-0 dot-grid opacity-30" />
+      {/* Dot grid background */}
+      <div className="absolute inset-0 dot-grid opacity-25" />
 
-      {/* Luxury gold orbs */}
-      <div className="orb w-[500px] h-[500px] bg-brand-800  top-10 -left-40   opacity-15" />
-      <div className="orb w-80   h-80   bg-accent-700 bottom-10 right-10  opacity-10" />
-      <div className="orb w-64   h-64   bg-brand-700  top-1/2  left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-8" />
+      {/* Warm luxury orbs */}
+      <div className="orb w-[600px] h-[600px] bg-brand-800  top-0  -left-60    opacity-12" />
+      <div className="orb w-96   h-96   bg-accent-700 bottom-0 right-0    opacity-10" />
+      <div className="orb w-72   h-72   bg-brand-700  top-1/2  left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-8" />
 
-      {/* Subtle image overlay */}
+      {/* Hero background visual — interior design space */}
       <div
-        className="absolute inset-0 opacity-[0.07]"
+        className="absolute inset-0 opacity-[0.09]"
         style={{
-          backgroundImage: 'url(https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1920&q=60)',
-          backgroundSize: 'cover',
+          backgroundImage: 'url(https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?w=1920&q=60)',
+          backgroundSize:   'cover',
           backgroundPosition: 'center',
         }}
       />
 
       {/* Gradient overlays */}
-      <div className="absolute inset-0 bg-gradient-to-b from-gray-950/60 via-transparent to-gray-950 pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-r from-gray-950/80 via-transparent to-gray-950/80 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-gray-950/70 via-transparent to-gray-950 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-r from-gray-950/85 via-transparent to-gray-950/70 pointer-events-none" />
 
-      <div className="section-wrapper relative z-10 py-24 lg:py-36">
+      <div className="section-wrapper relative z-10 py-20 lg:py-32">
         <motion.div
-          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.12 } } }}
+          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.11 } } }}
           initial="hidden"
           animate="show"
           className="max-w-5xl mx-auto text-center"
         >
-          {/* Badge */}
+          {/* Studio badge */}
           <motion.div variants={fadeUp} className="flex justify-center mb-6">
             <span className="section-badge gap-2">
-              <span className="w-2 h-2 rounded-full bg-brand-400 animate-pulse-slow inline-block" />
-              India's Premium Property Platform
+              <Sparkles size={11} className="text-brand-400" />
+              Premium Interior Design Studio · Est. 2013
             </span>
           </motion.div>
 
@@ -127,17 +152,17 @@ export default function Hero() {
             variants={fadeUp}
             className="font-display text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tight leading-none mb-4"
           >
-            <span className="text-white">Discover Premium</span>
+            <span className="text-white">Transforming Spaces Into</span>
             <br />
-            <span className="gradient-text">Living Across India</span>
+            <span className="gradient-text">Timeless Luxury Experiences</span>
           </motion.h1>
 
-          {/* Typing subheadline */}
+          {/* Typing sub-headline */}
           <motion.div
             variants={fadeUp}
-            className="text-xl sm:text-2xl font-semibold text-gray-300 mb-6 min-h-[2.5rem] flex items-center justify-center"
+            className="text-lg sm:text-xl font-medium text-gray-300 mb-4 min-h-[2.2rem] flex items-center justify-center"
           >
-            <span className="typing-cursor">{typedText}</span>
+            <span className="typing-cursor text-brand-300">{typedText}</span>
           </motion.div>
 
           {/* Description */}
@@ -145,9 +170,8 @@ export default function Hero() {
             variants={fadeUp}
             className="max-w-2xl mx-auto text-gray-400 text-base sm:text-lg leading-relaxed mb-10"
           >
-            Explore luxury apartments, ultra-premium villas, plots, and investment-grade opportunities
-            across Gurugram, Noida, Bengaluru, Mumbai, and Hyderabad — curated by India's most trusted
-            real estate concierge.
+            Premium interior design solutions for luxury homes, villas, apartments, and modern commercial spaces.
+            From concept to completion — crafted with precision, inspired by your vision.
           </motion.p>
 
           {/* CTA buttons */}
@@ -156,26 +180,26 @@ export default function Hero() {
             className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
           >
             <button
-              onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => document.getElementById('consult')?.scrollIntoView({ behavior: 'smooth' })}
               className="btn-primary text-base px-8 py-4"
             >
-              Explore Projects <ChevronRight size={18} />
+              <CalendarCheck size={17} /> Book Consultation
             </button>
             <button
-              onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => document.getElementById('collections')?.scrollIntoView({ behavior: 'smooth' })}
               className="btn-secondary text-base px-8 py-4"
             >
-              <Phone size={16} /> Book Consultation
+              Explore Collections <ChevronRight size={17} />
             </button>
             <button
-              onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => document.getElementById('transformations')?.scrollIntoView({ behavior: 'smooth' })}
               className="btn-ghost text-base px-6 py-4 border border-brand-700/30 hover:border-brand-600/50 hover:bg-brand-950/40"
             >
-              <CalendarCheck size={16} /> Schedule Site Visit
+              <Eye size={16} /> View Transformations
             </button>
           </motion.div>
 
-          {/* Stats */}
+          {/* Stats grid */}
           <motion.div
             variants={fadeUp}
             className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto"
@@ -194,7 +218,7 @@ export default function Hero() {
           </motion.div>
         </motion.div>
 
-        {/* Floating property preview card */}
+        {/* Featured design preview card */}
         <motion.div
           initial={{ opacity: 0, y: 60 }}
           animate={{ opacity: 1, y: 0 }}
@@ -206,62 +230,35 @@ export default function Hero() {
             <div className="flex items-center justify-between px-5 py-3 border-b border-white/5 bg-black/20">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-brand-500 animate-pulse-slow" />
-                <span className="text-xs text-gray-400 font-medium">Featured Properties</span>
+                <span className="text-xs text-gray-400 font-medium">Featured Design Collections</span>
               </div>
-              <span className="text-xs text-brand-400 font-semibold">RERA Verified</span>
+              <span className="text-xs text-brand-400 font-semibold tracking-wide">MAISON STUDIO</span>
             </div>
 
-            {/* Property grid */}
+            {/* Design cards grid */}
             <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {[
-                {
-                  name: 'The Arbour',
-                  builder: 'DLF',
-                  city: 'Gurugram',
-                  price: '₹4.5 Cr+',
-                  type: 'Luxury Apartments',
-                  badge: 'Ready to Move',
-                  img: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&q=70',
-                },
-                {
-                  name: 'Prestige Lakeside',
-                  builder: 'Prestige',
-                  city: 'Bengaluru',
-                  price: '₹1.8 Cr+',
-                  type: 'Premium Apartments',
-                  badge: 'RERA Approved',
-                  img: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400&q=70',
-                },
-                {
-                  name: 'Lodha Park',
-                  builder: 'Lodha',
-                  city: 'Mumbai',
-                  price: '₹12 Cr+',
-                  type: 'Sea-Facing Luxury',
-                  badge: 'Sea View',
-                  img: 'https://images.unsplash.com/photo-1523217582562-09d0def993a6?w=400&q=70',
-                },
-              ].map((p) => (
-                <div key={p.name} className="rounded-xl overflow-hidden border border-white/5 bg-white/5 group">
-                  <div className="relative h-28 overflow-hidden">
+              {FEATURED_DESIGNS.map((d) => (
+                <div key={d.name} className="rounded-xl overflow-hidden border border-white/5 bg-white/5 group cursor-pointer">
+                  <div className="relative h-32 overflow-hidden">
                     <img
-                      src={normalizeImageUrl(p.img)}
-                      alt={p.name}
+                      src={normalizeImageUrl(d.img)}
+                      alt={d.name}
                       loading="lazy"
                       onError={(e) => handleImageError(e)}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700"
+                      style={{ '--tw-scale-x': 1.08, '--tw-scale-y': 1.08 }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent" />
                     <span className="absolute top-2 left-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-brand-600/80 text-white border border-brand-500/50">
-                      {p.badge}
+                      {d.badge}
                     </span>
                   </div>
                   <div className="p-3">
-                    <div className="text-xs font-bold text-white leading-snug">{p.name}</div>
-                    <div className="text-xs text-gray-500">{p.builder} · {p.city}</div>
+                    <div className="text-xs font-bold text-white leading-snug">{d.name}</div>
+                    <div className="text-xs text-gray-500 mt-0.5">{d.style}</div>
                     <div className="flex items-center justify-between mt-1.5">
-                      <span className="text-brand-400 text-xs font-bold">{p.price}</span>
-                      <span className="text-gray-600 text-xs">{p.type}</span>
+                      <span className="text-brand-400 text-xs font-semibold">{d.area}</span>
+                      <span className="text-gray-600 text-xs">Design Studio</span>
                     </div>
                   </div>
                 </div>
@@ -270,10 +267,10 @@ export default function Hero() {
 
             {/* Footer bar */}
             <div className="px-5 py-2.5 border-t border-white/5 bg-black/20 flex items-center justify-between">
-              <span className="text-xs text-gray-500">100+ projects across 5 cities</span>
+              <span className="text-xs text-gray-500">500+ completed projects · 12 years of luxury design</span>
               <button
-                onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
-                className="text-xs text-brand-400 font-semibold hover:text-brand-300 flex items-center gap-1"
+                onClick={() => document.getElementById('collections')?.scrollIntoView({ behavior: 'smooth' })}
+                className="text-xs text-brand-400 font-semibold hover:text-brand-300 flex items-center gap-1 transition-colors"
               >
                 View All <ChevronRight size={12} />
               </button>
