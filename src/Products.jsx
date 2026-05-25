@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo, useCallback, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion' // AnimatePresence kept for modal open/close
-import { Building2, MapPin, Calendar, Shield, Heart, CalendarCheck, ChevronRight, ChevronLeft, X, Bed, Ruler, Waves, Dumbbell, Leaf, Car, Wifi, Star, Coffee } from 'lucide-react'
+import { Building2, MapPin, Calendar, Shield, Heart, CalendarCheck, ChevronRight, ChevronLeft, X, Bed, Ruler, Waves, Dumbbell, Leaf, Car, Wifi, Star, Coffee, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { fetchProjects, fetchCities, fetchSubProjects, fetchProperties, fetchProjectImages, fetchAmenities, fetchFloorPlans, createInterestLead, createSiteVisit } from './api'
-import { getSession } from './utils'
+import { getSession, isValidEmail } from './utils'
 import { normalizeImageUrl, getImageSrc, handleImageError, LazyImage, FALLBACK_IMG } from './imageUtils'
 
 // ── Amenity icon mapper ───────────────────────────────────────────────────────
@@ -437,43 +437,64 @@ function ProjectModal({ project, onClose, onInterest, onVisit }) {
 }
 
 // ── Interest / Visit Modal ────────────────────────────────────────────────────
+const TIME_SLOTS_MODAL = ['Morning (10AM–1PM)', 'Afternoon (2PM–5PM)', 'Evening (5PM–7PM)']
+
 function LeadModal({ project, type, onClose }) {
   const session = getSession()
   const [form, setForm] = useState({
     name:          session?.username || '',
-    email:         session?.email || '',
+    email:         session?.email    || '',
     phone:         '',
     budget:        '',
     message:       '',
-    preferredDate: '',
-    timeSlot:      'Morning (10AM–1PM)',
+    preferredDate: '',            // optional for site visit
+    preferredTime: TIME_SLOTS_MODAL[0],
   })
-  const [loading, setLoading] = useState(false)
-  const [sent,    setSent]    = useState(false)
+  const [loading,    setLoading]    = useState(false)
+  const [sent,       setSent]       = useState(false)
+  const [formError,  setFormError]  = useState('')
+
+  function validateModal() {
+    const name  = form.name.trim()
+    const email = form.email.trim()
+    const phone = form.phone.trim()
+    if (!name)                return 'Full name is required.'
+    if (!phone)               return 'Phone number is required.'
+    if (!email)               return 'Email address is required.'
+    if (!isValidEmail(email)) return 'Please enter a valid email address.'
+    if (type === 'interest' && !form.budget) return 'Please select a budget range.'
+    return null
+  }
 
   async function handleSubmit(e) {
     e.preventDefault()
+    const err = validateModal()
+    if (err) { setFormError(err); return }
+
     setLoading(true)
+    setFormError('')
     try {
       if (type === 'interest') {
         await createInterestLead({
           username:  session?.username || '',
-          name:      form.name,
-          email:     form.email,
-          phone:     form.phone,
-          projectId: project?.id,
+          name:      form.name.trim(),
+          email:     form.email.trim(),
+          phone:     form.phone.trim(),
+          projectId: project?.id   || '',
+          projectName: project?.name || '',
           budget:    form.budget,
-          message:   form.message,
+          message:   form.message.trim(),
         })
       } else {
         await createSiteVisit({
           username:      session?.username || '',
-          name:          form.name,
-          email:         form.email,
-          phone:         form.phone,
-          projectId:     project?.id,
-          preferredDate: form.preferredDate,
-          timeSlot:      form.timeSlot,
+          name:          form.name.trim(),
+          email:         form.email.trim(),
+          phone:         form.phone.trim(),
+          projectId:     project?.id   || '',
+          projectName:   project?.name || '',
+          preferredDate: form.preferredDate,   // optional — empty string is fine
+          preferredTime: form.preferredTime,
         })
       }
       setSent(true)
@@ -532,76 +553,104 @@ function LeadModal({ project, type, onClose }) {
             <button onClick={onClose} className="btn-secondary text-sm px-8">Done</button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="p-5 space-y-3">
+          <form onSubmit={handleSubmit} noValidate className="p-5 space-y-3">
+            {formError && (
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-red-900/20 border border-red-700/40 text-red-300 text-sm">
+                <AlertCircle size={14} className="flex-shrink-0" />
+                {formError}
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-gray-400 mb-1 block">Full Name</label>
+                <label className="text-xs text-gray-400 mb-1 block">
+                  Full Name <span className="text-red-400">*</span>
+                </label>
                 <input
                   className="input-field text-sm"
                   value={form.name}
-                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                  onChange={(e) => { setFormError(''); setForm((f) => ({ ...f, name: e.target.value })) }}
                   placeholder="Your name"
-                  required
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-400 mb-1 block">Phone</label>
+                <label className="text-xs text-gray-400 mb-1 block">
+                  Phone <span className="text-red-400">*</span>
+                </label>
                 <input
+                  type="tel"
                   className="input-field text-sm"
                   value={form.phone}
-                  onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                  onChange={(e) => { setFormError(''); setForm((f) => ({ ...f, phone: e.target.value })) }}
                   placeholder="+91 98765 43210"
-                  required
                 />
               </div>
             </div>
+
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Email</label>
+              <label className="text-xs text-gray-400 mb-1 block">
+                Email <span className="text-red-400">*</span>
+              </label>
               <input
                 type="email"
                 className="input-field text-sm"
                 value={form.email}
-                onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                onChange={(e) => { setFormError(''); setForm((f) => ({ ...f, email: e.target.value })) }}
                 placeholder="you@email.com"
-                required
               />
             </div>
 
             {type === 'interest' ? (
-              <div>
-                <label className="text-xs text-gray-400 mb-1 block">Budget Range</label>
-                <select
-                  className="input-field text-sm"
-                  value={form.budget}
-                  onChange={(e) => setForm((f) => ({ ...f, budget: e.target.value }))}
-                  required
-                >
-                  <option value="">Select budget</option>
-                  {['₹1–2 Cr', '₹2–5 Cr', '₹5–10 Cr', '₹10 Cr+'].map((b) => (
-                    <option key={b} value={b}>{b}</option>
-                  ))}
-                </select>
-              </div>
+              <>
+                <div>
+                  <label className="text-xs text-gray-400 mb-1 block">
+                    Budget Range <span className="text-red-400">*</span>
+                  </label>
+                  <select
+                    className="input-field text-sm"
+                    value={form.budget}
+                    onChange={(e) => { setFormError(''); setForm((f) => ({ ...f, budget: e.target.value })) }}
+                  >
+                    <option value="">Select budget</option>
+                    {['Under ₹1 Cr', '₹1–2 Cr', '₹2–5 Cr', '₹5–10 Cr', '₹10 Cr+'].map((b) => (
+                      <option key={b} value={b}>{b}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs text-gray-400 mb-1 block">
+                    Message <span className="text-gray-600">(optional)</span>
+                  </label>
+                  <textarea
+                    className="input-field text-sm resize-none"
+                    rows={2}
+                    value={form.message}
+                    onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
+                    placeholder="Any specific requirements or questions..."
+                  />
+                </div>
+              </>
             ) : (
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs text-gray-400 mb-1 block">Preferred Date</label>
+                  <label className="text-xs text-gray-400 mb-1 block">
+                    Preferred Date <span className="text-gray-600">(optional)</span>
+                  </label>
                   <input
                     type="date"
                     className="input-field text-sm"
                     value={form.preferredDate}
                     onChange={(e) => setForm((f) => ({ ...f, preferredDate: e.target.value }))}
-                    required
                   />
                 </div>
                 <div>
                   <label className="text-xs text-gray-400 mb-1 block">Time Slot</label>
                   <select
                     className="input-field text-sm"
-                    value={form.timeSlot}
-                    onChange={(e) => setForm((f) => ({ ...f, timeSlot: e.target.value }))}
+                    value={form.preferredTime}
+                    onChange={(e) => setForm((f) => ({ ...f, preferredTime: e.target.value }))}
                   >
-                    {['Morning (10AM–1PM)', 'Afternoon (2PM–5PM)', 'Evening (5PM–7PM)'].map((s) => (
+                    {TIME_SLOTS_MODAL.map((s) => (
                       <option key={s} value={s}>{s}</option>
                     ))}
                   </select>

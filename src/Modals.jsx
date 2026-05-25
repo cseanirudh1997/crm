@@ -7,8 +7,9 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Send, CheckCircle, Loader, Heart, CalendarCheck, Phone, Mail, Shield } from 'lucide-react'
+import { X, Send, CheckCircle, Loader, Heart, CalendarCheck, Phone, Mail, Shield, AlertCircle } from 'lucide-react'
 import { createInterestLead, createSiteVisit } from './api'
+import { isValidEmail } from './utils'
 import toast from 'react-hot-toast'
 
 /* ── Shared modal shell ── */
@@ -72,25 +73,31 @@ export function InterestLeadModal({ session, project, onClose }) {
     budget:  '',
     message: '',
   })
-  const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(null)
+  const [loading,   setLoading]   = useState(false)
+  const [success,   setSuccess]   = useState(null)
+  const [formError, setFormError] = useState('')
 
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!form.name || !form.phone) {
-      toast.error('Please fill in name and phone number.')
-      return
-    }
+    const name  = form.name.trim()
+    const phone = form.phone.trim()
+    const email = form.email.trim()
+    if (!name)  { setFormError('Full name is required.'); return }
+    if (!phone) { setFormError('Phone number is required.'); return }
+    if (email && !isValidEmail(email)) { setFormError('Please enter a valid email address.'); return }
+
+    setFormError('')
     setLoading(true)
     try {
       const res = await createInterestLead({
-        username:  session?.username || '',
-        name:      form.name,
-        email:     form.email,
-        phone:     form.phone,
-        projectId: project?.id || '',
-        budget:    form.budget,
-        message:   form.message,
+        username:    session?.username || '',
+        name,
+        email,
+        phone,
+        projectId:   project?.id   || '',
+        projectName: project?.name || '',
+        budget:      form.budget,
+        message:     form.message.trim(),
       })
       setSuccess(res.message || 'Your interest has been registered. A relationship manager will call within 24 hours.')
       toast.success('Interest registered! We\'ll call you shortly.')
@@ -110,25 +117,31 @@ export function InterestLeadModal({ session, project, onClose }) {
       {success ? (
         <SuccessState message={success} onClose={onClose} />
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
+          {formError && (
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-red-900/20 border border-red-700/40 text-red-300 text-sm">
+              <AlertCircle size={14} className="flex-shrink-0" />
+              {formError}
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs text-gray-400 mb-1.5">Full Name *</label>
-              <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className="input-field text-sm" placeholder="Your name" required />
+              <label className="block text-xs text-gray-400 mb-1.5">Full Name <span className="text-red-400">*</span></label>
+              <input value={form.name} onChange={(e) => { setFormError(''); setForm((f) => ({ ...f, name: e.target.value })) }} className="input-field text-sm" placeholder="Your name" />
             </div>
             <div>
-              <label className="block text-xs text-gray-400 mb-1.5">Phone *</label>
+              <label className="block text-xs text-gray-400 mb-1.5">Phone <span className="text-red-400">*</span></label>
               <div className="relative">
                 <Phone size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                <input value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} className="input-field text-sm pl-8" placeholder="+91 98765 43210" required />
+                <input type="tel" value={form.phone} onChange={(e) => { setFormError(''); setForm((f) => ({ ...f, phone: e.target.value })) }} className="input-field text-sm pl-8" placeholder="+91 98765 43210" />
               </div>
             </div>
           </div>
           <div>
-            <label className="block text-xs text-gray-400 mb-1.5">Email</label>
+            <label className="block text-xs text-gray-400 mb-1.5">Email <span className="text-gray-600">(optional)</span></label>
             <div className="relative">
               <Mail size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-              <input type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} className="input-field text-sm pl-8" placeholder="you@email.com" />
+              <input type="email" value={form.email} onChange={(e) => { setFormError(''); setForm((f) => ({ ...f, email: e.target.value })) }} className="input-field text-sm pl-8" placeholder="you@email.com" />
             </div>
           </div>
           <div>
@@ -139,7 +152,7 @@ export function InterestLeadModal({ session, project, onClose }) {
             </select>
           </div>
           <div>
-            <label className="block text-xs text-gray-400 mb-1.5">Message (optional)</label>
+            <label className="block text-xs text-gray-400 mb-1.5">Message <span className="text-gray-600">(optional)</span></label>
             <textarea value={form.message} onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))} rows={3} className="input-field text-sm resize-none" placeholder="Any specific requirements, preferred floor, facing…" />
           </div>
           <button type="submit" disabled={loading} className="btn-primary w-full justify-center">
@@ -157,33 +170,41 @@ export function InterestLeadModal({ session, project, onClose }) {
 /* ════════════════════════════════════════════
    SiteVisitModal — book a site visit
    ════════════════════════════════════════════ */
+const TIME_SLOTS_VISIT = ['Morning (10AM–1PM)', 'Afternoon (2PM–5PM)', 'Evening (5PM–7PM)']
+
 export function SiteVisitModal({ session, project, onClose }) {
   const [form, setForm] = useState({
     name:          session?.username || '',
     email:         session?.email   || '',
     phone:         '',
-    preferredDate: '',
-    timeSlot:      'Morning (10AM–1PM)',
+    preferredDate: '',           // optional
+    preferredTime: TIME_SLOTS_VISIT[0],
   })
-  const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(null)
+  const [loading,   setLoading]   = useState(false)
+  const [success,   setSuccess]   = useState(null)
+  const [formError, setFormError] = useState('')
 
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!form.phone || !form.preferredDate) {
-      toast.error('Please fill in phone and preferred date.')
-      return
-    }
+    const name  = form.name.trim()
+    const phone = form.phone.trim()
+    const email = form.email.trim()
+    if (!name)  { setFormError('Full name is required.'); return }
+    if (!phone) { setFormError('Phone number is required.'); return }
+    if (email && !isValidEmail(email)) { setFormError('Please enter a valid email address.'); return }
+
+    setFormError('')
     setLoading(true)
     try {
       const res = await createSiteVisit({
-        username:     session?.username || '',
-        name:         form.name,
-        email:        form.email,
-        phone:        form.phone,
-        projectId:    project?.id || '',
-        preferredDate:form.preferredDate,
-        timeSlot:     form.timeSlot,
+        username:      session?.username || '',
+        name,
+        email,
+        phone,
+        projectId:     project?.id   || '',
+        projectName:   project?.name || '',
+        preferredDate: form.preferredDate,    // empty string is fine
+        preferredTime: form.preferredTime,
       })
       setSuccess(res.message || 'Site visit confirmed! You\'ll receive an SMS confirmation with visit details.')
       toast.success('Site visit booked! Confirmation SMS on its way.')
@@ -203,36 +224,53 @@ export function SiteVisitModal({ session, project, onClose }) {
       {success ? (
         <SuccessState message={success} onClose={onClose} />
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
+          {formError && (
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-red-900/20 border border-red-700/40 text-red-300 text-sm">
+              <AlertCircle size={14} className="flex-shrink-0" />
+              {formError}
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs text-gray-400 mb-1.5">Your Name</label>
-              <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className="input-field text-sm" placeholder="Full name" />
+              <label className="block text-xs text-gray-400 mb-1.5">Full Name <span className="text-red-400">*</span></label>
+              <input value={form.name} onChange={(e) => { setFormError(''); setForm((f) => ({ ...f, name: e.target.value })) }} className="input-field text-sm" placeholder="Full name" />
             </div>
             <div>
-              <label className="block text-xs text-gray-400 mb-1.5">Phone *</label>
+              <label className="block text-xs text-gray-400 mb-1.5">Phone <span className="text-red-400">*</span></label>
               <div className="relative">
                 <Phone size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                <input value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} className="input-field text-sm pl-8" placeholder="+91 98765 43210" required />
+                <input type="tel" value={form.phone} onChange={(e) => { setFormError(''); setForm((f) => ({ ...f, phone: e.target.value })) }} className="input-field text-sm pl-8" placeholder="+91 98765 43210" />
               </div>
             </div>
           </div>
           <div>
-            <label className="block text-xs text-gray-400 mb-1.5">Email</label>
+            <label className="block text-xs text-gray-400 mb-1.5">Email <span className="text-gray-600">(optional)</span></label>
             <div className="relative">
               <Mail size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-              <input type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} className="input-field text-sm pl-8" placeholder="you@email.com" />
+              <input type="email" value={form.email} onChange={(e) => { setFormError(''); setForm((f) => ({ ...f, email: e.target.value })) }} className="input-field text-sm pl-8" placeholder="you@email.com" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs text-gray-400 mb-1.5">Preferred Date *</label>
-              <input type="date" value={form.preferredDate} onChange={(e) => setForm((f) => ({ ...f, preferredDate: e.target.value }))} className="input-field text-sm" required />
+              <label className="block text-xs text-gray-400 mb-1.5">
+                Preferred Date <span className="text-gray-600">(optional)</span>
+              </label>
+              <input
+                type="date"
+                value={form.preferredDate}
+                onChange={(e) => setForm((f) => ({ ...f, preferredDate: e.target.value }))}
+                className="input-field text-sm"
+              />
             </div>
             <div>
               <label className="block text-xs text-gray-400 mb-1.5">Time Slot</label>
-              <select value={form.timeSlot} onChange={(e) => setForm((f) => ({ ...f, timeSlot: e.target.value }))} className="input-field text-sm">
-                {['Morning (10AM–1PM)', 'Afternoon (2PM–5PM)', 'Evening (5PM–7PM)'].map((s) => <option key={s} value={s}>{s}</option>)}
+              <select
+                value={form.preferredTime}
+                onChange={(e) => setForm((f) => ({ ...f, preferredTime: e.target.value }))}
+                className="input-field text-sm"
+              >
+                {TIME_SLOTS_VISIT.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
           </div>

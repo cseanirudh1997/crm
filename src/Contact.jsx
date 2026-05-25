@@ -13,21 +13,26 @@ const CONTACT_METHODS = [
   { icon: MapPin, label: 'Head Office',value: COMPANY_ADDRESS, href: '#'                         },
 ]
 
-const TIME_SLOTS = ['Morning (10AM–1PM)', 'Afternoon (2PM–5PM)', 'Evening (5PM–7PM)']
+const TIME_SLOTS    = ['Morning (10AM–1PM)', 'Afternoon (2PM–5PM)', 'Evening (5PM–7PM)']
+const BUDGET_RANGES = ['Under ₹1 Cr', '₹1–2 Cr', '₹2–5 Cr', '₹5–10 Cr', '₹10 Cr+']
+
+function emptyForm(session) {
+  return {
+    name:          session?.username || '',
+    email:         session?.email    || '',
+    phone:         '',
+    message:       '',
+    budget:        '',
+    projectName:   '',        // human-readable project name typed by user
+    preferredDate: '',        // optional — leave blank is fine
+    preferredTime: TIME_SLOTS[0],
+  }
+}
 
 export default function Contact() {
   const session = getSession()
   const [activeTab,  setActiveTab]  = useState('consultation')
-  const [form,       setForm]       = useState({
-    name:          session?.username || '',
-    email:         session?.email || '',
-    phone:         '',
-    message:       '',
-    budget:        '',
-    projectId:     '',
-    preferredDate: '',
-    timeSlot:      TIME_SLOTS[0],
-  })
+  const [form,       setForm]       = useState(() => emptyForm(session))
   const [loading,    setLoading]    = useState(false)
   const [submitted,  setSubmitted]  = useState(false)
   const [error,      setError]      = useState('')
@@ -37,16 +42,24 @@ export default function Contact() {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }))
   }
 
+  function validate() {
+    const name  = form.name.trim()
+    const email = form.email.trim()
+    const phone = form.phone.trim()
+
+    if (!name)               return 'Full name is required.'
+    if (!phone)              return 'Phone number is required.'
+    if (!email)              return 'Email address is required.'
+    if (!isValidEmail(email)) return 'Please enter a valid email address.'
+    if (activeTab === 'consultation' && !form.budget)
+                             return 'Please select a budget range.'
+    return null
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!form.name || !form.email || !form.phone) {
-      setError('Please fill in name, email, and phone.')
-      return
-    }
-    if (!isValidEmail(form.email)) {
-      setError('Please enter a valid email address.')
-      return
-    }
+    const validationError = validate()
+    if (validationError) { setError(validationError); return }
 
     setLoading(true)
     setError('')
@@ -54,17 +67,23 @@ export default function Contact() {
     try {
       let res
       if (activeTab === 'consultation') {
-        res = await submitContact({ name: form.name, email: form.email, phone: form.phone, message: form.message || `Budget: ${form.budget}` })
+        res = await submitContact({
+          name:    form.name.trim(),
+          email:   form.email.trim(),
+          phone:   form.phone.trim(),
+          budget:  form.budget,
+          message: form.message.trim(),
+        })
       } else {
-        if (!form.preferredDate) { setError('Please select a preferred date.'); setLoading(false); return }
         res = await createSiteVisit({
-          username:     session?.username || '',
-          name:         form.name,
-          email:        form.email,
-          phone:        form.phone,
-          projectId:    form.projectId || 'general',
-          preferredDate:form.preferredDate,
-          timeSlot:     form.timeSlot,
+          username:      session?.username || '',
+          name:          form.name.trim(),
+          email:         form.email.trim(),
+          phone:         form.phone.trim(),
+          projectId:     '',                       // no ID from contact form
+          projectName:   form.projectName.trim(),
+          preferredDate: form.preferredDate,       // optional
+          preferredTime: form.preferredTime,
         })
       }
 
@@ -85,7 +104,7 @@ export default function Contact() {
 
   function reset() {
     setSubmitted(false)
-    setForm({ name: session?.username || '', email: session?.email || '', phone: '', message: '', budget: '', projectId: '', preferredDate: '', timeSlot: TIME_SLOTS[0] })
+    setForm(emptyForm(session))
     setError('')
   }
 
@@ -166,6 +185,7 @@ export default function Contact() {
             {/* Tab bar */}
             <div className="flex border-b border-white/10">
               <button
+                type="button"
                 onClick={() => { setActiveTab('consultation'); reset() }}
                 className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-semibold transition-colors ${
                   activeTab === 'consultation'
@@ -176,6 +196,7 @@ export default function Contact() {
                 <Heart size={15} /> Book Consultation
               </button>
               <button
+                type="button"
                 onClick={() => { setActiveTab('visit'); reset() }}
                 className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-semibold transition-colors ${
                   activeTab === 'visit'
@@ -208,7 +229,7 @@ export default function Contact() {
                         ? 'Our property concierge will reach out within 24 hours to discuss your requirements in detail.'
                         : 'You\'ll receive an SMS with the visit details. Our team will arrange premium transport if needed.'}
                     </p>
-                    <button onClick={reset} className="btn-ghost border border-white/10 hover:border-white/20">
+                    <button type="button" onClick={reset} className="btn-ghost border border-white/10 hover:border-white/20">
                       Submit Another Request
                     </button>
                   </motion.div>
@@ -219,6 +240,7 @@ export default function Contact() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
                     onSubmit={handleSubmit}
+                    noValidate
                     className="space-y-4"
                   >
                     {error && (
@@ -228,47 +250,91 @@ export default function Contact() {
                       </div>
                     )}
 
+                    {/* Row 1 — Name + Phone */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs text-gray-400 mb-1.5">Full Name</label>
+                        <label className="block text-xs text-gray-400 mb-1.5">
+                          Full Name <span className="text-red-400">*</span>
+                        </label>
                         <div className="relative">
                           <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
-                          <input name="name" type="text" value={form.name} onChange={handleChange} className="input-field pl-9 text-sm" placeholder="Your name" required />
+                          <input
+                            name="name"
+                            type="text"
+                            value={form.name}
+                            onChange={handleChange}
+                            className="input-field pl-9 text-sm"
+                            placeholder="Your name"
+                          />
                         </div>
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-400 mb-1.5">Phone Number</label>
+                        <label className="block text-xs text-gray-400 mb-1.5">
+                          Phone Number <span className="text-red-400">*</span>
+                        </label>
                         <div className="relative">
                           <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
-                          <input name="phone" type="tel" value={form.phone} onChange={handleChange} className="input-field pl-9 text-sm" placeholder="+91 98765 43210" required />
+                          <input
+                            name="phone"
+                            type="tel"
+                            value={form.phone}
+                            onChange={handleChange}
+                            className="input-field pl-9 text-sm"
+                            placeholder="+91 98765 43210"
+                          />
                         </div>
                       </div>
                     </div>
 
+                    {/* Row 2 — Email */}
                     <div>
-                      <label className="block text-xs text-gray-400 mb-1.5">Email Address</label>
+                      <label className="block text-xs text-gray-400 mb-1.5">
+                        Email Address <span className="text-red-400">*</span>
+                      </label>
                       <div className="relative">
                         <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
-                        <input name="email" type="email" value={form.email} onChange={handleChange} className="input-field pl-9 text-sm" placeholder="you@email.com" required />
+                        <input
+                          name="email"
+                          type="email"
+                          value={form.email}
+                          onChange={handleChange}
+                          className="input-field pl-9 text-sm"
+                          placeholder="you@email.com"
+                        />
                       </div>
                     </div>
 
+                    {/* Tab-specific fields */}
                     {activeTab === 'consultation' ? (
                       <>
                         <div>
-                          <label className="block text-xs text-gray-400 mb-1.5">Budget Range</label>
-                          <select name="budget" value={form.budget} onChange={handleChange} className="input-field text-sm">
+                          <label className="block text-xs text-gray-400 mb-1.5">
+                            Budget Range <span className="text-red-400">*</span>
+                          </label>
+                          <select
+                            name="budget"
+                            value={form.budget}
+                            onChange={handleChange}
+                            className="input-field text-sm"
+                          >
                             <option value="">Select your budget</option>
-                            {['Under ₹1 Cr', '₹1–2 Cr', '₹2–5 Cr', '₹5–10 Cr', '₹10 Cr+'].map((b) => (
+                            {BUDGET_RANGES.map((b) => (
                               <option key={b} value={b}>{b}</option>
                             ))}
                           </select>
                         </div>
                         <div>
-                          <label className="block text-xs text-gray-400 mb-1.5">Message (optional)</label>
+                          <label className="block text-xs text-gray-400 mb-1.5">Message <span className="text-gray-600">(optional)</span></label>
                           <div className="relative">
                             <MessageSquare size={14} className="absolute left-3 top-3 text-gray-500 pointer-events-none" />
-                            <textarea name="message" value={form.message} onChange={handleChange} rows={3} className="input-field pl-9 text-sm resize-none" placeholder="Preferred cities, property type, timeline..." />
+                            <textarea
+                              name="message"
+                              value={form.message}
+                              onChange={handleChange}
+                              rows={3}
+                              className="input-field pl-9 text-sm resize-none"
+                              placeholder="Preferred cities, property type, timeline..."
+                            />
                           </div>
                         </div>
                       </>
@@ -276,19 +342,41 @@ export default function Contact() {
                       <>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs text-gray-400 mb-1.5">Preferred Date</label>
-                            <input name="preferredDate" type="date" value={form.preferredDate} onChange={handleChange} className="input-field text-sm" required />
+                            <label className="block text-xs text-gray-400 mb-1.5">
+                              Preferred Date <span className="text-gray-600">(optional)</span>
+                            </label>
+                            <input
+                              name="preferredDate"
+                              type="date"
+                              value={form.preferredDate}
+                              onChange={handleChange}
+                              className="input-field text-sm"
+                            />
                           </div>
                           <div>
                             <label className="block text-xs text-gray-400 mb-1.5">Time Slot</label>
-                            <select name="timeSlot" value={form.timeSlot} onChange={handleChange} className="input-field text-sm">
+                            <select
+                              name="preferredTime"
+                              value={form.preferredTime}
+                              onChange={handleChange}
+                              className="input-field text-sm"
+                            >
                               {TIME_SLOTS.map((s) => <option key={s} value={s}>{s}</option>)}
                             </select>
                           </div>
                         </div>
                         <div>
-                          <label className="block text-xs text-gray-400 mb-1.5">Project of Interest (optional)</label>
-                          <input name="projectId" type="text" value={form.projectId} onChange={handleChange} className="input-field text-sm" placeholder="e.g. The Arbour, Lodha Park, or leave blank" />
+                          <label className="block text-xs text-gray-400 mb-1.5">
+                            Project of Interest <span className="text-gray-600">(optional)</span>
+                          </label>
+                          <input
+                            name="projectName"
+                            type="text"
+                            value={form.projectName}
+                            onChange={handleChange}
+                            className="input-field text-sm"
+                            placeholder="e.g. The Arbour, Lodha Park, or leave blank"
+                          />
                         </div>
                       </>
                     )}

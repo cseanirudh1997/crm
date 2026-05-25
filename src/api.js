@@ -345,12 +345,12 @@ export async function createInterestLead({ username, name, email, phone, project
 
 /**
  * Book a site visit.
- * Sheet: SiteVisitRequests — username | name | email | phone | projectId | preferredDate | timeSlot | submittedAt
+ * Sheet: SiteVisitRequests — username | name | email | phone | projectId | projectName | preferredDate | preferredTime | submittedAt
  * @returns {{ success: boolean, message: string, visitId?: string }}
  */
-export async function createSiteVisit({ username, name, email, phone, projectId, preferredDate, timeSlot }) {
+export async function createSiteVisit({ username, name, email, phone, projectId, projectName, preferredDate, preferredTime }) {
   try {
-    return await post({ action: 'createSiteVisit', username, name, email, phone, projectId, preferredDate, timeSlot })
+    return await post({ action: 'createSiteVisit', username, name, email, phone, projectId, projectName, preferredDate, preferredTime })
   } catch {
     return {
       success:  true,
@@ -466,11 +466,17 @@ export async function sendChatMessage(query) {
 
 /**
  * Submit a general consultation / callback request.
- * Sheet: InterestLeads (reused) — name | email | phone | message | submittedAt
+ * Sheet: InterestLeads — name | email | phone | budget | message | submittedAt
  * @returns {{ success: boolean, message: string }}
  */
-export async function submitContact({ name, email, phone, message }) {
-  return post({ action: 'createInterestLead', name, email, phone, message })
+export async function submitContact({ name, email, phone, budget, message }) {
+  // Encode budget into message so it always reaches the sheet even if GAS drops unknown fields
+  const fullMessage = [
+    budget ? `Budget: ${budget}` : '',
+    message,
+  ].filter(Boolean).join(' | ')
+
+  return post({ action: 'createInterestLead', name, email, phone, budget, message: fullMessage })
 }
 
 // ── Project Images ─────────────────────────────
