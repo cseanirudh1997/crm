@@ -42,11 +42,11 @@ export default function Testimonials() {
       <div className="orb w-96 h-96 bg-brand-900 -top-20 right-10 opacity-8" />
       <div className="section-wrapper relative z-10">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="text-center mb-12">
-          <span className="section-badge mb-4"><Users size={11} /> Client Stories</span>
+          <span className="section-badge mb-4"><Users size={11} /> Testimonials</span>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
-            Words From Our <span className="gradient-text">Happy Clients</span>
+            Words From <span className="gradient-text">Clients & Mentees</span>
           </h2>
-          <p className="text-gray-400 text-base max-w-xl mx-auto">Trusted by homeowners, entrepreneurs, and design enthusiasts across India's finest cities.</p>
+          <p className="text-gray-400 text-base max-w-xl mx-auto">Trusted by enterprise teams, data scientists, and ML leaders across India's top tech companies.</p>
         </motion.div>
 
         {loading ? (

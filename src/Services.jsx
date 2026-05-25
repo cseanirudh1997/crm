@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Home, ChefHat, Sofa, Layers, Bed, Building2, Sparkles, CalendarCheck, ArrowRight } from 'lucide-react'
+import { Brain, Cpu, TrendingUp, Users, MessageSquare, BookOpen, Sparkles, CalendarCheck, ArrowRight } from 'lucide-react'
 import { fetchServices } from './api'
 
-const ICON_MAP = { Home, ChefHat, Sofa, Layers, Bed, Building2 }
+const ICON_MAP = { Brain, Cpu, TrendingUp, Users, MessageSquare, BookOpen }
 
 function SkeletonCard() {
   return (
@@ -33,12 +33,12 @@ export default function Services() {
       <div className="orb w-96 h-96 bg-brand-900 -top-20 right-0 opacity-8" />
       <div className="section-wrapper relative z-10">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="text-center mb-12">
-          <span className="section-badge mb-4"><Sparkles size={11} /> Our Services</span>
+          <span className="section-badge mb-4"><Sparkles size={11} /> AI Services</span>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
-            Premium <span className="gradient-text">Design Services</span>
+            Expert <span className="gradient-text">AI Consulting & Mentorship</span>
           </h2>
           <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-            From a single room to a complete villa transformation — our bespoke interior design services are crafted for those who demand the extraordinary.
+            From enterprise AI strategy to 1-on-1 mentorship — specialized services for organizations building production AI systems and data scientists accelerating their careers.
           </p>
         </motion.div>
 
@@ -46,7 +46,7 @@ export default function Services() {
           {loading
             ? [...Array(6)].map((_, i) => <SkeletonCard key={i} />)
             : services.map((svc, i) => {
-                const Icon = ICON_MAP[svc.icon] || Home
+                const Icon = ICON_MAP[svc.icon] || Brain
                 return (
                   <motion.div
                     key={svc.serviceId}
@@ -73,9 +73,9 @@ export default function Services() {
 
         <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mt-12">
           <button onClick={() => document.getElementById('consult')?.scrollIntoView({ behavior: 'smooth' })} className="btn-primary px-8 py-4">
-            <CalendarCheck size={16} /> Book a Free Consultation
+            <CalendarCheck size={16} /> Book a Free Strategy Call
           </button>
-          <p className="text-xs text-gray-500 mt-3">Custom design packages available · No-obligation initial consultation</p>
+          <p className="text-xs text-gray-500 mt-3">Custom enterprise packages available · No-obligation initial call</p>
         </motion.div>
       </div>
     </section>

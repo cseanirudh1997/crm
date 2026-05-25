@@ -69,7 +69,7 @@ export default function Signup() {
           tier:            TIERS.CUSTOMER,
           onboardingStage: ONBOARDING_STAGES.PENDING,
         })
-        toast.success('Account created! Welcome to Maison Studio ✨')
+        toast.success('Account created! Welcome to VN.AI ✨')
         navigate('/dashboard')
       } else {
         setError(res.message || 'Signup failed. Please try again.')
@@ -103,7 +103,7 @@ export default function Signup() {
               <span className="text-2xl font-bold gradient-text">{COMPANY_NAME}</span>
             </Link>
             <h1 className="text-2xl font-extrabold text-white mb-1">Create your account</h1>
-            <p className="text-gray-400 text-sm">Create a free account to bring your interior design vision to life.</p>
+            <p className="text-gray-400 text-sm">Create a free account to access the AI mentorship portal and exclusive resources.</p>
           </div>
 
           {/* Error */}
@@ -217,9 +217,9 @@ export default function Signup() {
             {/* Perks */}
             <div className="pt-1 space-y-1.5">
               {[
-                'Access to curated design packages',
-                'Dedicated Maison design consultant',
-                'Exclusive style trends & mood boards',
+                'Access to AI mentorship resources & session notes',
+                'Dedicated AI career roadmap & progress tracking',
+                'Exclusive GenAI research insights & tools',
               ].map((p) => (
                 <div key={p} className="flex items-center gap-2 text-xs text-gray-400">
                   <CheckCircle size={12} className="text-brand-400 flex-shrink-0" />

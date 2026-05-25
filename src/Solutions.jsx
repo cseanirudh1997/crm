@@ -1,4 +1,4 @@
-// CaseStudies — Home Transformation showcase
+// CaseStudies — Enterprise AI Transformation showcase
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { BookOpen, Clock, Ruler, Sparkles, TrendingUp, ChevronRight, ArrowRight } from 'lucide-react'
@@ -33,17 +33,17 @@ export default function CaseStudies() {
   }, [])
 
   return (
-    <section id="transformations" className="py-20 relative">
+    <section id="casestudies" className="py-20 relative">
       <div className="orb w-80 h-80 bg-accent-800 -bottom-20 -left-20 opacity-8" />
       <div className="section-wrapper relative z-10">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="text-center mb-12">
-          <span className="section-badge mb-4"><BookOpen size={11} /> Transformation Stories</span>
+          <span className="section-badge mb-4"><BookOpen size={11} /> Case Studies</span>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
-            Real Homes, <span className="gradient-text">Extraordinary Transformations</span>
+            Enterprise AI, <span className="gradient-text">Measurable Outcomes</span>
           </h2>
           <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-            From concept to completion — explore how we've transformed ordinary spaces into extraordinary luxury experiences for clients across India.
+            From strategy to production — deep-dive case studies showing how enterprise AI systems were designed, built, and validated to create real business impact.
           </p>
         </motion.div>
 
@@ -86,7 +86,7 @@ export default function CaseStudies() {
                     <div className="absolute bottom-4 left-5 right-5">
                       {selected.style && <span className="section-badge text-[10px] mb-2 inline-flex">{selected.style}</span>}
                       <h3 className="font-display text-xl font-bold text-white leading-tight">{selected.title}</h3>
-                      <p className="text-xs text-brand-300 font-medium mt-1">{selected.client}</p>
+                      <p className="text-xs text-brand-300 font-medium mt-1">Client: {selected.client}</p>
                     </div>
                   </div>
                   <div className="p-5 space-y-4">
@@ -109,7 +109,7 @@ export default function CaseStudies() {
                       </div>
                     )}
                     <button onClick={() => document.getElementById('consult')?.scrollIntoView({ behavior: 'smooth' })} className="btn-primary w-full justify-center text-sm">
-                      Transform My Space <ArrowRight size={14} />
+                      Discuss a Similar Engagement <ArrowRight size={14} />
                     </button>
                   </div>
                 </motion.div>
@@ -119,9 +119,9 @@ export default function CaseStudies() {
         </div>
 
         <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mt-14">
-          <p className="text-gray-500 text-sm mb-4">Ready to write your own transformation story?</p>
+          <p className="text-gray-500 text-sm mb-4">Ready to build your own AI success story?</p>
           <button onClick={() => document.getElementById('consult')?.scrollIntoView({ behavior: 'smooth' })} className="btn-primary px-8 py-4">
-            <Sparkles size={16} /> Start Your Transformation
+            <Sparkles size={16} /> Start Your AI Engagement
           </button>
         </motion.div>
       </div>

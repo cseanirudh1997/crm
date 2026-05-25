@@ -67,23 +67,23 @@ export default function Inspirations() {
   }, [])
 
   return (
-    <section id="inspirations" className="py-20 relative">
+    <section id="publications" className="py-20 relative">
       <div className="absolute inset-0 dot-grid opacity-10 pointer-events-none" />
       <div className="orb w-80 h-80 bg-brand-800 top-0 -right-20 opacity-8" />
       <div className="section-wrapper relative z-10">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="text-center mb-10">
-          <span className="section-badge mb-4"><Sparkles size={11} /> Design Inspirations</span>
+          <span className="section-badge mb-4"><Sparkles size={11} /> AI Content</span>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
-            Stories, Walkthroughs <span className="gradient-text">&amp; Insights</span>
+            Tutorials, Deep-Dives <span className="gradient-text">&amp; AI Insights</span>
           </h2>
           <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-            Explore cinematic design walkthroughs, expert articles, and interior inspiration curated by the Maison studio team.
+            Practitioner-grade AI/ML tutorials, system design deep-dives, and strategic insights on GenAI, pricing AI, and MLOps in production.
           </p>
         </motion.div>
 
         {/* Tab switcher */}
         <div className="flex justify-center gap-2 mb-10">
-          {[{ id: 'videos', label: 'Video Walkthroughs', icon: Play }, { id: 'blogs', label: 'Design Articles', icon: BookOpen }].map(({ id, label, icon: Icon }) => (
+          {[{ id: 'videos', label: 'AI Tutorials', icon: Play }, { id: 'blogs', label: 'Technical Articles', icon: BookOpen }].map(({ id, label, icon: Icon }) => (
             <button key={id} onClick={() => setTab(id)} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${tab === id ? 'bg-brand-600 text-white shadow-glow-sm' : 'glass border border-white/10 text-gray-400 hover:text-white'}`}>
               <Icon size={14} /> {label}
             </button>

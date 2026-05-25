@@ -6,10 +6,10 @@ import { NAV_LINKS, COMPANY_NAME } from './config'
 import { getSession, clearSession, scrollToSection } from './utils'
 
 const NOTIFICATIONS = [
-  { id: 1, dot: 'bg-brand-500',   title: 'New Trend Report — Spring 2026',       body: 'Warm Minimalism & Japandi styles dominate the season. See our curated collection.',   time: '2m ago' },
-  { id: 2, dot: 'bg-emerald-500', title: 'Your Consultation is Confirmed',        body: 'Your design consultation has been scheduled for tomorrow at 11:00 AM.',               time: '1h ago' },
-  { id: 3, dot: 'bg-accent-500',  title: 'New Design Collection Live',            body: 'Luxury Penthouse Living Suite — 4,200 sq ft. View the full photo gallery.',           time: '4h ago' },
-  { id: 4, dot: 'bg-amber-500',   title: '3D Visualization Package Updated',      body: 'Enhanced photorealistic renders now available for your approved design brief.',        time: '1d ago' },
+  { id: 1, dot: 'bg-brand-500',   title: 'New Article Published — Pricing AI',        body: 'Your RAG vs Fine-Tuning article crossed 10K reads. Trending on LinkedIn.',          time: '2m ago' },
+  { id: 2, dot: 'bg-emerald-500', title: 'Mentorship Session Confirmed',               body: 'Your 1-on-1 session with Arjun Mehta is confirmed for tomorrow at 10:00 AM.',      time: '1h ago' },
+  { id: 3, dot: 'bg-accent-500',  title: 'Speaking Slot Confirmed — DataHack Summit', body: 'Your talk "Pricing AI at Scale" is confirmed for March 15, Bengaluru.',            time: '4h ago' },
+  { id: 4, dot: 'bg-amber-500',   title: 'Newsletter — 1,300+ Subscribers Milestone', body: 'Your AI newsletter crossed 1,300 subscribers. Open rate: 68%. Keep it up!',        time: '1d ago' },
 ]
 
 export default function Navbar() {
@@ -104,7 +104,7 @@ export default function Navbar() {
             </div>
             <div className="flex flex-col leading-none">
               <span className="text-lg font-bold tracking-tight gradient-text">{COMPANY_NAME}</span>
-              <span className="text-[9px] text-gray-500 uppercase tracking-widest font-medium hidden sm:block">Interior Design Studio</span>
+              <span className="text-[9px] text-gray-500 uppercase tracking-widest font-medium hidden sm:block">AI Leadership · GenAI Consulting</span>
             </div>
           </Link>
 
@@ -149,7 +149,7 @@ export default function Navbar() {
                   >
                     <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
                       <span className="text-sm font-semibold text-white flex items-center gap-1.5">
-                        <Sparkles size={12} className="text-brand-400" /> Studio Updates
+                        <Sparkles size={12} className="text-brand-400" /> Platform Updates
                       </span>
                       <button onClick={() => setNotifUnread(false)} className="text-xs text-brand-400 hover:underline">
                         Mark all read

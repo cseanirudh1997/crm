@@ -1,39 +1,39 @@
 // ─────────────────────────────────────────────
-//  DesignPartners — marquee of luxury brand partners
-//  & design accolades (compositor-threaded animation)
+//  AICredentials — marquee of tech companies, certifications
+//  & AI achievements (compositor-threaded animation)
 // ─────────────────────────────────────────────
 
 import { motion } from 'framer-motion'
-import { Award } from 'lucide-react'
+import { Zap } from 'lucide-react'
 
-const PARTNERS_ROW1 = [
-  { name: 'Poliform',           tag: 'Italian Furniture'      },
-  { name: 'Miele',              tag: 'Premium Appliances'     },
-  { name: 'Häfele',             tag: 'Hardware & Fittings'    },
-  { name: 'Minotti',            tag: 'Luxury Sofas'           },
-  { name: 'Versace Home',       tag: 'Luxury Furnishings'     },
-  { name: 'Armani Casa',        tag: 'Designer Collection'    },
-  { name: 'Boffi',              tag: 'Premium Kitchens'       },
-  { name: 'Flos',               tag: 'Architectural Lighting' },
-  { name: 'Poliform',           tag: 'Italian Furniture'      },
-  { name: 'Miele',              tag: 'Premium Appliances'     },
-  { name: 'Häfele',             tag: 'Hardware & Fittings'    },
-  { name: 'Minotti',            tag: 'Luxury Sofas'           },
+const COMPANIES_ROW1 = [
+  { name: 'Walmart Global Tech',  tag: 'Senior Data Scientist'      },
+  { name: 'AWS',                   tag: 'ML Specialty Certified'      },
+  { name: 'Google Cloud',          tag: 'Data Engineer Certified'     },
+  { name: 'Databricks',            tag: 'Data Engineer Certified'     },
+  { name: 'DeepLearning.AI',       tag: 'Deep Learning Specialization'},
+  { name: 'Flipkart',              tag: 'Enterprise AI Consulting'    },
+  { name: 'KDD 2025',              tag: 'Published Research'          },
+  { name: 'Forbes India',          tag: 'Featured Expert'             },
+  { name: 'Walmart Global Tech',  tag: 'Senior Data Scientist'       },
+  { name: 'AWS',                   tag: 'ML Specialty Certified'      },
+  { name: 'Google Cloud',          tag: 'Data Engineer Certified'     },
+  { name: 'Databricks',            tag: 'Data Engineer Certified'     },
 ]
 
-const AWARDS_ROW2 = [
-  { name: 'AD100 Studio 2025',      tag: 'Architectural Digest'    },
-  { name: 'Elle Décor Award',       tag: 'Best Interior Studio'    },
-  { name: 'India Design Awards',    tag: 'Residential Category'    },
-  { name: 'CII Design Excellence',  tag: '2024 Winner'             },
-  { name: 'Houzz Best of Design',   tag: '5 Consecutive Years'     },
-  { name: 'FX International Award', tag: 'Residential Project'     },
-  { name: 'CNBC Awaaz RE Award',    tag: 'Design Partner 2025'     },
-  { name: 'AD100 Studio 2025',      tag: 'Architectural Digest'    },
-  { name: 'Elle Décor Award',       tag: 'Best Interior Studio'    },
-  { name: 'India Design Awards',    tag: 'Residential Category'    },
-  { name: 'CII Design Excellence',  tag: '2024 Winner'             },
-  { name: 'Houzz Best of Design',   tag: '5 Consecutive Years'     },
+const ACHIEVEMENTS_ROW2 = [
+  { name: '$42M GMV Impact',             tag: 'Pricing AI System'          },
+  { name: '1,300+ Newsletter Readers',   tag: '68% Open Rate'              },
+  { name: 'DataHack Summit Speaker',     tag: 'AI & ML Track 2026'         },
+  { name: '50+ Mentees',                 tag: 'FAANG & Unicorn Placements'  },
+  { name: '8 Enterprise AI Deployments', tag: 'Production ML Systems'      },
+  { name: 'arXiv & KDD Publications',    tag: 'Peer-Reviewed Research'     },
+  { name: 'NeurIPS Industry Track',      tag: 'Responsible AI Talk'        },
+  { name: '$42M GMV Impact',             tag: 'Pricing AI System'          },
+  { name: '1,300+ Newsletter Readers',   tag: '68% Open Rate'              },
+  { name: 'DataHack Summit Speaker',     tag: 'AI & ML Track 2026'         },
+  { name: '50+ Mentees',                 tag: 'FAANG & Unicorn Placements' },
+  { name: '8 Enterprise AI Deployments', tag: 'Production ML Systems'      },
 ]
 
 function MarqueeTrack({ items, direction = 'fwd' }) {
@@ -47,7 +47,7 @@ function MarqueeTrack({ items, direction = 'fwd' }) {
             className="flex-shrink-0 flex items-center gap-2.5 px-5 py-3 rounded-xl glass border border-white/8 hover:border-brand-700/40 transition-all duration-300 cursor-default"
           >
             <div className="w-7 h-7 rounded-lg bg-brand-900/60 border border-brand-700/30 flex items-center justify-center">
-              <Award size={12} className="text-brand-400" />
+              <Zap size={12} className="text-brand-400" />
             </div>
             <div>
               <div className="text-xs font-semibold text-gray-200 whitespace-nowrap">{item.name}</div>
@@ -60,7 +60,7 @@ function MarqueeTrack({ items, direction = 'fwd' }) {
   )
 }
 
-export default function DesignPartners() {
+export default function AICredentials() {
   return (
     <section className="py-14 relative overflow-hidden border-y border-white/5">
       {/* Fade edges */}
@@ -75,13 +75,13 @@ export default function DesignPartners() {
         className="text-center mb-8"
       >
         <p className="text-xs text-gray-500 uppercase tracking-widest font-semibold">
-          Trusted by — premium brands · award-winning designs · global partners
+          Trusted by — enterprise clients · certified credentials · published research · speaking circuit
         </p>
       </motion.div>
 
       <div className="flex flex-col gap-3">
-        <MarqueeTrack items={PARTNERS_ROW1} direction="fwd" />
-        <MarqueeTrack items={AWARDS_ROW2}   direction="rev" />
+        <MarqueeTrack items={COMPANIES_ROW1}     direction="fwd" />
+        <MarqueeTrack items={ACHIEVEMENTS_ROW2}  direction="rev" />
       </div>
     </section>
   )

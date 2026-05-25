@@ -1,30 +1,34 @@
 // ─────────────────────────────────────────────
-//  Maison — Global Configuration
-//  Premium Interior Design & Luxury Spaces
+//  VN.AI — Global Configuration
+//  Premium Personal Branding + AI Leadership Platform
+//  Senior Data Scientist · GenAI Leader · Enterprise AI Consultant
 // ─────────────────────────────────────────────
 
+// TODO: Replace with your personal brand Google Apps Script deployment URL
 export const API_URL =
   'https://script.google.com/macros/s/AKfycbzVulNq3OJDhedqXtHcNKt25ntv9rYdJRBX1jfJetsrwXKLP4TYw9KJ087lEzQfM5xF/exec'
 
-export const COMPANY_NAME    = 'Maison'
-export const COMPANY_TAGLINE = 'Premium Interior Design & Luxury Spaces'
-export const COMPANY_EMAIL   = 'studio@maisonstudio.in'
+export const COMPANY_NAME    = 'VN.AI'
+export const COMPANY_TAGLINE = 'Senior Data Scientist · GenAI Leader · Enterprise AI Consultant'
+export const COMPANY_EMAIL   = 'connect@vnai.in'
 export const COMPANY_PHONE   = '+91 98765 43210'
-export const COMPANY_ADDRESS = 'DLF Cyber City, Sector 24, Gurugram, Haryana 122002'
+export const COMPANY_ADDRESS = 'Gurugram, Haryana, India'
 
 export const SOCIAL_LINKS = {
-  instagram: 'https://instagram.com/maisonstudio',
-  pinterest: 'https://pinterest.com/maisonstudio',
-  youtube:   'https://youtube.com/@maisonstudio',
-  linkedin:  'https://linkedin.com/company/maisonstudio',
+  linkedin:  'https://linkedin.com/in/vnai',
+  youtube:   'https://youtube.com/@vnai',
+  instagram: 'https://instagram.com/vnai',
+  twitter:   'https://twitter.com/vnai',
 }
 
 export const NAV_LINKS = [
-  { label: 'Collections',     href: '#collections'     },
-  { label: 'Transformations', href: '#transformations' },
-  { label: 'Services',        href: '#services'        },
-  { label: 'Inspirations',    href: '#inspirations'    },
-  { label: 'Consult',         href: '#consult'         },
+  { label: 'About',        href: '#about'        },
+  { label: 'Projects',     href: '#projects'     },
+  { label: 'Case Studies', href: '#casestudies'  },
+  { label: 'Services',     href: '#services'     },
+  { label: 'Publications', href: '#publications' },
+  { label: 'Ecosystem',    href: '#ecosystem'    },
+  { label: 'Consult',      href: '#consult'      },
 ]
 
 // ── Feature flags — driven by PlatformConfig at runtime ──────────────────

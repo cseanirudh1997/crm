@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Eye, EyeOff, Palette, LogIn, AlertCircle, Mail, ArrowRight } from 'lucide-react'
+import { Eye, EyeOff, Brain, LogIn, AlertCircle, Mail, ArrowRight } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { loginUser } from './api'
 import { saveSession, isValidEmail } from './utils'
@@ -88,12 +88,12 @@ export default function Login() {
           <div className="text-center mb-8">
             <Link to="/" className="inline-flex items-center gap-2 mb-6 group">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-600 flex items-center justify-center shadow-glow-sm">
-                <Palette size={20} className="text-white" />
+                <Brain size={20} className="text-white" />
               </div>
               <span className="text-2xl font-bold gradient-text">{COMPANY_NAME}</span>
             </Link>
             <h1 className="text-2xl font-extrabold text-white mb-1">Welcome back</h1>
-            <p className="text-gray-400 text-sm">Sign in to your account to continue</p>
+            <p className="text-gray-400 text-sm">Sign in to access your AI mentorship portal</p>
           </div>
 
           {/* Error banner */}

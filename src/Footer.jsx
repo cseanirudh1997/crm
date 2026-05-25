@@ -1,33 +1,33 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Palette, Instagram, Youtube, Linkedin, Mail, Phone, MapPin } from 'lucide-react'
+import { Brain, Twitter, Youtube, Linkedin, Mail, Phone, MapPin } from 'lucide-react'
 import { COMPANY_NAME, COMPANY_EMAIL, COMPANY_PHONE, COMPANY_ADDRESS, SOCIAL_LINKS } from './config'
 
 const FOOTER_LINKS = {
-  'Design Services': [
-    { label: 'Full Home Interior',   href: '#services'    },
-    { label: 'Modular Kitchen',      href: '#services'    },
-    { label: 'Living Room Design',   href: '#services'    },
-    { label: '3D Visualization',     href: '#services'    },
-    { label: 'Commercial Design',    href: '#services'    },
+  'AI Services': [
+    { label: 'Enterprise AI Strategy',  href: '#services'     },
+    { label: 'GenAI Architecture',      href: '#services'     },
+    { label: 'Pricing AI Consulting',   href: '#services'     },
+    { label: '1-on-1 Mentorship',       href: '#services'     },
+    { label: 'Mock Interviews',         href: '#services'     },
   ],
   'Explore': [
-    { label: 'Design Collections',    href: '#collections'     },
-    { label: 'Transformations',       href: '#transformations' },
-    { label: 'Design Inspirations',   href: '#inspirations'    },
-    { label: 'Client Testimonials',   href: '#testimonials'    },
-    { label: 'FAQ',                   href: '#faq'             },
+    { label: 'AI Projects',         href: '#projects'     },
+    { label: 'Case Studies',        href: '#casestudies'  },
+    { label: 'Publications',        href: '#publications' },
+    { label: 'Testimonials',        href: '#testimonials' },
+    { label: 'FAQ',                 href: '#faq'          },
   ],
-  'Company': [
-    { label: 'About Maison',      href: '#testimonials' },
-    { label: 'Design Portfolio',  href: '#collections'  },
-    { label: 'Careers',           href: '#'             },
-    { label: 'Press & Media',     href: '#'             },
-    { label: 'Privacy Policy',    href: '#'             },
+  'Connect': [
+    { label: 'About',            href: '#about'        },
+    { label: 'Book a Call',      href: '#consult'      },
+    { label: 'Newsletter',       href: '#consult'      },
+    { label: 'Speaking',         href: '#about'        },
+    { label: 'Privacy Policy',   href: '#'             },
   ],
 }
 
-const SOCIAL_ICONS = { instagram: Instagram, youtube: Youtube, linkedin: Linkedin }
+const SOCIAL_ICONS = { linkedin: Linkedin, youtube: Youtube, twitter: Twitter }
 
 export default function Footer() {
   return (
@@ -42,18 +42,18 @@ export default function Footer() {
             <Link to="/" className="inline-flex items-center gap-2.5 mb-5 group">
               <div className="relative">
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-accent-600 flex items-center justify-center shadow-glow-sm group-hover:shadow-glow transition-all duration-300">
-                  <Palette size={17} className="text-white" />
+                  <Brain size={17} className="text-white" />
                 </div>
                 <div className="absolute inset-0 w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-accent-600 blur-md opacity-40 group-hover:opacity-70 transition-opacity" />
               </div>
               <div>
                 <span className="text-xl font-bold tracking-tight gradient-text">{COMPANY_NAME}</span>
-                <div className="text-[9px] text-gray-500 uppercase tracking-widest font-medium">Interior Design Studio</div>
+                <div className="text-[9px] text-gray-500 uppercase tracking-widest font-medium">AI Leadership · GenAI Consulting</div>
               </div>
             </Link>
 
             <p className="text-gray-400 text-sm leading-relaxed mb-5">
-              Premium interior design studio crafting luxury living spaces across India's finest cities. 12 years of excellence. 500+ transformations. 98% client satisfaction.
+              Senior Data Scientist & Enterprise AI Consultant. 12+ years building AI systems at scale. $42M+ business impact. 50+ mentees placed at FAANG and top unicorns.
             </p>
 
             <div className="space-y-2.5 mb-6">
@@ -105,7 +105,7 @@ export default function Footer() {
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6 border-t border-white/5">
           <p className="text-xs text-gray-600">
-            © {new Date().getFullYear()} {COMPANY_NAME} Interior Design Studio. All rights reserved.
+            © {new Date().getFullYear()} {COMPANY_NAME} · AI Leadership & Consulting. All rights reserved.
           </p>
           <p className="text-xs text-gray-600">
             🌀 Magic applied with{' '}

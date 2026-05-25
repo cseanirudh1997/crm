@@ -6,19 +6,21 @@ import { submitContact } from './api'
 import { COMPANY_EMAIL, COMPANY_PHONE, COMPANY_ADDRESS } from './config'
 
 const SERVICES = [
-  'Full Home Interior',
-  'Luxury Modular Kitchen',
-  'Living Room Design',
-  '3D Visualization',
-  'Luxury Bedroom Design',
-  'Commercial Interior Design',
-  'Other / Custom Project',
+  'Enterprise AI Strategy',
+  'GenAI System Design / RAG',
+  'Pricing AI Consulting',
+  'Personalization & Recommendation',
+  'MLOps & Production ML',
+  '1-on-1 DS/ML Mentorship',
+  'Mock Interview Preparation',
+  'Team Workshop',
+  'Other / Custom Engagement',
 ]
 
 const WHYUS = [
-  { icon: Clock,    label: '24-hour response guarantee' },
-  { icon: CheckCircle, label: 'Free initial consultation' },
-  { icon: Palette,  label: 'Bespoke design — no templates' },
+  { icon: Clock,       label: '24-hour response guarantee' },
+  { icon: CheckCircle, label: 'Free initial strategy call'  },
+  { icon: Palette,     label: 'Bespoke engagement — no templates' },
 ]
 
 export default function Contact() {
@@ -59,12 +61,12 @@ export default function Contact() {
       <div className="orb w-96 h-96 bg-brand-900 -bottom-10 -left-20 opacity-8" />
       <div className="section-wrapper relative z-10">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="text-center mb-12">
-          <span className="section-badge mb-4"><CalendarCheck size={11} /> Book Consultation</span>
+          <span className="section-badge mb-4"><CalendarCheck size={11} /> Book a Strategy Call</span>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
-            Begin Your <span className="gradient-text">Design Journey</span>
+            Start Your <span className="gradient-text">AI Journey</span>
           </h2>
           <p className="text-gray-400 text-base max-w-2xl mx-auto leading-relaxed">
-            Tell us about your space and vision. Our senior designer will contact you within 24 hours to schedule a complimentary consultation.
+            Tell me about your AI challenge or career goal. I'll reach out within 24 hours to schedule a complimentary strategy call.
           </p>
         </motion.div>
 
@@ -72,8 +74,8 @@ export default function Contact() {
           {/* Left info panel */}
           <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="lg:col-span-2 space-y-6">
             <div className="glass border border-brand-700/20 rounded-2xl p-6 bg-gradient-to-br from-brand-950/40 to-transparent">
-              <h3 className="font-display text-xl font-bold text-white mb-2">Why Consult With Us?</h3>
-              <p className="text-gray-400 text-sm leading-relaxed mb-5">12 years of luxury interior design. 500+ completed projects. 98% client satisfaction rate.</p>
+              <h3 className="font-display text-xl font-bold text-white mb-2">Why Work With Me?</h3>
+              <p className="text-gray-400 text-sm leading-relaxed mb-5">12+ years in AI/ML. 8+ enterprise systems in production. $42M+ business impact. 50+ mentees placed.</p>
               <div className="space-y-3">
                 {WHYUS.map(({ icon: Icon, label }) => (
                   <div key={label} className="flex items-center gap-3">
@@ -111,7 +113,7 @@ export default function Contact() {
                 <CheckCircle size={48} className="text-emerald-400 mx-auto mb-4" />
                 <h3 className="font-display text-xl font-bold text-white mb-2">Consultation Request Received!</h3>
                 <p className="text-gray-400 text-sm leading-relaxed mb-6">
-                  Thank you, {form.name}! Our senior designer will contact you within 24 hours to schedule your complimentary consultation.
+                  Thank you, {form.name}! I'll personally reach out within 24 hours to schedule your complimentary strategy call.
                 </p>
                 <button onClick={() => { setDone(false); setForm({ name: '', email: '', phone: '', service: '', message: '' }) }} className="btn-secondary">
                   Submit Another Request
@@ -122,7 +124,7 @@ export default function Contact() {
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs text-gray-400 mb-1.5 font-medium">Full Name *</label>
-                    <input name="name" value={form.name} onChange={update} placeholder="Priya Sharma" required className="input-field" />
+                    <input name="name" value={form.name} onChange={update} placeholder="Your name" required className="input-field" />
                   </div>
                   <div>
                     <label className="block text-xs text-gray-400 mb-1.5 font-medium">Phone Number *</label>
@@ -131,7 +133,7 @@ export default function Contact() {
                 </div>
                 <div>
                   <label className="block text-xs text-gray-400 mb-1.5 font-medium">Email Address *</label>
-                  <input name="email" type="email" value={form.email} onChange={update} placeholder="priya@example.com" required className="input-field" />
+                  <input name="email" type="email" value={form.email} onChange={update} placeholder="you@company.com" required className="input-field" />
                 </div>
                 <div>
                   <label className="block text-xs text-gray-400 mb-1.5 font-medium">Service Interest</label>
@@ -142,12 +144,12 @@ export default function Contact() {
                 </div>
                 <div>
                   <label className="block text-xs text-gray-400 mb-1.5 font-medium">Tell us about your space</label>
-                  <textarea name="message" value={form.message} onChange={update} rows={4} placeholder="Describe your space, style preferences, approximate area, timeline, and any specific requirements..." className="input-field resize-none" />
+                  <textarea name="message" value={form.message} onChange={update} rows={4} placeholder="Describe your AI challenge, current state, team size, timeline, and what success looks like for you..." className="input-field resize-none" />
                 </div>
                 <button type="submit" disabled={sending} className="btn-primary w-full justify-center py-4">
-                  {sending ? (<><Loader2 size={16} className="animate-spin" /> Submitting...</>) : (<><Send size={16} /> Book Free Consultation</>)}
+                  {sending ? (<><Loader2 size={16} className="animate-spin" /> Submitting...</>) : (<><Send size={16} /> Book Free Strategy Call</>)}
                 </button>
-                <p className="text-xs text-gray-600 text-center">We respond within 24 hours · No spam · No commitment required</p>
+                <p className="text-xs text-gray-600 text-center">Personal response within 24 hours · No spam · No commitment required</p>
               </form>
             )}
           </motion.div>

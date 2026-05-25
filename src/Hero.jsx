@@ -1,16 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ChevronRight, Sparkles, Home, Eye, CalendarCheck, Award, Users, Star } from 'lucide-react'
-import { normalizeImageUrl, handleImageError } from './imageUtils'
+import { ChevronRight, Sparkles, Brain, CalendarCheck, Award, Users, BookOpen, TrendingUp } from 'lucide-react'
 
 const TYPING_STRINGS = [
-  'Transforming Spaces Into Timeless Luxury',
-  'Crafting Premium Living Rooms & Villas',
-  'Bespoke Modular Kitchen Experiences',
-  'Architectural Visualization & 3D Planning',
-  'Luxury Bedroom & Master Suite Design',
-  'From Concept to Cinematic Reality',
+  'Building Enterprise AI Systems at Scale',
+  'GenAI Architecture · RAG · LLM Fine-Tuning',
+  'Pricing AI · Personalization · Demand Forecasting',
+  'Mentoring the Next Generation of AI Leaders',
+  'Turning AI Research into Production Impact',
+  'From ML Model to $42M Business Outcome',
 ]
 
 function useTypingEffect(strings, speed = 70, pause = 2200) {
@@ -42,10 +41,10 @@ function useTypingEffect(strings, speed = 70, pause = 2200) {
 }
 
 const STATS = [
-  { value: 500,  suffix: '+',  label: 'Projects Completed', icon: Home    },
-  { value: 98,   suffix: '%',  label: 'Client Satisfaction', icon: Star   },
-  { value: 12,   suffix: '+',  label: 'Years of Expertise',  icon: Award  },
-  { value: 2500, suffix: '+',  label: 'Happy Clients',       icon: Users  },
+  { value: 8,    suffix: '+',  label: 'Enterprise AI Systems',  icon: Brain      },
+  { value: 50,   suffix: '+',  label: 'Mentees Placed',         icon: Users      },
+  { value: 42,   suffix: 'M+', label: 'GMV Impact ($)',         icon: TrendingUp },
+  { value: 1300, suffix: '+',  label: 'Newsletter Subscribers', icon: BookOpen   },
 ]
 
 function AnimatedCounter({ target, suffix, duration = 2000 }) {
@@ -79,27 +78,27 @@ function AnimatedCounter({ target, suffix, duration = 2000 }) {
   return <span ref={ref}>{count}{suffix}</span>
 }
 
-const FEATURED_DESIGNS = [
+const FEATURED_PROJECTS = [
   {
-    name:    'Modern Luxury Living Room',
-    style:   'Contemporary',
-    area:    '1,200 sq ft',
-    badge:   'Featured Collection',
-    img:     'https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?w=400&q=70',
+    name:    'Pricing Intelligence Platform',
+    style:   'Retail · SageMaker',
+    metric:  '$42M GMV Impact',
+    badge:   'Featured Project',
+    img:     'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&q=70',
   },
   {
-    name:    'Scandinavian Master Bedroom',
-    style:   'Minimal Luxury',
-    area:    '650 sq ft',
-    badge:   'Award Winning',
-    img:     'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=70',
+    name:    'GenAI Content Platform',
+    style:   'Media · RAG + LangChain',
+    metric:  '74% Cost Reduction',
+    badge:   'Production System',
+    img:     'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=400&q=70',
   },
   {
-    name:    'Premium Modular Kitchen',
-    style:   'Modern Contemporary',
-    area:    '420 sq ft',
-    badge:   'Client Favorite',
-    img:     'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=70',
+    name:    'Real-Time Fraud Detection',
+    style:   'FinTech · Flink + ML',
+    metric:  '96.8% Precision',
+    badge:   'High-Impact',
+    img:     'https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?w=400&q=70',
   },
 ]
 
@@ -113,16 +112,16 @@ export default function Hero() {
       {/* Dot grid background */}
       <div className="absolute inset-0 dot-grid opacity-25" />
 
-      {/* Warm luxury orbs */}
+      {/* AI-themed orbs */}
       <div className="orb w-[600px] h-[600px] bg-brand-800  top-0  -left-60    opacity-12" />
       <div className="orb w-96   h-96   bg-accent-700 bottom-0 right-0    opacity-10" />
       <div className="orb w-72   h-72   bg-brand-700  top-1/2  left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-8" />
 
-      {/* Hero background visual — interior design space */}
+      {/* Hero background visual */}
       <div
-        className="absolute inset-0 opacity-[0.09]"
+        className="absolute inset-0 opacity-[0.07]"
         style={{
-          backgroundImage: 'url(https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?w=1920&q=60)',
+          backgroundImage: 'url(https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=1920&q=60)',
           backgroundSize:   'cover',
           backgroundPosition: 'center',
         }}
@@ -139,11 +138,11 @@ export default function Hero() {
           animate="show"
           className="max-w-5xl mx-auto text-center"
         >
-          {/* Studio badge */}
+          {/* Badge */}
           <motion.div variants={fadeUp} className="flex justify-center mb-6">
             <span className="section-badge gap-2">
               <Sparkles size={11} className="text-brand-400" />
-              Premium Interior Design Studio · Est. 2013
+              Senior Data Scientist · GenAI Leader · Enterprise AI Consultant
             </span>
           </motion.div>
 
@@ -152,9 +151,9 @@ export default function Hero() {
             variants={fadeUp}
             className="font-display text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tight leading-none mb-4"
           >
-            <span className="text-white">Transforming Spaces Into</span>
+            <span className="text-white">Enterprise AI That</span>
             <br />
-            <span className="gradient-text">Timeless Luxury Experiences</span>
+            <span className="gradient-text">Drives Real Business Impact</span>
           </motion.h1>
 
           {/* Typing sub-headline */}
@@ -170,8 +169,8 @@ export default function Hero() {
             variants={fadeUp}
             className="max-w-2xl mx-auto text-gray-400 text-base sm:text-lg leading-relaxed mb-10"
           >
-            Premium interior design solutions for luxury homes, villas, apartments, and modern commercial spaces.
-            From concept to completion — crafted with precision, inspired by your vision.
+            Pricing AI · GenAI Systems · MLOps · Personalization · Forecasting.
+            12+ years building AI that ships — and mentoring data scientists to do the same.
           </motion.p>
 
           {/* CTA buttons */}
@@ -183,19 +182,19 @@ export default function Hero() {
               onClick={() => document.getElementById('consult')?.scrollIntoView({ behavior: 'smooth' })}
               className="btn-primary text-base px-8 py-4"
             >
-              <CalendarCheck size={17} /> Book Consultation
+              <CalendarCheck size={17} /> Book AI Consultation
             </button>
             <button
-              onClick={() => document.getElementById('collections')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
               className="btn-secondary text-base px-8 py-4"
             >
-              Explore Collections <ChevronRight size={17} />
+              Explore AI Projects <ChevronRight size={17} />
             </button>
             <button
-              onClick={() => document.getElementById('transformations')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => document.getElementById('casestudies')?.scrollIntoView({ behavior: 'smooth' })}
               className="btn-ghost text-base px-6 py-4 border border-brand-700/30 hover:border-brand-600/50 hover:bg-brand-950/40"
             >
-              <Eye size={16} /> View Transformations
+              <Award size={16} /> View Case Studies
             </button>
           </motion.div>
 
@@ -218,7 +217,7 @@ export default function Hero() {
           </motion.div>
         </motion.div>
 
-        {/* Featured design preview card */}
+        {/* Featured AI projects preview card */}
         <motion.div
           initial={{ opacity: 0, y: 60 }}
           animate={{ opacity: 1, y: 0 }}
@@ -230,25 +229,23 @@ export default function Hero() {
             <div className="flex items-center justify-between px-5 py-3 border-b border-white/5 bg-black/20">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-brand-500 animate-pulse-slow" />
-                <span className="text-xs text-gray-400 font-medium">Featured Design Collections</span>
+                <span className="text-xs text-gray-400 font-medium">Featured AI Projects</span>
               </div>
-              <span className="text-xs text-brand-400 font-semibold tracking-wide">MAISON STUDIO</span>
+              <span className="text-xs text-brand-400 font-semibold tracking-wide">VN.AI</span>
             </div>
 
-            {/* Design cards grid */}
+            {/* Project cards grid */}
             <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {FEATURED_DESIGNS.map((d) => (
+              {FEATURED_PROJECTS.map((d) => (
                 <div key={d.name} className="rounded-xl overflow-hidden border border-white/5 bg-white/5 group cursor-pointer">
                   <div className="relative h-32 overflow-hidden">
                     <img
-                      src={normalizeImageUrl(d.img)}
+                      src={d.img}
                       alt={d.name}
                       loading="lazy"
-                      onError={(e) => handleImageError(e)}
-                      className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700"
-                      style={{ '--tw-scale-x': 1.08, '--tw-scale-y': 1.08 }}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                     <span className="absolute top-2 left-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-brand-600/80 text-white border border-brand-500/50">
                       {d.badge}
                     </span>
@@ -257,8 +254,8 @@ export default function Hero() {
                     <div className="text-xs font-bold text-white leading-snug">{d.name}</div>
                     <div className="text-xs text-gray-500 mt-0.5">{d.style}</div>
                     <div className="flex items-center justify-between mt-1.5">
-                      <span className="text-brand-400 text-xs font-semibold">{d.area}</span>
-                      <span className="text-gray-600 text-xs">Design Studio</span>
+                      <span className="text-brand-400 text-xs font-semibold">{d.metric}</span>
+                      <span className="text-gray-600 text-xs">Production</span>
                     </div>
                   </div>
                 </div>
@@ -267,9 +264,9 @@ export default function Hero() {
 
             {/* Footer bar */}
             <div className="px-5 py-2.5 border-t border-white/5 bg-black/20 flex items-center justify-between">
-              <span className="text-xs text-gray-500">500+ completed projects · 12 years of luxury design</span>
+              <span className="text-xs text-gray-500">8+ enterprise AI systems · $42M+ business impact</span>
               <button
-                onClick={() => document.getElementById('collections')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
                 className="text-xs text-brand-400 font-semibold hover:text-brand-300 flex items-center gap-1 transition-colors"
               >
                 View All <ChevronRight size={12} />

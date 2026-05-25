@@ -11,13 +11,14 @@ import { createBookingRequest } from './api'
 import { getSession } from './utils'
 
 const SERVICES = [
-  'Full Home Interior',
-  'Luxury Modular Kitchen',
-  'Living Room Design',
-  '3D Visualization',
-  'Luxury Bedroom Design',
-  'Commercial Interior Design',
-  'Design Consultation Only',
+  'AI Strategy Session (60 min)',
+  'GenAI / LLM Mentorship',
+  'Pricing AI Consulting',
+  'MLOps & Feature Store Design',
+  'FAANG Interview Prep',
+  'Enterprise AI Workshop',
+  'ML System Design Review',
+  'AI Career Roadmap',
   'Other',
 ]
 
@@ -72,7 +73,7 @@ export default function ConsultationBookingModal({ project, service: preService,
                 <CalendarCheck size={15} className="text-white" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">Book a Design Consultation</h3>
+                <h3 className="text-sm font-bold text-white">Book a Strategy Session</h3>
                 {project && <p className="text-xs text-brand-400">{project.title}</p>}
               </div>
             </div>
@@ -86,7 +87,7 @@ export default function ConsultationBookingModal({ project, service: preService,
                 <CheckCircle size={48} className="text-emerald-400 mx-auto mb-4" />
                 <h4 className="font-bold text-white text-lg mb-2">Consultation Booked!</h4>
                 <p className="text-gray-400 text-sm leading-relaxed mb-5">
-                  Thank you, {form.name}! Our senior designer will contact you within 24 hours to confirm your consultation details.
+                  Thank you, {form.name}! I'll personally reach out within 24 hours to confirm your session details.
                 </p>
                 <button onClick={onClose} className="btn-primary">Done</button>
               </div>
@@ -128,12 +129,12 @@ export default function ConsultationBookingModal({ project, service: preService,
                 </div>
                 <div>
                   <label className="block text-xs text-gray-400 mb-1.5">Notes / Requirements</label>
-                  <textarea name="notes" value={form.notes} onChange={update} rows={3} placeholder="Describe your space, style preferences, approximate area..." className="input-field resize-none" />
+                  <textarea name="notes" value={form.notes} onChange={update} rows={3} placeholder="Describe your AI challenge, career goal, or what you'd like to achieve..." className="input-field resize-none" />
                 </div>
                 <button type="submit" disabled={sending} className="btn-primary w-full justify-center py-3.5">
                   {sending ? (<><Loader2 size={15} className="animate-spin" /> Booking...</>) : (<><Send size={15} /> Confirm Consultation</>)}
                 </button>
-                <p className="text-xs text-gray-600 text-center">Free consultation · No commitment required</p>
+                <p className="text-xs text-gray-600 text-center">Free strategy call · No commitment required</p>
               </form>
             )}
           </div>

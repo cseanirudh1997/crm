@@ -1,7 +1,7 @@
 import { useEffect, useRef, lazy, Suspense } from 'react'
 import { HashRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
-import { Palette } from 'lucide-react'
+import { Brain } from 'lucide-react'
 
 // Utils
 import { scrollToSection } from './utils'
@@ -13,16 +13,19 @@ import Chatbot        from './Chatbot'
 import ProtectedRoute from './ProtectedRoute'
 
 // Home page sections
-import Hero         from './Hero'
-import Services     from './Services'
-import Products     from './Products'
-import Solutions    from './Solutions'
-import Pricing      from './Pricing'
-import Testimonials from './Testimonials'
-import Clients      from './Clients'
-import FAQ          from './FAQ'
-import Newsletter   from './Newsletter'
-import Contact      from './Contact'
+import Hero             from './Hero'
+import About            from './About'
+import Services         from './Services'
+import Products         from './Products'
+import Solutions        from './Solutions'
+import Testimonials          from './Testimonials'
+import Clients               from './Clients'
+import Certifications        from './Certifications'
+import FAQ                   from './FAQ'
+import Newsletter             from './Newsletter'
+import Contact                from './Contact'
+import Ecosystem              from './Ecosystem'
+import SpeakingPublications   from './SpeakingPublications'
 
 // Auth + Dashboard — lazy-loaded so they don't inflate the initial bundle
 const Login     = lazy(() => import('./Login'))
@@ -72,11 +75,14 @@ function HomePage() {
     <>
       <Hero />
       <Clients />
+      <About />
       <Products />
       <Solutions />
       <Services />
-      <Pricing />
+      <SpeakingPublications />
+      <Ecosystem />
       <Testimonials />
+      <Certifications />
       <FAQ />
       <Contact />
       <Newsletter />
@@ -150,11 +156,11 @@ export default function App() {
               <div className="min-h-screen flex items-center justify-center bg-gray-950">
                 <div className="text-center">
                   <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-600 to-accent-600 flex items-center justify-center shadow-glow mx-auto mb-6">
-                    <Palette size={36} className="text-white" />
+                    <Brain size={36} className="text-white" />
                   </div>
                   <h1 className="text-8xl font-black gradient-text mb-4">404</h1>
                   <p className="text-gray-400 text-lg mb-2">Page not found.</p>
-                  <p className="text-gray-600 text-sm mb-8">The design page you're looking for doesn't exist or has been moved.</p>
+                  <p className="text-gray-600 text-sm mb-8">The page you're looking for doesn't exist or has been moved.</p>
                   <Link to="/" className="btn-primary">← Back to Home</Link>
                 </div>
               </div>

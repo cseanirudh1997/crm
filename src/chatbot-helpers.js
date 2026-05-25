@@ -1,25 +1,25 @@
 // ─────────────────────────────────────────────
-//  Maison — Chatbot helpers (interior design assistant)
+//  VN.AI — Chatbot helpers (AI leadership assistant)
 // ─────────────────────────────────────────────
 
 export const SUGGESTED_PROMPTS = [
-  'Show modern luxury interiors',
-  'Explain modular kitchen packages',
-  'How do consultations work?',
-  'Show villa transformation ideas',
-  'What design styles are available?',
-  'What is the cost of full home interior?',
+  'Tell me about GenAI expertise',
+  'Explain pricing AI systems',
+  'How do mentorship sessions work?',
+  'What enterprise AI projects are available?',
+  'Show AI/ML case studies',
+  'How to book a consultation?',
 ]
 
 export const FALLBACK_RESPONSE =
-  "I'm unable to fetch a response right now. Please reach out directly at studio@maisonstudio.in or use the consultation form on our website — our design team responds within 24 hours."
+  "I'm unable to fetch a response right now. Please reach out directly at connect@vnai.in or use the consultation form — I respond to all inquiries within 24 hours."
 
 /** Build the initial bot greeting message */
 export function getWelcomeMessage() {
   return {
     id:   Date.now(),
     role: 'bot',
-    text: '✨ Welcome to Maison! I\'m your AI Design Assistant. Ask me about our interior design collections, modular kitchens, 3D visualization, consultation packages, or luxury design styles.',
+    text: '🤖 Hi! I\'m your AI Assistant. Ask me about GenAI systems, enterprise AI consulting, pricing AI models, mentorship programs, or how to book a strategy session.',
     ts:   new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
   }
 }

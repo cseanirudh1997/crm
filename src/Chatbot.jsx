@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MessageCircle, X, Send, Palette, Sparkles } from 'lucide-react'
+import { MessageCircle, X, Send, Brain, Sparkles } from 'lucide-react'
 import { sendChatMessage } from './api'
 import { SUGGESTED_PROMPTS, FALLBACK_RESPONSE, getWelcomeMessage, buildUserMessage, buildBotMessage } from './chatbot-helpers'
 
@@ -51,7 +51,7 @@ export default function Chatbot() {
         {showDot && !open && (
           <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute -top-1 -right-1 w-4 h-4 bg-brand-500 rounded-full border-2 border-gray-950 z-10 animate-pulse-slow" />
         )}
-        <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setOpen(!open)} className="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-600 to-accent-600 flex items-center justify-center shadow-glow text-white" aria-label="Open design assistant">
+        <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setOpen(!open)} className="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-600 to-accent-600 flex items-center justify-center shadow-glow text-white" aria-label="Open AI assistant">
           <AnimatePresence mode="wait">
             {open
               ? <motion.div key="x"    initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }}><X size={22} /></motion.div>
@@ -73,12 +73,12 @@ export default function Chatbot() {
               {/* Header */}
               <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-brand-900/80 to-gray-900/80 border-b border-white/10">
                 <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-accent-600 flex items-center justify-center shadow-glow-sm">
-                  <Palette size={15} className="text-white" />
+                  <Brain size={15} className="text-white" />
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-white flex items-center gap-1">Design Assistant <Sparkles size={11} className="text-brand-300" /></div>
+                  <div className="text-sm font-semibold text-white flex items-center gap-1">AI Assistant <Sparkles size={11} className="text-brand-300" /></div>
                   <div className="text-xs text-emerald-400 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse-slow" /> Maison Studio
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse-slow" /> VN.AI
                   </div>
                 </div>
                 <button onClick={() => setOpen(false)} className="ml-auto text-gray-500 hover:text-gray-300 transition-colors"><X size={16} /></button>
@@ -110,12 +110,12 @@ export default function Chatbot() {
               {/* Input */}
               <div className="p-3 border-t border-white/10">
                 <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 focus-within:border-brand-500 transition-colors">
-                  <input ref={inputRef} type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKeyDown} placeholder="Ask about designs, services, pricing…" className="flex-1 bg-transparent text-sm text-white placeholder-gray-600 outline-none" disabled={loading} />
+                  <input ref={inputRef} type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKeyDown} placeholder="Ask about AI consulting, mentorship, services…" className="flex-1 bg-transparent text-sm text-white placeholder-gray-600 outline-none" disabled={loading} />
                   <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => sendMessage()} disabled={!input.trim() || loading} className="w-7 h-7 rounded-lg bg-brand-600 flex items-center justify-center text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-brand-500 transition-colors">
                     <Send size={13} />
                   </motion.button>
                 </div>
-                <p className="text-center text-gray-700 text-xs mt-2">Powered by Maison AI · Premium Design Assistant</p>
+                <p className="text-center text-gray-700 text-xs mt-2">Powered by VN.AI · GenAI Consulting Assistant</p>
               </div>
             </div>
           </motion.div>

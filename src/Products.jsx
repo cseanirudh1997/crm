@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  Design Collections — interior project browser + detail modal
+//  AI Projects — enterprise AI system browser + detail modal
 //  Fetches: getProjects + getMediaAssets
 // ─────────────────────────────────────────────
 
@@ -7,15 +7,15 @@ import { useState, useEffect, useCallback, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   X, AlertCircle, Maximize2,
-  Grid3X3, Filter, Layers, Palette, Ruler, Calendar,
-  CalendarCheck, Star, ArrowRight, ImageIcon,
+  Grid3X3, Filter, Layers, Brain, Cpu, Clock,
+  CalendarCheck, Star, ArrowRight, ImageIcon, TrendingUp,
 } from 'lucide-react'
 import { fetchProjects, fetchMediaAssets } from './api'
 import { normalizeImageUrl, handleImageError, LazyImage } from './imageUtils'
 
 const CATEGORIES = [
-  'All', 'Living Room', 'Bedroom', 'Kitchen',
-  'Villa', 'Workspace', 'Dining', 'Luxury Apartment', 'Bathroom',
+  'All', 'Pricing AI', 'GenAI', 'MLOps', 'NLP', 'Predictive AI',
+  'Forecasting', 'Personalization', 'Computer Vision',
 ]
 
 function SkeletonCard() {
@@ -51,13 +51,13 @@ function ProjectModal({ project, onClose, onBook }) {
     return () => document.removeEventListener('keydown', handler)
   }, [onClose])
 
-  const styleLabel = project.designStyle || project.impact || '—'
-  const materials  = (project.materials || project.technologies || '').split(',').map((m) => m.trim()).filter(Boolean)
+  const styleLabel = project.industry || project.category || '—'
+  const materials  = (project.technologies || project.materials || '').split(',').map((m) => m.trim()).filter(Boolean)
 
   const TABS = [
-    { id: 'gallery', label: 'Gallery',           icon: ImageIcon    },
-    { id: 'details', label: 'Style & Materials', icon: Layers       },
-    { id: 'book',    label: 'Book Consult',      icon: CalendarCheck },
+    { id: 'gallery', label: 'Screenshots',       icon: ImageIcon    },
+    { id: 'details', label: 'Stack & Impact',    icon: Layers       },
+    { id: 'book',    label: 'Discuss Project',   icon: CalendarCheck },
   ]
 
   return (
@@ -163,10 +163,10 @@ function ProjectModal({ project, onClose, onBook }) {
               <p className="text-gray-300 text-sm leading-relaxed">{project.description}</p>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { label: 'Design Style', value: styleLabel,              icon: Palette  },
-                  { label: 'Area',         value: project.area || '—',     icon: Ruler    },
-                  { label: 'Timeline',     value: project.duration || '—', icon: Calendar },
-                  { label: 'Investment',   value: project.budget || '—',   icon: Star     },
+                  { label: 'Industry',  value: styleLabel,               icon: Brain      },
+                  { label: 'Scale',     value: project.area || '—',      icon: TrendingUp },
+                  { label: 'Timeline',  value: project.duration || '—',  icon: Clock      },
+                  { label: 'Tier',      value: project.budget || '—',    icon: Star       },
                 ].map(({ label, value, icon: Icon }) => (
                   <div key={label} className="glass p-3.5 rounded-xl border border-white/5">
                     <div className="flex items-center gap-2 mb-1">
@@ -180,8 +180,8 @@ function ProjectModal({ project, onClose, onBook }) {
               {materials.length > 0 && (
                 <div className="glass p-4 rounded-xl border border-white/5">
                   <div className="flex items-center gap-2 mb-2">
-                    <Layers size={13} className="text-brand-400" />
-                    <span className="text-xs text-gray-500">Materials & Finishes</span>
+                    <Cpu size={13} className="text-brand-400" />
+                    <span className="text-xs text-gray-500">Tech Stack</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {materials.map((mat) => <span key={mat} className="property-badge">{mat}</span>)}
@@ -196,16 +196,16 @@ function ProjectModal({ project, onClose, onBook }) {
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-600 to-accent-600 flex items-center justify-center mx-auto mb-5 shadow-glow">
                 <CalendarCheck size={28} className="text-white" />
               </div>
-              <h3 className="font-display text-xl font-bold text-white mb-2">Love this design?</h3>
+              <h3 className="font-display text-xl font-bold text-white mb-2">Interested in this system?</h3>
               <p className="text-gray-400 text-sm leading-relaxed mb-6 max-w-md mx-auto">
-                Book a complimentary consultation with a senior Maison designer. We'll craft a bespoke version of this style for your space.
+                Book a complimentary AI strategy session. We can discuss how a similar architecture could drive measurable impact for your organization.
               </p>
               <div className="space-y-3">
                 <button
                   onClick={() => { onClose(); onBook(project) }}
                   className="btn-primary w-full justify-center text-sm py-3"
                 >
-                  <CalendarCheck size={16} /> Book Design Consultation
+                  <CalendarCheck size={16} /> Book AI Strategy Session
                 </button>
                 <button
                   onClick={() => { onClose(); document.getElementById('consult')?.scrollIntoView({ behavior: 'smooth' }) }}
@@ -214,7 +214,7 @@ function ProjectModal({ project, onClose, onBook }) {
                   Go to Consultation Form
                 </button>
               </div>
-              <p className="text-xs text-gray-600 mt-4">Free initial consultation · No commitment required</p>
+              <p className="text-xs text-gray-600 mt-4">Free initial call · No commitment required</p>
             </div>
           )}
         </div>
@@ -224,8 +224,8 @@ function ProjectModal({ project, onClose, onBook }) {
 }
 
 const ProjectCard = memo(function ProjectCard({ project, onSelect }) {
-  const category = project.category || project.industry || 'Design'
-  const style    = project.designStyle || project.impact || ''
+  const category = project.category || project.industry || 'AI'
+  const style    = project.industry || project.impact || ''
   return (
     <motion.div
       layout
@@ -272,14 +272,14 @@ const ProjectCard = memo(function ProjectCard({ project, onSelect }) {
           {project.budget && <span className="text-xs font-bold text-brand-400">{project.budget}</span>}
         </div>
         <div className="mt-3 flex items-center gap-1 text-xs text-brand-400 font-medium group-hover:gap-2 transition-all">
-          View Collection <ArrowRight size={11} />
+          View Project <ArrowRight size={11} />
         </div>
       </div>
     </motion.div>
   )
 })
 
-export default function DesignCollections() {
+export default function AIProjects() {
   const [projects, setProjects] = useState([])
   const [loading,  setLoading]  = useState(true)
   const [error,    setError]    = useState(null)
@@ -302,7 +302,7 @@ export default function DesignCollections() {
   }, [])
 
   return (
-    <section id="collections" className="py-20 relative">
+    <section id="projects" className="py-20 relative">
       <div className="absolute inset-0 dot-grid opacity-15 pointer-events-none" />
       <div className="orb w-96 h-96 bg-brand-900 top-10 -right-32 opacity-8" />
       <div className="section-wrapper relative z-10">
@@ -313,13 +313,13 @@ export default function DesignCollections() {
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <span className="section-badge mb-4"><Grid3X3 size={11} /> Design Collections</span>
+          <span className="section-badge mb-4"><Grid3X3 size={11} /> AI Projects</span>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
-            Curated Luxury <span className="gradient-text">Design Collections</span>
+            Enterprise AI Systems <span className="gradient-text">In Production</span>
           </h2>
           <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-            Explore our portfolio of premium interior design projects — from minimalist master bedrooms to opulent
-            villa transformations across India's finest cities.
+            8+ enterprise AI systems shipped across retail, FinTech, media, telecom, and supply chain —
+            each built from data architecture to production deployment with measurable business impact.
           </p>
         </motion.div>
 
@@ -358,9 +358,9 @@ export default function DesignCollections() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">
-            <Palette size={40} className="mx-auto mb-4 text-gray-600" />
-            <p className="text-gray-400 text-base">No collections in this category yet.</p>
-            <button onClick={() => setCategory('All')} className="btn-primary mt-4">View All Collections</button>
+            <Brain size={40} className="mx-auto mb-4 text-gray-600" />
+            <p className="text-gray-400 text-base">No projects in this domain yet.</p>
+            <button onClick={() => setCategory('All')} className="btn-primary mt-4">View All Projects</button>
           </div>
         ) : (
           <AnimatePresence mode="popLayout">
@@ -383,9 +383,9 @@ export default function DesignCollections() {
               onClick={() => document.getElementById('consult')?.scrollIntoView({ behavior: 'smooth' })}
               className="btn-primary px-8 py-4"
             >
-              <CalendarCheck size={16} /> Book a Design Consultation
+              <CalendarCheck size={16} /> Book an AI Strategy Session
             </button>
-            <p className="text-xs text-gray-500 mt-3">Free initial consultation · Bespoke design brief for your space</p>
+            <p className="text-xs text-gray-500 mt-3">Free initial call · Discuss your AI use case and roadmap</p>
           </motion.div>
         )}
       </div>
